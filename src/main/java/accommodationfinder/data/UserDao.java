@@ -54,9 +54,26 @@ public class UserDao {
                 } else {
                     return null;
                 }
-            } catch (SQLException e) {
-                System.err.println("Error getting user by username: " + e.getMessage());
-                throw e;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting user by username: " + e.getMessage());
+            throw e;
+        }
+    }
+
+
+    public User getUserByEmail(String email) throws SQLException {
+        String sql = "SELECT * FROM users WHERE email = ?";
+        try (Connection connection = dbConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+            preparedStatement.setString(1, email);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return mapResultSetToUser(resultSet); // Helper method to create User object from ResultSet
+                } else {
+                    return null; // User not found
+                }
             }
         }
     }
