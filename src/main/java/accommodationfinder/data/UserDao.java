@@ -42,4 +42,24 @@ public class UserDao {
     }
 
 
+    public User getUserByUsername(String username) throws SQLException {
+        String sql = "SELECT * FROM users WHERE  username = ?";
+        try(Connection connection = dbConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+            preparedStatement.setString(2, username);
+            try(ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return mapResultSetToUser(resultSet);
+                } else {
+                    return null;
+                }
+            } catch (SQLException e) {
+                System.err.println("Error getting user by username: " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+
 }
