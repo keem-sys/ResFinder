@@ -3,6 +3,8 @@ package accommodationfinder.auth;
 import java.time.LocalDateTime;
 
 public class User {
+
+    // User attributes
     private Long id;
     private String fullName;
     private String username;
@@ -10,7 +12,7 @@ public class User {
     private String passwordHash;
     private LocalDateTime registrationDate;
 
-
+    // Attributes initialisation
     public User(Long id, String fullName, String username, String email, String passwordHash) {
         this.id = id;
         this.fullName = fullName;

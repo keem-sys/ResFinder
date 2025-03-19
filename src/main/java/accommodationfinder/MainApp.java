@@ -20,6 +20,8 @@ public class MainApp {
             System.err.println("Nimbus Look and Feel not available, using default.");
         }
 
+
+        // Run the MainWindow class set in UI using EDT throws Error if application start failed
         SwingUtilities.invokeLater(() -> {
             try{
                 MainWindow mainWindow = new MainWindow();
