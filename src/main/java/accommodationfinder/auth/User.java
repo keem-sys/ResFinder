@@ -12,7 +12,11 @@ public class User {
     private String passwordHash;
     private LocalDateTime registrationDate;
 
-    // Attributes initialisation
+
+    // Default constructor
+    public User() {}
+
+    // Overloaded Constructor
     public User(Long id, String fullName, String username, String email, String passwordHash) {
         this.id = id;
         this.fullName = fullName;
