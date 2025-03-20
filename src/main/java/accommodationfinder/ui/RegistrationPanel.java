@@ -1,4 +1,6 @@
-package accommodationfinder.ui;
+package accommodationfinder.ui; // Make sure this package name matches your project structure
+
+import accommodationfinder.auth.User;
 
 import javax.swing.*;
 import java.awt.*;
@@ -58,7 +60,7 @@ public class RegistrationPanel extends JPanel {
                 String username = usernameField.getText();
                 String email = emailField.getText();
                 char[] passwordChars = passwordField.getPassword();
-                String password = new String(passwordChars);
+                String password = new String(passwordChars); // Convert char[] to String for now - Security Note Below!
                 char[] confirmPasswordChars = confirmPasswordField.getPassword();
                 String confirmPassword =  new String(confirmPasswordChars);
 
@@ -73,13 +75,13 @@ public class RegistrationPanel extends JPanel {
                 // Registration logic
                 // Input validation
                 if (fullName.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty()
-                || confirmPassword.isEmpty()) {
+                        || confirmPassword.isEmpty()) {
                     setErrorMessage("All fields are required");
                     return;
                 }
 
                 // Email validation
-                String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+                String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+@[A-Za-z0-9.-]+$"; // Corrected Regex
                 Pattern pattern = Pattern.compile(emailRegex);
                 Matcher matcher = pattern.matcher(email);
                 if (!matcher.matches()) {
@@ -94,11 +96,31 @@ public class RegistrationPanel extends JPanel {
 
                 if (password.length() < 8) {
                     setErrorMessage("Password must be at least 8 characters long");
+                    return;
                 }
 
-                System.out.println("Full Name: " + fullName);
-                System.out.println("Username: " + username);
-                System.out.println("Email: " + email);
+                System.out.println("Registration Validated - Ready for Backend Integration"); // Updated message
+
+                // **Security Note (Client-Side Password Handling):**
+                // In real-world applications, be extra cautious about handling passwords as Strings in memory,
+                // even temporarily on the client-side. `char[]` is generally preferred for security,
+                // as it can be explicitly cleared from memory after use. However, for this student project,
+                // using String for simplicity in UI logic might be acceptable as long as you are hashing
+                // the password securely on the backend (which is the most crucial part).
+
+                // **NEXT STEP: Integrate with Java Backend (Authentication Service) here!**
+                // You will replace the System.out.println(...) above with code to:
+                // 1. Create a User object with the collected data
+                // 2. Call a method on your Authentication Service (e.g., userService.registerUser(...))
+                // 3. Handle the response from the service (success or error)
+                // 4. Update UI based on the response (display success message or error messages from backend)
+
+                try {
+                    User user = new User(null, fullName, username, email, password);
+
+                } catch (Exception ex) {
+
+                }
 
 
                 // Clear password fields after processing
@@ -108,16 +130,13 @@ public class RegistrationPanel extends JPanel {
         });
 
         cancelButton.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent e) {
-                    // Placeholder for cancel action
-                    System.out.println("Cancel button clicked");
-                    //  switch to LoginPanel or clear the RegistrationPanel
-                }
-            });
-
-
+                // Placeholder for cancel action
+                System.out.println("Cancel button clicked");
+                //  switch to LoginPanel or clear the RegistrationPanel
+            }
+        });
     }
 
     // Method to get the RegistrationPanel (for adding to MainWindow later)
@@ -129,8 +148,4 @@ public class RegistrationPanel extends JPanel {
     public void setErrorMessage(String message) {
         errorMsgLbl.setText(message);
     }
-
-
-
-
 }
