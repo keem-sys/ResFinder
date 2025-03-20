@@ -2,6 +2,8 @@ package accommodationfinder.auth;
 
 
 import accommodationfinder.data.UserDao;
+import de.mkammerer.argon2.Argon2;
+import de.mkammerer.argon2.Argon2Factory;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -70,11 +72,18 @@ public class UserService {
     }
 
     private String hashPassword(String plainTextPassword) {
+        int iterations = 2;
+        int memory = 65536;
+        int parallelism = 1;
 
-        // TODO: Implement secure password hashing
-        // TODO: NOT store plain text passwords!
+        Argon2 argon2 = Argon2Factory.create();
+        char[] passwordChars = plainTextPassword.toCharArray();
 
-        System.out.println("Warning: Password hashing is NOT yet implemented securely!");
-        return plainTextPassword;
+        try {
+            // Hash password
+            return argon2.hash(iterations, memory, parallelism, passwordChars);
+        } finally {
+            argon2.wipeArray(passwordChars);
+        }
     }
 }
