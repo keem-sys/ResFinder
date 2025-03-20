@@ -1,11 +1,13 @@
 package accommodationfinder.ui; // Make sure this package name matches your project structure
 
 import accommodationfinder.auth.User;
+import accommodationfinder.auth.UserService;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,7 +17,11 @@ public class RegistrationPanel extends JPanel {
     private JPasswordField passwordField, confirmPasswordField;
     private JButton registerButton, cancelButton;
 
-    public RegistrationPanel() {
+    private final UserService userService;
+
+    public RegistrationPanel(UserService userService) {
+        this.userService = userService;
+
         setLayout(new GridLayout(7, 2,10, 5));
 
         fullNameLbl =  new JLabel("Name: ");
@@ -117,9 +123,28 @@ public class RegistrationPanel extends JPanel {
 
                 try {
                     User user = new User(null, fullName, username, email, password);
+                    Long userId = userService.registerUser(user);
 
-                } catch (Exception ex) {
+                    setErrorMessage("Registration Successful! You can now login!");
+                    clearInputFields();
 
+                    System.out.println("User registered successfully with ID: " + userId);
+
+
+                } catch (SQLException sqlException) {
+                    System.err.println("Database error during registration: " + sqlException.getMessage());
+                    sqlException.printStackTrace();
+                    setErrorMessage("Database error occurred during registration: " + sqlException.getMessage());
+
+                } catch (Exception backendException) { // Catch other potential backend exceptions
+                    System.err.println("Backend registration error: " + backendException.getMessage());
+                    backendException.printStackTrace();
+                    setErrorMessage("Registration failed: " + backendException.getMessage());
+                } finally {
+                    // Clear password fields after attempting registration (regardless of success or failure)
+                    passwordField.setText("");
+                    confirmPasswordField.setText("");
+                    confirmPasswordField.setText(""); // Clear confirm password as well
                 }
 
 
@@ -137,6 +162,14 @@ public class RegistrationPanel extends JPanel {
                 //  switch to LoginPanel or clear the RegistrationPanel
             }
         });
+    }
+    // Helper method to clear input fields
+    private void clearInputFields() {
+        fullNameField.setText("");
+        usernameField.setText("");
+        emailField.setText("");
+        passwordField.setText("");
+        confirmPasswordField.setText("");
     }
 
     // Method to get the RegistrationPanel (for adding to MainWindow later)

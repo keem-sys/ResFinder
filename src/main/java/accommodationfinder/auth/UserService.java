@@ -15,7 +15,7 @@ public class UserService {
         this.userDao = userDao;
     }
 
-    public Long registerUser(User user) throws Exception {
+    public Long registerUser(User user) throws SQLException {
 
         if (user.getFullName() == null || user.getFullName().isEmpty() ||
                 user.getUsername() == null || user.getUsername().isEmpty() ||
@@ -37,7 +37,7 @@ public class UserService {
 
         try {
             if (userDao.isUsernameExists(user.getUsername())) {
-                throw new Exception("Username already exists");
+                throw new SQLException("Username already exists");
             }
 
         } catch (SQLException sqlException) {
@@ -47,7 +47,7 @@ public class UserService {
 
         try {
             if (userDao.isEmailExists(user.getEmail())) {
-                throw new Exception("Email already exists");
+                throw new SQLException("Email already exists");
             }
         } catch (SQLException sqlException) {
             System.err.println("Database error while checking the email: " + sqlException.getMessage());
