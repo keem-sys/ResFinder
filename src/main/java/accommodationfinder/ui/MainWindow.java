@@ -26,10 +26,10 @@ public class MainWindow extends JFrame {
             userDao = new UserDao(databaseConnection);
             userService = new UserService(userDao);
         } catch (SQLException e) {
-            System.err.println("Error initialising databse connection " + e.getMessage());
+            System.err.println("Error initialising database connection " + e.getMessage());
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error initialising database",
-                    "Databse Error", JOptionPane.ERROR_MESSAGE);
+                    "Database Error", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
             return;
         }

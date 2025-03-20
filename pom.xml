@@ -21,6 +21,17 @@
             <artifactId>h2</artifactId>
             <version>2.3.232</version>
         </dependency>
+
+
+        <dependency>
+            <groupId>de.mkammerer</groupId>
+            <artifactId>argon2-jvm</artifactId>
+            <version>2.12</version>
+        </dependency>
     </dependencies>
+
+
+
+
 
 </project>
