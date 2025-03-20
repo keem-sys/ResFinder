@@ -1,9 +1,14 @@
-package accommodationfinder.ui; // Make sure this package name matches your project structure
+package accommodationfinder.ui;
+
 
 import accommodationfinder.auth.User;
 import accommodationfinder.auth.UserService;
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,7 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RegistrationPanel extends JPanel {
-    private JLabel fullNameLbl, usernameLbl, emailLbl, passwordLbl, confirmPasswordLbl, errorMsgLbl;
+    private JLabel fullNameLbl, usernameLbl, emailLbl, passwordLbl, confirmPasswordLbl, errorMsgLbl, titleLabel;
     private JTextField fullNameField, usernameField, emailField;
     private JPasswordField passwordField, confirmPasswordField;
     private JButton registerButton, cancelButton;
@@ -22,13 +27,25 @@ public class RegistrationPanel extends JPanel {
     public RegistrationPanel(UserService userService) {
         this.userService = userService;
 
-        setLayout(new GridLayout(7, 2,10, 5));
+        // **Use FormLayout**
+        FormLayout layout = new FormLayout(
+                "right:pref, 3dlu, 150dlu",
+                "p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 7dlu, p, 7dlu, p"
+        );
+        PanelBuilder builder = new PanelBuilder(layout, this);
+        CellConstraints cc = new CellConstraints();
 
-        fullNameLbl =  new JLabel("Name: ");
-        usernameLbl = new JLabel("Username: ");
-        emailLbl = new JLabel("Email: ");
-        passwordLbl = new JLabel("Password: ");
-        confirmPasswordLbl = new JLabel("Confirm Password: ");
+        setBorder(new EmptyBorder(12, 12, 12, 12));
+
+        // Title Label
+        titleLabel = new JLabel("Welcome to Res Finder!", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+
+        fullNameLbl =  new JLabel("Name:");
+        usernameLbl = new JLabel("Username:");
+        emailLbl = new JLabel("Email:");
+        passwordLbl = new JLabel("Password:");
+        confirmPasswordLbl = new JLabel("Confirm Password:");
         errorMsgLbl = new JLabel("");
         errorMsgLbl.setForeground(Color.RED);
 
@@ -42,21 +59,35 @@ public class RegistrationPanel extends JPanel {
         registerButton = new JButton("Register");
         cancelButton = new JButton("Cancel");
 
-        add(fullNameLbl);
-        add(fullNameField);
-        add(usernameLbl);
-        add(usernameField);
-        add(emailLbl);
-        add(emailField);
-        add(passwordLbl);
-        add(passwordField);
-        add(confirmPasswordLbl);
-        add(confirmPasswordField);
-        add(errorMsgLbl);
-        add(new JLabel());
-        add(registerButton);
-        add(cancelButton);
+        int row = 1;
 
+        builder.add(titleLabel, cc.xyw(1, row, 3));
+        row += 2;
+
+        builder.addLabel(fullNameLbl.getText(), cc.xy(1, row));
+        builder.add(fullNameField, cc.xy(3, row));
+        row += 2;
+        builder.addLabel(usernameLbl.getText(), cc.xy(1, row));
+        builder.add(usernameField, cc.xy(3, row));
+        row += 2;
+        builder.addLabel(emailLbl.getText(), cc.xy(1, row));
+        builder.add(emailField, cc.xy(3, row));
+        row += 2;
+        builder.addLabel(passwordLbl.getText(), cc.xy(1, row));
+        builder.add(passwordField, cc.xy(3, row));
+        row += 2;
+        builder.addLabel(confirmPasswordLbl.getText(), cc.xy(1, row));
+        builder.add(confirmPasswordField, cc.xy(3, row));
+        row += 2;
+
+        builder.add(errorMsgLbl, cc.xyw(1, row, 3)); // Error message label spans 3 columns
+        row += 2;
+
+        // Button Panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.add(registerButton);
+        buttonPanel.add(cancelButton);
+        builder.add(buttonPanel, cc.xyw(1, row, 3)); // Buttons span 3 columns, centered
 
         registerButton.addActionListener(new ActionListener() {
             @Override
@@ -105,21 +136,7 @@ public class RegistrationPanel extends JPanel {
                     return;
                 }
 
-                System.out.println("Registration Validated - Ready for Backend Integration"); // Updated message
-
-                // **Security Note (Client-Side Password Handling):**
-                // In real-world applications, be extra cautious about handling passwords as Strings in memory,
-                // even temporarily on the client-side. `char[]` is generally preferred for security,
-                // as it can be explicitly cleared from memory after use. However, for this student project,
-                // using String for simplicity in UI logic might be acceptable as long as you are hashing
-                // the password securely on the backend (which is the most crucial part).
-
-                // **NEXT STEP: Integrate with Java Backend (Authentication Service) here!**
-                // You will replace the System.out.println(...) above with code to:
-                // 1. Create a User object with the collected data
-                // 2. Call a method on your Authentication Service (e.g., userService.registerUser(...))
-                // 3. Handle the response from the service (success or error)
-                // 4. Update UI based on the response (display success message or error messages from backend)
+                System.out.println("Registration Validated - Ready for Backend Integration");
 
                 try {
                     User user = new User(null, fullName, username, email, password);
@@ -141,28 +158,21 @@ public class RegistrationPanel extends JPanel {
                     backendException.printStackTrace();
                     setErrorMessage("Registration failed: " + backendException.getMessage());
                 } finally {
-                    // Clear password fields after attempting registration (regardless of success or failure)
                     passwordField.setText("");
                     confirmPasswordField.setText("");
-                    confirmPasswordField.setText(""); // Clear confirm password as well
                 }
-
-
-                // Clear password fields after processing
-                passwordField.setText("");
-                confirmPasswordField.setText("");
             }
         });
 
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Placeholder for cancel action
+                //TODO: switch to LoginPanel or clear the RegistrationPanel
                 System.out.println("Cancel button clicked");
-                //  switch to LoginPanel or clear the RegistrationPanel
             }
         });
     }
+
     // Helper method to clear input fields
     private void clearInputFields() {
         fullNameField.setText("");
@@ -172,12 +182,10 @@ public class RegistrationPanel extends JPanel {
         confirmPasswordField.setText("");
     }
 
-    // Method to get the RegistrationPanel (for adding to MainWindow later)
     public JPanel getRegistrationPanel() {
         return this;
     }
 
-    // Method to set error message (for displaying validation errors from backend)
     public void setErrorMessage(String message) {
         errorMsgLbl.setText(message);
     }
