@@ -22,12 +22,20 @@
             <version>2.3.232</version>
         </dependency>
 
-
+        <!--- Argo2 Dependency -->
         <dependency>
             <groupId>de.mkammerer</groupId>
             <artifactId>argon2-jvm</artifactId>
             <version>2.12</version>
         </dependency>
+
+        <!--- JGoodies-forms Dependency -->
+        <dependency>
+            <groupId>com.jgoodies</groupId>
+            <artifactId>jgoodies-forms</artifactId>
+            <version>1.9.0</version>
+        </dependency>
+
     </dependencies>
 
 
