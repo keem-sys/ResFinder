@@ -71,7 +71,65 @@ public class UserService {
 
     }
 
-    private String hashPassword(String plainTextPassword) {
+    public String loginUser(String usernameOrEmail, String plainTextPassword) throws Exception {
+        User user = null;
+
+        // find user by username
+        try {
+            user = userDao.getUserByUsername(usernameOrEmail);
+        } catch (SQLException e) {
+        }
+
+        //  If not found by username, try  find by email
+        if (user == null) {
+            try {
+                user = userDao.getUserByEmail(usernameOrEmail);
+            } catch (SQLException e) {
+            }
+        }
+
+
+        // User not found by either username or email
+        if (user == null) {
+            throw new Exception("Invalid username or email."); // Or custom AuthenticationException
+        }
+
+        //Password Verification (using Argon2-jvm)
+        if (!verifyPassword(plainTextPassword, user.getPasswordHash())) {
+            throw new Exception("Invalid password."); // Or custom AuthenticationException
+        }
+
+        // 5. TODO: JWT Generation (Placeholder - Implement JWT generation)
+        String jwtToken = generateJwtToken(user); // Placeholder - Implement JWT generation
+
+        return jwtToken; // Return the JWT token on successful login
+
+    }
+
+
+    // **Placeholder for JWT Generation (Implement JWT Generation)**
+    private String generateJwtToken(User user) {
+        // TODO: Implement JWT generation logic here**
+        // Using a JWT library (e.g., jjwt-api, java-jwt) to create a JWT for the user
+        System.out.println("Warning: JWT generation is NOT yet implemented!"); // Security Warning
+        return "DUMMY_JWT_TOKEN"; // INSECURE
+    }
+
+
+    //  Password Verification Method (using Argon2-jvm)**
+    private boolean verifyPassword(String plainTextPassword, String hashedPassword) {
+        Argon2 argon2 = Argon2Factory.create();
+        try {
+            return argon2.verify(hashedPassword, plainTextPassword.toCharArray());
+        } catch (Exception e) {
+            // Password verification failed (exception during verification process - could be Argon2 exceptions)
+            System.err.println("Password verification error: " + e.getMessage()); // Log verification error
+            return false; // Verification failed
+        }
+    }
+
+
+    private String hashPassword (String plainTextPassword){
         int iterations = 2;
         int memory = 65536;
         int parallelism = 1;
@@ -87,3 +145,8 @@ public class UserService {
         }
     }
 }
+
+
+
+
+
