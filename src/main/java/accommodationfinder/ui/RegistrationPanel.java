@@ -25,7 +25,6 @@ public class RegistrationPanel extends JPanel {
     public RegistrationPanel(UserService userService) {
         this.userService = userService;
 
-        // **Use FormLayout**
         FormLayout layout = new FormLayout(
                 "right:pref, 3dlu, 150dlu",
                 "p, 7dlu, p, 7dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 7dlu, p, 7dlu, p"
@@ -83,7 +82,7 @@ public class RegistrationPanel extends JPanel {
                 String username = usernameField.getText();
                 String email = emailField.getText();
                 char[] passwordChars = passwordField.getPassword();
-                String password = new String(passwordChars);
+                String password = new String(passwordChars); // TODO: chart[] to String for now
                 char[] confirmPasswordChars = confirmPasswordField.getPassword();
                 String confirmPassword =  new String(confirmPasswordChars);
 
@@ -158,7 +157,7 @@ public class RegistrationPanel extends JPanel {
             }
         });
 
-        add(builder.build());
+        add(builder.build()); // Add the built panel to this JPanel
     }
 
     // Helper method to clear input fields
