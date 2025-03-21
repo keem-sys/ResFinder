@@ -1,10 +1,8 @@
 package accommodationfinder.ui;
 
-
 import accommodationfinder.auth.User;
 import accommodationfinder.auth.UserService;
-import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.builder.FormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
 import javax.swing.*;
@@ -30,64 +28,52 @@ public class RegistrationPanel extends JPanel {
         // **Use FormLayout**
         FormLayout layout = new FormLayout(
                 "right:pref, 3dlu, 150dlu",
-                "p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 7dlu, p, 7dlu, p"
+                "p, 7dlu, p, 7dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 7dlu, p, 7dlu, p"
         );
-        PanelBuilder builder = new PanelBuilder(layout, this);
-        CellConstraints cc = new CellConstraints();
 
-        setBorder(new EmptyBorder(12, 12, 12, 12));
+        FormBuilder builder = FormBuilder.create().layout(layout).padding(new EmptyBorder(12, 12, 12, 12));
 
         // Title Label
         titleLabel = new JLabel("Welcome to Res Finder!", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        builder.add(titleLabel).xyw(1, 1, 3); // Row 1, spans 3 columns
 
-        fullNameLbl =  new JLabel("Name:");
+        fullNameLbl = new JLabel("Name:");
+        builder.add(fullNameLbl).xy(1, 3); // Row 3
+        fullNameField = new JTextField(20);
+        builder.add(fullNameField).xy(3, 3);
+
         usernameLbl = new JLabel("Username:");
+        builder.add(usernameLbl).xy(1, 5); // Row 5
+        usernameField = new JTextField(20);
+        builder.add(usernameField).xy(3, 5);
+
         emailLbl = new JLabel("Email:");
+        builder.add(emailLbl).xy(1, 7); // Row 7
+        emailField = new JTextField(20);
+        builder.add(emailField).xy(3, 7);
+
         passwordLbl = new JLabel("Password:");
+        builder.add(passwordLbl).xy(1, 9); // Row 9
+        passwordField = new JPasswordField(20);
+        builder.add(passwordField).xy(3, 9);
+
         confirmPasswordLbl = new JLabel("Confirm Password:");
+        builder.add(confirmPasswordLbl).xy(1, 11); // Row 11
+        confirmPasswordField = new JPasswordField(20);
+        builder.add(confirmPasswordField).xy(3, 11);
+
         errorMsgLbl = new JLabel("");
         errorMsgLbl.setForeground(Color.RED);
-
-        // TextFields and PasswordFields initialisation
-        fullNameField = new JTextField(20);
-        usernameField = new JTextField(20);
-        emailField = new JTextField(20);
-        passwordField = new JPasswordField(20);
-        confirmPasswordField = new JPasswordField(20);
-
-        registerButton = new JButton("Register");
-        cancelButton = new JButton("Cancel");
-
-        int row = 1;
-
-        builder.add(titleLabel, cc.xyw(1, row, 3));
-        row += 2;
-
-        builder.addLabel(fullNameLbl.getText(), cc.xy(1, row));
-        builder.add(fullNameField, cc.xy(3, row));
-        row += 2;
-        builder.addLabel(usernameLbl.getText(), cc.xy(1, row));
-        builder.add(usernameField, cc.xy(3, row));
-        row += 2;
-        builder.addLabel(emailLbl.getText(), cc.xy(1, row));
-        builder.add(emailField, cc.xy(3, row));
-        row += 2;
-        builder.addLabel(passwordLbl.getText(), cc.xy(1, row));
-        builder.add(passwordField, cc.xy(3, row));
-        row += 2;
-        builder.addLabel(confirmPasswordLbl.getText(), cc.xy(1, row));
-        builder.add(confirmPasswordField, cc.xy(3, row));
-        row += 2;
-
-        builder.add(errorMsgLbl, cc.xyw(1, row, 3)); // Error message label spans 3 columns
-        row += 2;
+        builder.add(errorMsgLbl).xyw(1, 13, 3); // Row 13, spans 3 columns
 
         // Button Panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        registerButton = new JButton("Register");
+        cancelButton = new JButton("Cancel");
         buttonPanel.add(registerButton);
         buttonPanel.add(cancelButton);
-        builder.add(buttonPanel, cc.xyw(1, row, 3)); // Buttons span 3 columns, centered
+        builder.add(buttonPanel).xyw(1, 15, 3); // Row 15, spans 3 columns, centered
 
         registerButton.addActionListener(new ActionListener() {
             @Override
@@ -97,7 +83,7 @@ public class RegistrationPanel extends JPanel {
                 String username = usernameField.getText();
                 String email = emailField.getText();
                 char[] passwordChars = passwordField.getPassword();
-                String password = new String(passwordChars); // Convert char[] to String for now - Security Note Below!
+                String password = new String(passwordChars);
                 char[] confirmPasswordChars = confirmPasswordField.getPassword();
                 String confirmPassword =  new String(confirmPasswordChars);
 
@@ -118,7 +104,7 @@ public class RegistrationPanel extends JPanel {
                 }
 
                 // Email validation
-                String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+@[A-Za-z0-9.-]+$"; // Corrected Regex
+                String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
                 Pattern pattern = Pattern.compile(emailRegex);
                 Matcher matcher = pattern.matcher(email);
                 if (!matcher.matches()) {
@@ -171,6 +157,8 @@ public class RegistrationPanel extends JPanel {
                 System.out.println("Cancel button clicked");
             }
         });
+
+        add(builder.build());
     }
 
     // Helper method to clear input fields
