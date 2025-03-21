@@ -42,7 +42,6 @@ public class MainWindow extends JFrame {
 
         JLabel titleLabel = new JLabel("Welcome to Res Finder!", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        add(titleLabel, BorderLayout.NORTH);
 
         setLocationRelativeTo(null);
     }

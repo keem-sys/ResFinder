@@ -17,7 +17,7 @@ public class UserDao {
 
     // Create User DAO
     public Long createUser(User user) throws SQLException {
-        String sql = "INSERT INTO users (full_name, username, email, password_hash, registration_date) " +
+        String sql = "INSERT INTO USERS (full_name, username, email, password_hash, registration_date) " +
                 "VALUES (?, ?, ?, ?, ?)";
 
         try (Connection connection = dbConnection.getConnection();
@@ -46,7 +46,7 @@ public class UserDao {
 
     // Method to get User by Username
     public User getUserByUsername(String username) throws SQLException {
-        String sql = "SELECT * FROM users WHERE username = ?";
+        String sql = "SELECT * FROM USERS WHERE username = ?";
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
@@ -66,7 +66,7 @@ public class UserDao {
 
     // Method to get User by Email
     public User getUserByEmail(String email) throws SQLException {
-        String sql = "SELECT * FROM users WHERE email = ?";
+        String sql = "SELECT * FROM USERS WHERE email = ?";
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
@@ -87,7 +87,7 @@ public class UserDao {
 
     // Check Username exists
     public boolean isUsernameExists(String username) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM users WHERE username = ?";
+        String sql = "SELECT COUNT(*) FROM USERS WHERE username = ?";
 
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -108,7 +108,7 @@ public class UserDao {
 
     // Check Email Exists
     public boolean isEmailExists(String email) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
+        String sql = "SELECT COUNT(*) FROM USERS WHERE email = ?";
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
