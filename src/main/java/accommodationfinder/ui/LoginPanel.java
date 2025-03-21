@@ -18,9 +18,11 @@ public class LoginPanel extends JPanel {
     private JButton loginButton, registerButton;
 
     private final UserService userService;
+    private final MainWindow mainWindow;
 
-    public LoginPanel(UserService userService) {
+    public LoginPanel(UserService userService, MainWindow mainWindow) {
         this.userService = userService;
+        this.mainWindow = mainWindow;
 
 
         FormLayout layout = new FormLayout(
@@ -80,7 +82,11 @@ public class LoginPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Register button clicked on Login Panel - Switch to Registration Panel");
-                // **NEXT: Implement switching to RegistrationPanel in MainWindow**
+                // **NEXT: Implement switching to RegistrationPanel in MainWindow**\
+                // Redirect to LoginPanel
+                SwingUtilities.invokeLater(() -> {
+                    mainWindow.switchToRegistrationPanel();
+                });
             }
         });
 

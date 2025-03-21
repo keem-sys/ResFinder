@@ -37,7 +37,7 @@ public class MainWindow extends JFrame {
         }
 
 
-        LoginPanel loginPanel = new LoginPanel(userService);
+        LoginPanel loginPanel = new LoginPanel(userService, this);
 
 
         RegistrationPanel registrationPanel = new RegistrationPanel(userService, this);
@@ -54,5 +54,12 @@ public class MainWindow extends JFrame {
         revalidate();
         repaint();
         System.out.println("Switched to login panel");
+    }
+
+    public void switchToRegistrationPanel() {
+        setContentPane(registrationPanel.getRegistrationPanel());
+        revalidate();
+        repaint();
+        System.out.println("Switched to registration panel");
     }
 }
