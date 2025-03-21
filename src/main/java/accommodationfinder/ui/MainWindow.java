@@ -10,10 +10,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class MainWindow extends JFrame {
+
     private DatabaseConnection databaseConnection;
     private UserDao userDao;
     private UserService userService;
     private RegistrationPanel registrationPanel;
+    private LoginPanel loginPanel;
 
     public MainWindow() {
         setTitle("Student Accommodation Finder");
@@ -35,10 +37,11 @@ public class MainWindow extends JFrame {
         }
 
 
+        LoginPanel loginPanel = new LoginPanel(userService);
 
 
-        RegistrationPanel registrationPanel = new RegistrationPanel(userService);
-        setContentPane(registrationPanel.getRegistrationPanel());
+        RegistrationPanel registrationPanel = new RegistrationPanel(userService, this);
+        setContentPane(loginPanel.getLoginPanel());
 
         JLabel titleLabel = new JLabel("Welcome to Res Finder!", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
@@ -46,4 +49,10 @@ public class MainWindow extends JFrame {
         setLocationRelativeTo(null);
     }
 
+    public void switchToLoginPanel() {
+        setContentPane(loginPanel.getLoginPanel());
+        revalidate();
+        repaint();
+        System.out.println("Switched to login panel");
+    }
 }

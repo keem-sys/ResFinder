@@ -21,9 +21,11 @@ public class RegistrationPanel extends JPanel {
     private JButton registerButton, cancelButton;
 
     private final UserService userService;
+    private final MainWindow mainWindow;
 
-    public RegistrationPanel(UserService userService) {
+    public RegistrationPanel(UserService userService, MainWindow mainWindow) {
         this.userService = userService;
+        this.mainWindow = mainWindow;
 
         FormLayout layout = new FormLayout(
                 "right:pref, 3dlu, 150dlu",
@@ -127,18 +129,22 @@ public class RegistrationPanel extends JPanel {
                     User user = new User(null, fullName, username, email, password);
                     Long userId = userService.registerUser(user);
 
-                    setErrorMessage("Registration Successful! You can now login!");
+                    setErrorMessage("Registration Successful! Redirecting you to login screen......");
                     clearInputFields();
 
                     System.out.println("User registered successfully with ID: " + userId);
 
+                    // Redirect to LoginPanel
+                    SwingUtilities.invokeLater(() -> {
+                        mainWindow.switchToLoginPanel();
+                    });
 
                 } catch (SQLException sqlException) {
                     System.err.println("Database error during registration: " + sqlException.getMessage());
                     sqlException.printStackTrace();
                     setErrorMessage("Database error occurred during registration: " + sqlException.getMessage());
 
-                } catch (Exception backendException) { // Catch other potential backend exceptions
+                } catch (Exception backendException) {
                     System.err.println("Backend registration error: " + backendException.getMessage());
                     backendException.printStackTrace();
                     setErrorMessage("Registration failed: " + backendException.getMessage());
@@ -152,8 +158,8 @@ public class RegistrationPanel extends JPanel {
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //TODO: switch to LoginPanel or clear the RegistrationPanel
                 System.out.println("Cancel button clicked");
+                mainWindow.switchToLoginPanel();
             }
         });
 

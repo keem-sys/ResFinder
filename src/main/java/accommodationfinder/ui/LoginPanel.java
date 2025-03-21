@@ -22,9 +22,10 @@ public class LoginPanel extends JPanel {
     public LoginPanel(UserService userService) {
         this.userService = userService;
 
+
         FormLayout layout = new FormLayout(
-                "right:pref, 3dlu, 150dlu", // Columns: Label, gap, Field
-                "p, 3dlu, p, 3dlu, p, 7dlu, p" // Rows: field, gap, field, ... , error label, gap, buttons
+                "right:pref, 3dlu, 150dlu", // Columns
+                "p, 3dlu, p, 3dlu, p, 7dlu, p, 7dlu, p" // Rows
         );
         FormBuilder builder = FormBuilder.create().layout(layout).padding(new EmptyBorder(12, 12, 12, 12));
 
