@@ -27,7 +27,10 @@ public class UserDao {
             preparedStatement.setString(2, user.getUsername());
             preparedStatement.setString(3, user.getEmail());
             preparedStatement.setString(4, user.getPasswordHash());
-            preparedStatement.setString(5, user.getRegistrationDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)); // Format LocalDateTime to String
+
+            // Convert LocalDateTime to java.sql.TimeStamp
+            Timestamp registrationTimestamp = Timestamp.valueOf(user.getRegistrationDate());
+            preparedStatement.setTimestamp(5, registrationTimestamp);
 
             preparedStatement.executeUpdate();
             ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
@@ -135,9 +138,9 @@ public class UserDao {
         user.setEmail(resultSet.getString("email"));
         user.setPasswordHash(resultSet.getString("password_hash"));
 
-        String registrationDateString = resultSet.getString("registration_date"); // Assuming date is stored as String in database
-        if (registrationDateString != null) {
-            user.setRegistrationDate(LocalDateTime.parse(registrationDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        Timestamp registrationTimestamp = resultSet.getTimestamp("registration_date");
+        if (registrationTimestamp != null) {
+            user.setRegistrationDate(registrationTimestamp.toLocalDateTime());
         }
 
         return user;
