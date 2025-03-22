@@ -16,7 +16,7 @@ public class LoginPanel extends JPanel {
     private JTextField usernameOrEmailField;
     private JPasswordField passwordField;
     private JButton loginButton, registrationButton;
-
+    private JCheckBox rememberMeChkBox;
     private final UserService userService;
     private final MainWindow mainWindow;
 
@@ -27,7 +27,7 @@ public class LoginPanel extends JPanel {
 
         FormLayout layout = new FormLayout(
                 "right:pref, 4dlu, 150dlu", // Columns
-                "p, 3dlu, p, 3dlu, p, 7dlu, p, 7dlu, p, 7dlu, p" // Rows
+                "p, 3dlu, p, 3dlu, p, 7dlu, p, 7dlu, p, 7dlu, p, 7dlu, p" // Rows
         );
         FormBuilder builder = FormBuilder.create().layout(layout).padding(new EmptyBorder(12, 12, 12, 12));
 
@@ -46,19 +46,22 @@ public class LoginPanel extends JPanel {
         passwordField = new JPasswordField(20);
         builder.add(passwordField).xy(3, 5);
 
+        rememberMeChkBox = new JCheckBox("Remember me");
+        builder.add(rememberMeChkBox).xyw(3, 7, 1);
+
         errorMessageLabel = new JLabel("");
         errorMessageLabel.setForeground(Color.RED);
-        builder.add(errorMessageLabel).xyw(1, 7, 3); // Row 7, spans 3 columns
+        builder.add(errorMessageLabel).xyw(1, 9, 3); // Row 7, spans 3 columns
 
         loginButton = new JButton("Login");
-        builder.add(loginButton).xyw(1, 9, 3); // Row 9, spans 7 columns
+        builder.add(loginButton).xyw(1, 11, 3); // Row 9, spans 7 columns
 
         JPanel registerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JLabel registerLabel = new JLabel("Are you a new user? ");
         registrationButton = new JButton("Sign Up!");
         registerPanel.add(registerLabel);
         registerPanel.add(registrationButton);
-        builder.add(registerPanel).xyw(1, 11, 3);
+        builder.add(registerPanel).xyw(1, 13, 3);
 
         loginButton.addActionListener(new ActionListener() {
             @Override
@@ -71,13 +74,37 @@ public class LoginPanel extends JPanel {
                 System.out.println("Username or Email: " + usernameOrEmail);
                 System.out.println("Password: " + password);
 
-                // **Login Logic - Backend Integration - NEXT STEP**
-                // 1. Call userService.loginUser(usernameOrEmail, password)
-                // 2. Handle successful login (get JWT, store it, switch to main app view)
+                // Input validation
+                if (usernameOrEmail.isEmpty() || password.isEmpty()) {
+                    setErrorMessage("Username/Email and Password are required");
+                    return;
+                }
+
+                // Login Logic - Backend Integration
                 // 3. Handle failed login (display error message)
+
+                try {
+                    // loginUser method called
+                    String jwtToken = userService.loginUser(usernameOrEmail, password);
+
+                    // 2. Handle successful login (get JWT, store it, switch to main app view)
+                    // TODO: Store JWT
+                    System.out.println("Login Successful! JWT Token: " + jwtToken);
+                    setErrorMessage("Login Successful!");
+
+                } catch (Exception authenticationException) { // Catch exceptions from backend (e.g., AuthenticationException)
+                    // 3. Handle Failed Login (display error message)
+                    System.err.println("Login failed: " + authenticationException.getMessage());
+                    authenticationException.printStackTrace();
+                    setErrorMessage("Login failed: " + authenticationException.getMessage()); // Display backend error message to user
+                } finally {
+                    // Clear password field after login attempt
+                    passwordField.setText("");
+                }
 
                 // Placeholder - Clear password field after attempt
                 passwordField.setText("");
+
             }
         });
 

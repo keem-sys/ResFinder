@@ -100,9 +100,9 @@ public class RegistrationPanel extends JPanel {
                 // Input validation
                 if (fullName.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty()
                         || confirmPassword.isEmpty()) {
-                    setErrorMessage("All fields are required");
                     return;
                 }
+                setErrorMessage("All fields are required");
 
                 // Email validation
                 String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
