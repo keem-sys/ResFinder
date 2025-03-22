@@ -87,18 +87,15 @@ public class LoginPanel extends JPanel {
                     // loginUser method called
                     String jwtToken = userService.loginUser(usernameOrEmail, password);
 
-                    // 2. Handle successful login (get JWT, store it, switch to main app view)
                     // TODO: Store JWT
                     System.out.println("Login Successful! JWT Token: " + jwtToken);
                     setErrorMessage("Login Successful!");
 
-                } catch (Exception authenticationException) { // Catch exceptions from backend (e.g., AuthenticationException)
-                    // 3. Handle Failed Login (display error message)
+                } catch (Exception authenticationException) {
                     System.err.println("Login failed: " + authenticationException.getMessage());
                     authenticationException.printStackTrace();
-                    setErrorMessage("Login failed: " + authenticationException.getMessage()); // Display backend error message to user
-                } finally {
-                    // Clear password field after login attempt
+                    setErrorMessage("Login failed: " + authenticationException.getMessage());                 }
+                finally {
                     passwordField.setText("");
                 }
 

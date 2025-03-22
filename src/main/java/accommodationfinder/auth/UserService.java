@@ -5,10 +5,21 @@ import accommodationfinder.data.UserDao;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+
+import javax.crypto.SecretKey;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+
 
 public class UserService {
     private final UserDao userDao;
@@ -80,7 +91,7 @@ public class UserService {
         } catch (SQLException e) {
         }
 
-        //  If not found by username, try  find by email
+        //  If not found by username, try to find by email
         if (user == null) {
             try {
                 user = userDao.getUserByEmail(usernameOrEmail);
@@ -111,9 +122,24 @@ public class UserService {
     private String generateJwtToken(User user) {
         // TODO: Implement JWT generation logic here**
         // Using a JWT library (e.g., jjwt-api, java-jwt) to create a JWT for the user
-        System.out.println("Warning: JWT generation is NOT yet implemented!"); // Security Warning
-        return "DUMMY_JWT_TOKEN"; // INSECURE
+        String SECRET_KEY_STRING = "413F4428472B4B6250655368566D597133743677397A24422645294840635166"; // INSECURE!
+        SecretKey SECRET_KEY = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY_STRING)); // HS256 key from Base64 String
+
+        // JWT Claims
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("username", user.getUsername());
+        claims.put("userId", user.getId());
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuer("ResFinderApp")
+                .setSubject(user.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
+                .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
+                .compact();
     }
+
 
 
     //  Password Verification Method (using Argon2-jvm)**
