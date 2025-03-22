@@ -13,6 +13,10 @@ target/
 *.iml
 *.ipr
 
+### User data
+student_accommodation_db.mv.db
+student_accommodation_db.trace.db
+
 ### Eclipse ###
 .apt_generated
 .classpath

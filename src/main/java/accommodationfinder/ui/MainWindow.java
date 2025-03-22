@@ -36,17 +36,20 @@ public class MainWindow extends JFrame {
             return;
         }
 
-
-        LoginPanel loginPanel = new LoginPanel(userService, this);
-
-
         RegistrationPanel registrationPanel = new RegistrationPanel(userService, this);
+        LoginPanel loginPanel = new LoginPanel(userService, this);
         setContentPane(loginPanel.getLoginPanel());
 
         JLabel titleLabel = new JLabel("Welcome to Res Finder!", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
 
         setLocationRelativeTo(null);
+    }
+    public void switchToRegistrationPanel() {
+        setContentPane(registrationPanel.getRegistrationPanel());
+        revalidate();
+        repaint();
+        System.out.println("Switched to registration panel");
     }
 
     public void switchToLoginPanel() {
@@ -56,10 +59,5 @@ public class MainWindow extends JFrame {
         System.out.println("Switched to login panel");
     }
 
-    public void switchToRegistrationPanel() {
-        setContentPane(registrationPanel.getRegistrationPanel());
-        revalidate();
-        repaint();
-        System.out.println("Switched to registration panel");
-    }
+
 }
