@@ -15,7 +15,7 @@ public class LoginPanel extends JPanel {
     private JLabel usernameOrEmailLabel, passwordLabel, errorMessageLabel, titleLabel;
     private JTextField usernameOrEmailField;
     private JPasswordField passwordField;
-    private JButton loginButton, registerButton;
+    private JButton loginButton, registrationButton;
 
     private final UserService userService;
     private final MainWindow mainWindow;
@@ -26,13 +26,13 @@ public class LoginPanel extends JPanel {
 
 
         FormLayout layout = new FormLayout(
-                "right:pref, 3dlu, 150dlu", // Columns
-                "p, 3dlu, p, 3dlu, p, 7dlu, p, 7dlu, p" // Rows
+                "right:pref, 4dlu, 150dlu", // Columns
+                "p, 3dlu, p, 3dlu, p, 7dlu, p, 7dlu, p, 7dlu, p" // Rows
         );
         FormBuilder builder = FormBuilder.create().layout(layout).padding(new EmptyBorder(12, 12, 12, 12));
 
         // Title Label
-        titleLabel = new JLabel("Welcome to Res Finder!", SwingConstants.CENTER);
+        titleLabel = new JLabel("Login!", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         builder.add(titleLabel).xyw(1, 1, 3); // Row 1, spans 3 columns
 
@@ -50,12 +50,15 @@ public class LoginPanel extends JPanel {
         errorMessageLabel.setForeground(Color.RED);
         builder.add(errorMessageLabel).xyw(1, 7, 3); // Row 7, spans 3 columns
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         loginButton = new JButton("Login");
-        registerButton = new JButton("Register");
-        buttonPanel.add(loginButton);
-        buttonPanel.add(registerButton);
-        builder.add(buttonPanel).xyw(1, 9, 3); // Row 9, spans 3 columns
+        builder.add(loginButton).xyw(1, 9, 3); // Row 9, spans 7 columns
+
+        JPanel registerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JLabel registerLabel = new JLabel("Are you a new user? ");
+        registrationButton = new JButton("Sign Up!");
+        registerPanel.add(registerLabel);
+        registerPanel.add(registrationButton);
+        builder.add(registerPanel).xyw(1, 11, 3);
 
         loginButton.addActionListener(new ActionListener() {
             @Override
@@ -78,7 +81,7 @@ public class LoginPanel extends JPanel {
             }
         });
 
-        registerButton.addActionListener(new ActionListener() {
+        registrationButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Register button clicked on Login Panel - Switch to Registration Panel");
