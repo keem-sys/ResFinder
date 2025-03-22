@@ -36,8 +36,8 @@ public class MainWindow extends JFrame {
             return;
         }
 
-        RegistrationPanel registrationPanel = new RegistrationPanel(userService, this);
-        LoginPanel loginPanel = new LoginPanel(userService, this);
+        this.registrationPanel = new RegistrationPanel(userService, this);
+        this.loginPanel = new LoginPanel(userService, this);
         setContentPane(loginPanel.getLoginPanel());
 
         JLabel titleLabel = new JLabel("Welcome to Res Finder!", SwingConstants.CENTER);

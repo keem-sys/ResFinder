@@ -35,7 +35,7 @@ public class RegistrationPanel extends JPanel {
         FormBuilder builder = FormBuilder.create().layout(layout).padding(new EmptyBorder(12, 12, 12, 12));
 
         // Title Label
-        titleLabel = new JLabel("Welcome to Res Finder!", SwingConstants.CENTER);
+        titleLabel = new JLabel("Welcome to Registration screen!", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         builder.add(titleLabel).xyw(1, 1, 3); // Row 1, spans 3 columns
 

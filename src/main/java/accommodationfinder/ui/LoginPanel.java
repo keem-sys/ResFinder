@@ -82,11 +82,8 @@ public class LoginPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Register button clicked on Login Panel - Switch to Registration Panel");
-                // **NEXT: Implement switching to RegistrationPanel in MainWindow**\
                 // Redirect to LoginPanel
-                SwingUtilities.invokeLater(() -> {
-                    mainWindow.switchToRegistrationPanel();
-                });
+                SwingUtilities.invokeLater(mainWindow::switchToRegistrationPanel);
             }
         });
 
