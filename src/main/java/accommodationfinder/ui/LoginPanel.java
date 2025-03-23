@@ -9,6 +9,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.prefs.Preferences;
 
 public class LoginPanel extends JPanel {
 
@@ -51,10 +52,10 @@ public class LoginPanel extends JPanel {
 
         errorMessageLabel = new JLabel("");
         errorMessageLabel.setForeground(Color.RED);
-        builder.add(errorMessageLabel).xyw(1, 9, 3); // Row 7, spans 3 columns
+        builder.add(errorMessageLabel).xyw(1, 9, 3);
 
         loginButton = new JButton("Login");
-        builder.add(loginButton).xyw(1, 11, 3); // Row 9, spans 7 columns
+        builder.add(loginButton).xyw(1, 11, 3);
 
         JPanel registerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JLabel registerLabel = new JLabel("Are you a new user? ");
@@ -70,9 +71,11 @@ public class LoginPanel extends JPanel {
                 String usernameOrEmail = usernameOrEmailField.getText();
                 char[] passwordChars = passwordField.getPassword();
                 String password = new String(passwordChars);
+                boolean rememberMe = rememberMeChkBox.isSelected();
 
                 System.out.println("Username or Email: " + usernameOrEmail);
                 System.out.println("Password: " + password);
+                System.out.println("Remember me: " + rememberMe);
 
                 // Input validation
                 if (usernameOrEmail.isEmpty() || password.isEmpty()) {
@@ -87,7 +90,18 @@ public class LoginPanel extends JPanel {
                     // loginUser method called
                     String jwtToken = userService.loginUser(usernameOrEmail, password);
 
-                    // TODO: Store JWT
+                    // Store JWT based on "Remember Me" checkbox state
+                    if (rememberMeChkBox.isSelected()) { // If "Remember Me" is checked
+                        mainWindow.saveJwtToPreferences(jwtToken); // Save JWT via MainWindow's method
+                        System.out.println("JWT token saved due to 'Remember Me' being checked.");
+                    } else {
+                        mainWindow.saveJwtToPreferences(null); // Clear JWT if "Remember Me" is not checked
+                        System.out.println("JWT token cleared as 'Remember Me' is not checked.");
+                    }
+
+                    mainWindow.showMainApplicationView(); // Switch to main app view
+
+
                     System.out.println("Login Successful! JWT Token: " + jwtToken);
                     setErrorMessage("Login Successful!");
 
@@ -98,9 +112,6 @@ public class LoginPanel extends JPanel {
                 finally {
                     passwordField.setText("");
                 }
-
-                // Placeholder - Clear password field after attempt
-                passwordField.setText("");
 
             }
         });
@@ -114,8 +125,9 @@ public class LoginPanel extends JPanel {
             }
         });
 
-        add(builder.build()); // Add the built panel to this JPanel
+        add(builder.build());
     }
+
 
     public JPanel getLoginPanel() {
         return this;
