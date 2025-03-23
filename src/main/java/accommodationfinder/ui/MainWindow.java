@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.prefs.Preferences;
 
 public class MainWindow extends JFrame {
 
@@ -21,28 +22,6 @@ public class MainWindow extends JFrame {
         setTitle("Student Accommodation Finder");
         setSize(900, 900);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // Attempt Login on Startup
-        String storedJwtToken = getJwtFromPreferences();
-        if (storedJwtToken != null && !storedJwtToken.isEmpty()) {
-            System.out.println("Found JWT in Preferences - Attempting to login...");
-
-            if (validateJwtToken(storedJwtToken)) { // TODO: Implement JWT validation in UserService
-                System.out.println("JWT Token valid - Automatic login successful!");
-
-                // TODO: Implement code to switch to main application view directly (skip login panel)
-
-                JOptionPane.showMessageDialog(this, "Automatic login successful!", "Login",
-                        JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                System.out.println("Stored JWT Token invalid - Showing Login Panel.");
-                initializeLoginPanel();
-            }
-        } else {
-            System.out.println("No JWT found in Preferences - Showing Login Panel.");
-            initializeLoginPanel();
-        }
-
 
         try {
             databaseConnection = new DatabaseConnection();
@@ -60,6 +39,38 @@ public class MainWindow extends JFrame {
 
         this.registrationPanel = new RegistrationPanel(userService, this);
         this.loginPanel = new LoginPanel(userService, this);
+
+        // Attempt Login on Startup
+        String storedJwtToken = getJwtFromPreferences();
+        if (storedJwtToken != null && !storedJwtToken.isEmpty()) {
+            System.out.println("Found JWT in Preferences - Attempting to login...");
+
+            if (userService.validateJwtToken(storedJwtToken)) {
+                System.out.println("JWT Token valid - Automatic login successful!");
+
+                // TODO: Implement code to switch to main application view directly (skip login panel)
+
+                JOptionPane.showMessageDialog(this, "Automatic login successful!", "Login",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+            } else {
+                System.out.println("Stored JWT Token invalid - Showing Login Panel.");
+                switchToLoginPanel();
+            }
+        } else {
+            System.out.println("No JWT found in Preferences - Showing Login Panel.");
+            switchToLoginPanel();
+        }
+
+        /*
+        if (getContentPane() == null) { // If no panel was set (no auto-login)
+            switchToMainPanel();
+        }
+
+         */
+
+
+
         setContentPane(loginPanel.getLoginPanel());
 
         JLabel titleLabel = new JLabel("Welcome to Res Finder!", SwingConstants.CENTER);
@@ -68,22 +79,9 @@ public class MainWindow extends JFrame {
         setLocationRelativeTo(null);
     }
 
-    //   method to initialize LoginPanel and set content pane
-    private void initializeLoginPanel() {
-        loginPanel = new LoginPanel(userService, this);
-        setContentPane(loginPanel.getLoginPanel());
-    }
-
     private String getJwtFromPreferences() {
         java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(getClass());
         return prefs.get("jwtToken", null);
-    }
-
-    // Placeholder for now for JWT Validation Method
-    private boolean validateJwtToken(String jwtToken) {
-        // TODO: Implement JWT validation logic in UserService (UserService.validateJwtToken(jwtToken))
-        System.out.println("Warning: JWT validation is NOT yet implemented! assuming JWT is valid.");
-        return true;
     }
 
 
@@ -101,6 +99,14 @@ public class MainWindow extends JFrame {
         System.out.println("Switched to login panel");
     }
 
+    public void saveJwtToPreferences(String jwtToken) {
+        Preferences prefs = Preferences.userNodeForPackage(getClass());
+        if (jwtToken != null) {
+            prefs.put("jwtToken", jwtToken);
+        } else {
+            prefs.remove("jwtToken"); // Remove if null (logout)
+        }
+    }
 
 
 

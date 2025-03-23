@@ -1,16 +1,14 @@
 package accommodationfinder.auth;
 
-
 import accommodationfinder.data.UserDao;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
-
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import java.security.Key;
 
-import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -18,34 +16,34 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Properties;
-
 
 
 public class UserService {
     private final UserDao userDao;
-    private final String jwtSecretKeyString;
-
+    private final Key jwtSecretKey;
+    private static final long JWT_EXPIRATION_MS = 1000 * 60 * 60 * 24;
 
     public UserService(UserDao userDao) {
         this.userDao = userDao;
-        this.jwtSecretKeyString = loadJwtSecretKeyFromConfig();
+        this.jwtSecretKey = loadJwtSecretKeyFromConfig();
     }
 
-    private String loadJwtSecretKeyFromConfig() {
+
+    private Key loadJwtSecretKeyFromConfig() {
         Properties properties = new Properties();
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream("application.properties")) { // Load from classpath
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream("application.properties")) {
             if (input == null) {
                 throw new IllegalStateException("Unable to find application.properties file!");
             }
             properties.load(input);
-            String secretKey = properties.getProperty("jwt.secretKey");
-            if (secretKey == null || secretKey.isEmpty()) {
+            String secretKeyBase64 = properties.getProperty("jwt.secretKey"); // get Base64 encoded key
+            if (secretKeyBase64 == null || secretKeyBase64.isEmpty()) {
                 throw new IllegalStateException("jwt.secretKey property not found in application.properties!");
             }
-            return secretKey;
+            return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKeyBase64)); // Decode and return the key
         } catch (IOException e) {
             throw new IllegalStateException("Error loading application.properties file!", e);
         }
@@ -128,40 +126,48 @@ public class UserService {
             throw new Exception("Invalid username or email."); // Or custom AuthenticationException
         }
 
-        //Password Verification (using Argon2-jvm)
+        // Password Verification (using Argon2-jvm)
         if (!verifyPassword(plainTextPassword, user.getPasswordHash())) {
             throw new Exception("Invalid password."); // Or custom AuthenticationException
         }
 
-        // 5. TODO: JWT Generation (Placeholder - Implement JWT generation)
-        String jwtToken = generateJwtToken(user); // Placeholder - Implement JWT generation
+        // TODO: JWT Generation (Placeholder - Implement JWT generation)
+        String jwtToken = generateJwtToken(user);
 
-        return jwtToken; // Return the JWT token on successful login
+        return jwtToken;
 
     }
 
 
-    // **Placeholder for JWT Generation (Implement JWT Generation)**
+  
     private String generateJwtToken(User user) {
-        // TODO: Implement JWT generation logic here**
-        String SECRET_KEY_STRING = this.jwtSecretKeyString;
-        SecretKey SECRET_KEY = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY_STRING));
-
-        // JWT Claims
         Map<String, Object> claims = new HashMap<>();
         claims.put("username", user.getUsername());
         claims.put("userId", user.getId());
 
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuer("ResFinderApp")
-                .setSubject(user.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
-                .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
+                .claims(claims)
+                .issuer("ResFinderApp")
+                .subject(user.getUsername())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION_MS))
+                .signWith(jwtSecretKey) // Use the key directly (recommended approach)
                 .compact();
     }
 
+    // JWT method validation using JJWT
+    public boolean validateJwtToken(String jwtToken) { // Make public
+        try {
+            Jwts.parser() // Use parserBuilder
+                    .setSigningKey(jwtSecretKey)
+                    .build()
+                    .parseClaimsJws(jwtToken);
+            return true;
+        } catch (JwtException e) {
+            System.out.println("JWT validation failed: " + e.getMessage());
+            return false;
+        }
+    }
 
 
     //  Password Verification Method (using Argon2-jvm)**
@@ -193,8 +199,3 @@ public class UserService {
         }
     }
 }
-
-
-
-
-

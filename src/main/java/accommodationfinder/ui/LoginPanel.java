@@ -91,18 +91,15 @@ public class LoginPanel extends JPanel {
                     String jwtToken = userService.loginUser(usernameOrEmail, password);
 
                     // Store JWT based on "Remember Me" checkbox state
-                    if (rememberMe) {
-                        System.out.println("Remember Me checked - Storing JWT persistently using Preferences API");
-                        storeJwtInPreferences(jwtToken);
-
+                    if (rememberMeChkBox.isSelected()) { // If "Remember Me" is checked
+                        mainWindow.saveJwtToPreferences(jwtToken); // Save JWT via MainWindow's method
+                        System.out.println("JWT token saved due to 'Remember Me' being checked.");
                     } else {
-                        System.out.println("Remember Me NOT checked - JWT will be session-only");
-
-                        // **JWT will be session-only (in memory)**
-                        clearJwtFromPreferences();
-
-                        // TODO: Switch to main application view after successful login (after implementing JWT storage)
+                        mainWindow.saveJwtToPreferences(null); // Clear JWT if "Remember Me" is not checked
+                        System.out.println("JWT token cleared as 'Remember Me' is not checked.");
                     }
+
+                    // Switch to main app view
 
 
                     System.out.println("Login Successful! JWT Token: " + jwtToken);
@@ -131,19 +128,6 @@ public class LoginPanel extends JPanel {
         add(builder.build());
     }
 
-    // Method to store JWT in Preferences API
-    private void storeJwtInPreferences(String jwtToken) {
-        java.util.prefs.Preferences preferences = java.util.prefs.Preferences.userNodeForPackage(getClass());
-        preferences.put("jwtToken", jwtToken);
-        System.out.println("JWT token stored in preferences API");
-    }
-
-    // Method to clear JWT from preferences API (When RememberMe not checked)
-    private void clearJwtFromPreferences() {
-        java.util.prefs.Preferences preferences = java.util.prefs.Preferences.userNodeForPackage(getClass());
-        preferences.remove("jwtToken");
-        System.out.println("JWT cleared from Preferences API");
-    }
 
     public JPanel getLoginPanel() {
         return this;
