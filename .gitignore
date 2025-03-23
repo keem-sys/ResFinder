@@ -4,6 +4,7 @@ target/
 !**/src/test/**/target/
 
 ### IntelliJ IDEA ###
+.idea/
 .idea/modules.xml
 .idea/jarRepositories.xml
 .idea/compiler.xml
@@ -11,6 +12,13 @@ target/
 *.iws
 *.iml
 *.ipr
+
+### User data
+student_accommodation_db.mv.db
+student_accommodation_db.trace.db
+
+## Application Properties
+src/main/resources/application.properties
 
 ### Eclipse ###
 .apt_generated
