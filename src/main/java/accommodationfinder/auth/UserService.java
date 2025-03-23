@@ -11,6 +11,8 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -18,14 +20,35 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Properties;
 
 
 
 public class UserService {
     private final UserDao userDao;
+    private final String jwtSecretKeyString;
+
 
     public UserService(UserDao userDao) {
         this.userDao = userDao;
+        this.jwtSecretKeyString = loadJwtSecretKeyFromConfig();
+    }
+
+    private String loadJwtSecretKeyFromConfig() {
+        Properties properties = new Properties();
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream("application.properties")) { // Load from classpath
+            if (input == null) {
+                throw new IllegalStateException("Unable to find application.properties file!");
+            }
+            properties.load(input);
+            String secretKey = properties.getProperty("jwt.secretKey");
+            if (secretKey == null || secretKey.isEmpty()) {
+                throw new IllegalStateException("jwt.secretKey property not found in application.properties!");
+            }
+            return secretKey;
+        } catch (IOException e) {
+            throw new IllegalStateException("Error loading application.properties file!", e);
+        }
     }
 
     public Long registerUser(User user) throws SQLException {
@@ -121,9 +144,8 @@ public class UserService {
     // **Placeholder for JWT Generation (Implement JWT Generation)**
     private String generateJwtToken(User user) {
         // TODO: Implement JWT generation logic here**
-        // Using a JWT library (e.g., jjwt-api, java-jwt) to create a JWT for the user
-        String SECRET_KEY_STRING = "413F4428472B4B6250655368566D597133743677397A24422645294840635166"; // INSECURE!
-        SecretKey SECRET_KEY = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY_STRING)); // HS256 key from Base64 String
+        String SECRET_KEY_STRING = this.jwtSecretKeyString;
+        SecretKey SECRET_KEY = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY_STRING));
 
         // JWT Claims
         Map<String, Object> claims = new HashMap<>();

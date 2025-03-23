@@ -17,6 +17,9 @@ target/
 student_accommodation_db.mv.db
 student_accommodation_db.trace.db
 
+## Application Properties
+src/main/resources/application.properties
+
 ### Eclipse ###
 .apt_generated
 .classpath

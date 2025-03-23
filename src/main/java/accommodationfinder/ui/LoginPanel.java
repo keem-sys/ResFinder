@@ -51,10 +51,10 @@ public class LoginPanel extends JPanel {
 
         errorMessageLabel = new JLabel("");
         errorMessageLabel.setForeground(Color.RED);
-        builder.add(errorMessageLabel).xyw(1, 9, 3); // Row 7, spans 3 columns
+        builder.add(errorMessageLabel).xyw(1, 9, 3);
 
         loginButton = new JButton("Login");
-        builder.add(loginButton).xyw(1, 11, 3); // Row 9, spans 7 columns
+        builder.add(loginButton).xyw(1, 11, 3);
 
         JPanel registerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JLabel registerLabel = new JLabel("Are you a new user? ");
@@ -70,9 +70,11 @@ public class LoginPanel extends JPanel {
                 String usernameOrEmail = usernameOrEmailField.getText();
                 char[] passwordChars = passwordField.getPassword();
                 String password = new String(passwordChars);
+                boolean rememberMe = rememberMeChkBox.isSelected();
 
                 System.out.println("Username or Email: " + usernameOrEmail);
                 System.out.println("Password: " + password);
+                System.out.println("Remember me: " + rememberMe);
 
                 // Input validation
                 if (usernameOrEmail.isEmpty() || password.isEmpty()) {
