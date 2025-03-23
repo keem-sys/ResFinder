@@ -7,12 +7,14 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class MainApplicationPanel extends JPanel {
+public class MainApplicationPanel {
 
     private JPanel mainPanel;
     private JLabel welcomeLabel;
     private JButton logoutButton;
     private JTextArea featuredListingsArea;
+    private JButton loginButton; // New Login Button
+    private JButton registerButton; // New Register Button
 
     private final UserService userService;
     private final MainWindow mainWindow;
@@ -21,7 +23,6 @@ public class MainApplicationPanel extends JPanel {
         this.userService = userService;
         this.mainWindow = mainWindow;
 
-        // Initialize UI components
         mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
 
@@ -29,20 +30,42 @@ public class MainApplicationPanel extends JPanel {
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 24));
 
         featuredListingsArea = new JTextArea("Featured Accommodation Listings will go here...\n(Placeholder)");
-        featuredListingsArea.setEditable(false); // Make it read-only
+        featuredListingsArea.setEditable(false);
 
         logoutButton = new JButton("Logout");
         logoutButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                logout(); // Call logout method
+                logout();
             }
         });
 
-        // Add components to the main panel
+        loginButton = new JButton("Login"); // Initialize Login Button
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainWindow.switchToLoginPanel();
+            }
+        });
+
+        registerButton = new JButton("Register"); // Initialize Register Button
+        registerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainWindow.switchToRegistrationPanel(); // Redirect to RegistrationPanel in MainWindow
+            }
+        });
+
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // Panel for buttons
+        buttonPanel.add(loginButton);      // Add Login Button to button panel
+        buttonPanel.add(registerButton);   // Add Register Button to button panel
+
+
         mainPanel.add(welcomeLabel, BorderLayout.NORTH);
         mainPanel.add(new JScrollPane(featuredListingsArea), BorderLayout.CENTER);
-        mainPanel.add(logoutButton, BorderLayout.SOUTH);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        mainPanel.add(logoutButton, BorderLayout.EAST);
     }
 
     public JPanel getMainPanel() {
@@ -50,11 +73,9 @@ public class MainApplicationPanel extends JPanel {
     }
 
     private void logout() {
-        mainWindow.saveJwtToPreferences(null); // Clear JWT from preferences
-
+        mainWindow.saveJwtToPreferences(null);
         mainWindow.switchToLoginPanel();
-        JOptionPane.showMessageDialog(mainWindow, "Logged out successfully.", "Logout", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(mainWindow, "Logged out successfully.", "Logout",
+                JOptionPane.INFORMATION_MESSAGE);
     }
-
-
 }

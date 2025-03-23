@@ -99,7 +99,7 @@ public class LoginPanel extends JPanel {
                         System.out.println("JWT token cleared as 'Remember Me' is not checked.");
                     }
 
-                    // Switch to main app view
+                    mainWindow.showMainApplicationView(); // Switch to main app view
 
 
                     System.out.println("Login Successful! JWT Token: " + jwtToken);

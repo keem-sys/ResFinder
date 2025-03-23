@@ -17,11 +17,13 @@ public class MainWindow extends JFrame {
     private UserService userService;
     private RegistrationPanel registrationPanel;
     private LoginPanel loginPanel;
+    private MainApplicationPanel mainApplicationPanel;
 
     public MainWindow() {
         setTitle("Student Accommodation Finder");
-        setSize(900, 900);
+        setSize(1280, 720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
 
         try {
             databaseConnection = new DatabaseConnection();
@@ -37,41 +39,30 @@ public class MainWindow extends JFrame {
             return;
         }
 
+        this.mainApplicationPanel = new MainApplicationPanel(userService, this);
         this.registrationPanel = new RegistrationPanel(userService, this);
         this.loginPanel = new LoginPanel(userService, this);
+
+        setContentPane(mainApplicationPanel.getMainPanel());
+
+        boolean automaticLoginAttempted = false;
 
         // Attempt Login on Startup
         String storedJwtToken = getJwtFromPreferences();
         if (storedJwtToken != null && !storedJwtToken.isEmpty()) {
-            System.out.println("Found JWT in Preferences - Attempting to login...");
-
             if (userService.validateJwtToken(storedJwtToken)) {
-                System.out.println("JWT Token valid - Automatic login successful!");
-
-                // TODO: Implement code to switch to main application view directly (skip login panel)
-
-                JOptionPane.showMessageDialog(this, "Automatic login successful!", "Login",
-                        JOptionPane.INFORMATION_MESSAGE);
-
+                System.out.println("Automatic login successful (in background, for session persistence).");
+                // TODO: Update UI elements based on logged-in state here if needed.
             } else {
-                System.out.println("Stored JWT Token invalid - Showing Login Panel.");
-                switchToLoginPanel();
+                System.out.println("Stored JWT invalid, starting in guest mode.");
             }
         } else {
-            System.out.println("No JWT found in Preferences - Showing Login Panel.");
-            switchToLoginPanel();
+            System.out.println("Starting in guest mode.");
         }
 
-        /*
-        if (getContentPane() == null) { // If no panel was set (no auto-login)
-            switchToMainPanel();
-        }
-
-         */
 
 
 
-        setContentPane(loginPanel.getLoginPanel());
 
         JLabel titleLabel = new JLabel("Welcome to Res Finder!", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
@@ -106,6 +97,13 @@ public class MainWindow extends JFrame {
         } else {
             prefs.remove("jwtToken"); // Remove if null (logout)
         }
+    }
+
+    public void showMainApplicationView() {
+        setContentPane(mainApplicationPanel.getMainPanel());
+        revalidate();
+        repaint();
+        System.out.println("Switched to Main Application Panel");
     }
 
 
