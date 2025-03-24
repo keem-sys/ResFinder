@@ -3,7 +3,7 @@
 [![Java](https://img.shields.io/badge/Java-17+-orange.svg?style=flat-square)](https://www.java.com/)
 [![Swing](https://img.shields.io/badge/Java%20Swing-GUI-blue.svg?style=flat-square)](https://docs.oracle.com/javase/tutorial/uiswing/)
 [![H2 Database](https://img.shields.io/badge/H2%20Database-Embedded-lightgrey.svg?style=flat-square)](https://www.h2database.com/html/)
-[![License](https://img.shields.io/badge/Apache%202.0-License-blue.svg?style=flat-square&logo=apache)](LICENSE) 
+[![License](https://img.shields.io/badge/Apache%202.0-License-blue.svg?style=flat-square&logo=apache)](Apache-2.0 License) 
 
 <!-- TODO: ADD SCREENSHOT OF THE APP -->
 
@@ -127,7 +127,7 @@ This project is developed and maintained by:
 
 ## License
 
-[Apache License 2.0](LICENSE)
+[Apache License 2.0](Apache-2.0%20License)
 
 This project is licensed under the **Apache License 2.0**.
 
