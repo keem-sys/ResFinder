@@ -96,40 +96,32 @@ CPUT students often encounter significant difficulties in finding appropriate ac
 This project is developed and maintained by:
 
 <div style="text-align: center;">
-
-  <a href="https://github.com/keem-sys" target="_blank">
+  <a href="https://github.com/keem-sys" target="_blank" style="display: inline-block; margin-right: 10px;">
     <img src="https://github.com/keem-sys.png?size=100" width="80px;" style="border-radius:50%; border: 1px solid #888;" alt="Keem-sys"/>
-    <br />
   </a>
 
-  <a href="https://github.com/AidenWallace" target="_blank">
+  <a href="https://github.com/AidenWallace" target="_blank" style="display: inline-block; margin-right: 10px;">
     <img src="https://github.com/AidenWallace.png?size=100" width="80px;" style="border-radius:50%; border: 1px solid #888;" alt="Aiden Clinton Wallace"/>
-    <br />
-
   </a>
-    <a href="https://github.com/Jaydenchoppa" target="_blank">
+
+  <a href="https://github.com/Jaydenchoppa" target="_blank" style="display: inline-block; margin-right: 10px;">
     <img src="https://github.com/Jaydenchoppa.png?size=100" width="80px;" style="border-radius:50%; border: 1px solid #888;"
-    alt="Jayden Avontuur"/>
-    <br />
+    alt="Jayden"/>
   </a>
 
-  <a href="https://github.com/Matthew-codez" target="_blank">
+  <a href="https://github.com/Matthew-codez" target="_blank" style="display: inline-block; margin-right: 10px;">
     <img src="https://github.com/Matthew-codez.png?size=100" width="80px;" style="border-radius:50%; border: 1px solid #888;"
     alt="Matthew"/>
-    <br />
   </a>
 
-  <a href="https://github.com/WazeerG" target="_blank">
+  <a href="https://github.com/WazeerG" target="_blank" style="display: inline-block; margin-right: 10px;">
     <img src="https://github.com/WazeerG.png?size=100" width="80px;" style="border-radius:50%; border: 1px solid #888;"
     alt="Wazeer"/>
-    <br />
-    <sub><b>Wazeer</b></sub>
   </a>
 
-   <a href="https://github.com/Gwangwa-Innocentia" target="_blank">
+   <a href="https://github.com/Gwangwa-Innocentia" target="_blank" style="display: inline-block;">
     <img src="https://github.com/Gwangwa-Innocentia.png?size=100" width="80px;" style="border-radius:50%; border: 1px solid #888;"
       alt="Innocentia Gwangwa"/>
-    <br />
   </a>
 </div>
 
