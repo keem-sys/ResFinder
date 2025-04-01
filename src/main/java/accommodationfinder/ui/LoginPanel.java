@@ -1,118 +1,206 @@
 package accommodationfinder.ui;
 
 import accommodationfinder.auth.UserService;
-import com.jgoodies.forms.builder.FormBuilder;
-import com.jgoodies.forms.layout.FormLayout;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.prefs.Preferences;
 
 public class LoginPanel extends JPanel {
 
-    private JLabel usernameOrEmailLabel, passwordLabel, errorMessageLabel, titleLabel;
+    private JLabel usernameOrEmailLabel, passwordLabel, errorMessageLabel, titleLabel, registerPromptLabel;
     private JTextField usernameOrEmailField;
     private JPasswordField passwordField;
-    private JButton loginButton, registrationButton;
+    private JButton loginButton, cancelButton, registrationButton;
     private JCheckBox rememberMeChkBox;
     private final UserService userService;
     private final MainWindow mainWindow;
+
+    private static final Color PANEL_BACKGROUND_COLOR = new Color(230, 230, 230);
 
     public LoginPanel(UserService userService, MainWindow mainWindow) {
         this.userService = userService;
         this.mainWindow = mainWindow;
 
+        setLayout(new GridBagLayout());
+        setBackground(PANEL_BACKGROUND_COLOR);
 
-        FormLayout layout = new FormLayout(
-                "right:pref, 4dlu, 150dlu", // Columns
-                "p, 3dlu, p, 3dlu, p, 7dlu, p, 7dlu, p, 7dlu, p, 7dlu, p" // Rows
-        );
-        FormBuilder builder = FormBuilder.create().layout(layout).padding(new EmptyBorder(12, 12, 12, 12));
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        formPanel.setOpaque(false);
 
-        // Title Label
-        titleLabel = new JLabel("Login!", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        builder.add(titleLabel).xyw(1, 1, 3); // Row 1, spans 3 columns
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
 
+        SwingUtilities.invokeLater(() -> usernameOrEmailField.requestFocusInWindow());
+
+        // --- Title ---
+        titleLabel = new JLabel("Login!");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(0, 5, 25, 5);
+        formPanel.add(titleLabel, gbc);
+        gbc.gridwidth = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        // --- Username/Email Row ---
         usernameOrEmailLabel = new JLabel("Username or Email:");
-        builder.add(usernameOrEmailLabel).xy(1, 3); // Row 3
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.EAST;
+        formPanel.add(usernameOrEmailLabel, gbc);
+
         usernameOrEmailField = new JTextField(20);
-        builder.add(usernameOrEmailField).xy(3, 3);
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(usernameOrEmailField, gbc);
 
+        // --- Password Row ---
         passwordLabel = new JLabel("Password:");
-        builder.add(passwordLabel).xy(1, 5); // Row 5
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.EAST;
+        formPanel.add(passwordLabel, gbc);
+
         passwordField = new JPasswordField(20);
-        builder.add(passwordField).xy(3, 5);
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(passwordField, gbc);
 
+        // --- Remember Me Checkbox ---
         rememberMeChkBox = new JCheckBox("Remember me");
-        builder.add(rememberMeChkBox).xyw(3, 7, 1);
+        rememberMeChkBox.setOpaque(false);
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(rememberMeChkBox, gbc);
 
-        errorMessageLabel = new JLabel("");
+        // --- Error Message Label (Initially hidden) ---
+        errorMessageLabel = new JLabel(" ");
         errorMessageLabel.setForeground(Color.RED);
-        builder.add(errorMessageLabel).xyw(1, 9, 3);
+        errorMessageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2; // Span columns
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(10, 5, 5, 5);
+        formPanel.add(errorMessageLabel, gbc);
+        gbc.gridwidth = 1;
+        gbc.insets = new Insets(5, 5, 5, 5);
 
+        // --- Login Button ---
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        buttonPanel.setBackground(PANEL_BACKGROUND_COLOR);
+        buttonPanel.setOpaque(false);
         loginButton = new JButton("Login");
-        builder.add(loginButton).xyw(1, 11, 3);
+        cancelButton = new JButton("Cancel");
+        loginButton.setFont(new Font("Arial", Font.BOLD, 15));
+        cancelButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        loginButton.setPreferredSize(new Dimension(100, 35));
+        cancelButton.setPreferredSize(new Dimension(100, 35));
 
-        JPanel registerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JLabel registerLabel = new JLabel("Are you a new user? ");
+        buttonPanel.add(loginButton);
+        buttonPanel.add(cancelButton);
+
+        gbc.gridx = 1;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(10, 5, 10, 5);
+        formPanel.add(buttonPanel, gbc);
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.NONE;
+
+        // --- Sign Up Prompt ---
+        JPanel registerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+        registerPanel.setOpaque(false);
+        registerPromptLabel = new JLabel("Are you a new user?");
         registrationButton = new JButton("Sign Up!");
-        registerPanel.add(registerLabel);
+        registrationButton.setPreferredSize(new Dimension(101, 30));
+        registrationButton.setFont(new Font("Arial", Font.PLAIN, 12));
+        registerPanel.add(registerPromptLabel);
         registerPanel.add(registrationButton);
-        builder.add(registerPanel).xyw(1, 13, 3);
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(20, 5, 0, 5);
+        formPanel.add(registerPanel, gbc);
+
+        // formPanel added to main LoginPanel
+        GridBagConstraints mainGbc = new GridBagConstraints();
+        mainGbc.gridx = 0;
+        mainGbc.gridy = 0;
+        mainGbc.weightx = 1.0;
+        mainGbc.weighty = 1.0;
+        mainGbc.anchor = GridBagConstraints.CENTER;
+        mainGbc.fill = GridBagConstraints.NONE;
+        add(formPanel, mainGbc);
 
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Login button clicked");
-                String usernameOrEmail = usernameOrEmailField.getText();
+                String usernameOrEmail = usernameOrEmailField.getText().trim();
                 char[] passwordChars = passwordField.getPassword();
                 String password = new String(passwordChars);
                 boolean rememberMe = rememberMeChkBox.isSelected();
 
                 System.out.println("Username or Email: " + usernameOrEmail);
-                System.out.println("Password: " + password);
                 System.out.println("Remember me: " + rememberMe);
 
                 // Input validation
                 if (usernameOrEmail.isEmpty() || password.isEmpty()) {
                     setErrorMessage("Username/Email and Password are required");
                     return;
+                } else {
+                    setErrorMessage(" ");
                 }
 
-                // Login Logic - Backend Integration
-                // 3. Handle failed login (display error message)
-
                 try {
-                    // loginUser method called
                     String jwtToken = userService.loginUser(usernameOrEmail, password);
 
-                    // Store JWT based on "Remember Me" checkbox state
-                    if (rememberMeChkBox.isSelected()) { // If "Remember Me" is checked
-                        mainWindow.saveJwtToPreferences(jwtToken); // Save JWT via MainWindow's method
+                    if (rememberMe) {
+                        mainWindow.saveJwtToPreferences(jwtToken);
                         System.out.println("JWT token saved due to 'Remember Me' being checked.");
                     } else {
-                        mainWindow.saveJwtToPreferences(null); // Clear JWT if "Remember Me" is not checked
+                        mainWindow.saveJwtToPreferences(null);
                         System.out.println("JWT token cleared as 'Remember Me' is not checked.");
                     }
 
-                    mainWindow.showMainApplicationView(); // Switch to main app view
+                    mainWindow.showMainApplicationView();
+                    System.out.println("Login Successful!");
+                    clearInputs();
 
-
-                    System.out.println("Login Successful! JWT Token: " + jwtToken);
-                    setErrorMessage("Login Successful!");
 
                 } catch (Exception authenticationException) {
                     System.err.println("Login failed: " + authenticationException.getMessage());
-                    authenticationException.printStackTrace();
-                    setErrorMessage("Login failed: " + authenticationException.getMessage());                 }
-                finally {
+                    setErrorMessage("Login failed: Invalid credentials.");
+                } finally {
                     passwordField.setText("");
                 }
+            }
+        });
 
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Cancel button clicked - Switch to MainWindow");
+                mainWindow.showMainApplicationView();
             }
         });
 
@@ -120,12 +208,16 @@ public class LoginPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Register button clicked on Login Panel - Switch to Registration Panel");
-                // Redirect to LoginPanel
                 SwingUtilities.invokeLater(mainWindow::switchToRegistrationPanel);
             }
         });
+    }
 
-        add(builder.build());
+    private void clearInputs() {
+        usernameOrEmailField.setText("");
+        passwordField.setText("");
+        rememberMeChkBox.setSelected(false);
+        setErrorMessage(" ");
     }
 
 

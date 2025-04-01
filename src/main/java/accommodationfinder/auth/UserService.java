@@ -132,9 +132,8 @@ public class UserService {
         }
 
         // TODO: JWT Generation (Placeholder - Implement JWT generation)
-        String jwtToken = generateJwtToken(user);
 
-        return jwtToken;
+        return generateJwtToken(user);
 
     }
 
