@@ -12,7 +12,7 @@ public class LoginPanel extends JPanel {
     private JLabel usernameOrEmailLabel, passwordLabel, errorMessageLabel, titleLabel, registerPromptLabel;
     private JTextField usernameOrEmailField;
     private JPasswordField passwordField;
-    private JButton loginButton, registrationButton;
+    private JButton loginButton, cancelButton, registrationButton;
     private JCheckBox rememberMeChkBox;
     private final UserService userService;
     private final MainWindow mainWindow;
@@ -102,16 +102,26 @@ public class LoginPanel extends JPanel {
         gbc.insets = new Insets(5, 5, 5, 5);
 
         // --- Login Button ---
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        buttonPanel.setBackground(PANEL_BACKGROUND_COLOR);
+        buttonPanel.setOpaque(false);
         loginButton = new JButton("Login");
+        cancelButton = new JButton("Cancel");
         loginButton.setFont(new Font("Arial", Font.BOLD, 15));
-        loginButton.setPreferredSize(new Dimension(100, 40));
+        cancelButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        loginButton.setPreferredSize(new Dimension(100, 35));
+        cancelButton.setPreferredSize(new Dimension(100, 35));
+
+        buttonPanel.add(loginButton);
+        buttonPanel.add(cancelButton);
+
         gbc.gridx = 1;
         gbc.gridy = 5;
-        gbc.gridwidth = 1;
+        gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.insets = new Insets(10, 5, 10, 5);
-        formPanel.add(loginButton, gbc);
+        formPanel.add(buttonPanel, gbc);
         gbc.gridwidth = 1;
         gbc.fill = GridBagConstraints.NONE;
 
@@ -120,7 +130,8 @@ public class LoginPanel extends JPanel {
         registerPanel.setOpaque(false);
         registerPromptLabel = new JLabel("Are you a new user?");
         registrationButton = new JButton("Sign Up!");
-        registrationButton.setPreferredSize(new Dimension(101, 35));
+        registrationButton.setPreferredSize(new Dimension(101, 30));
+        registrationButton.setFont(new Font("Arial", Font.PLAIN, 12));
         registerPanel.add(registerPromptLabel);
         registerPanel.add(registrationButton);
         gbc.gridx = 0;
@@ -182,6 +193,14 @@ public class LoginPanel extends JPanel {
                 } finally {
                     passwordField.setText("");
                 }
+            }
+        });
+
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Cancel button clicked - Switch to MainWindow");
+                mainWindow.showMainApplicationView();
             }
         });
 
