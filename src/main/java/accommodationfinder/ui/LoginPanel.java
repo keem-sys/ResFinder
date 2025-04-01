@@ -17,12 +17,14 @@ public class LoginPanel extends JPanel {
     private final UserService userService;
     private final MainWindow mainWindow;
 
+    private static final Color PANEL_BACKGROUND_COLOR = new Color(230, 230, 230);
+
     public LoginPanel(UserService userService, MainWindow mainWindow) {
         this.userService = userService;
         this.mainWindow = mainWindow;
 
         setLayout(new GridBagLayout());
-        setBackground(new Color(220, 220, 220));
+        setBackground(PANEL_BACKGROUND_COLOR);
 
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
@@ -31,6 +33,8 @@ public class LoginPanel extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
+
+        SwingUtilities.invokeLater(() -> usernameOrEmailField.requestFocusInWindow());
 
         // --- Title ---
         titleLabel = new JLabel("Login!");
