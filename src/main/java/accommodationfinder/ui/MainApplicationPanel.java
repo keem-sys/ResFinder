@@ -1,5 +1,6 @@
 package accommodationfinder.ui;
 
+import accommodationfinder.service.AccommodationService;
 import accommodationfinder.service.UserService;
 
 import javax.swing.*;
@@ -24,10 +25,12 @@ public class MainApplicationPanel {
 
     // References
     private final UserService userService;
+    private final AccommodationService accommodationService;
     private final MainWindow mainWindow;
 
-    public MainApplicationPanel(UserService userService, MainWindow mainWindow) {
+    public MainApplicationPanel(UserService userService, AccommodationService accommodationService, MainWindow mainWindow) {
         this.userService = userService;
+        this.accommodationService = accommodationService;
         this.mainWindow = mainWindow;
 
         mainPanel = new JPanel(new BorderLayout(10, 10));

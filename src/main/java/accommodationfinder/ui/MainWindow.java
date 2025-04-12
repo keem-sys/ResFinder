@@ -1,5 +1,7 @@
 package accommodationfinder.ui;
 
+import accommodationfinder.data.AccommodationDao;
+import accommodationfinder.service.AccommodationService;
 import accommodationfinder.service.UserService;
 import accommodationfinder.data.DatabaseConnection;
 import accommodationfinder.data.UserDao;
@@ -19,7 +21,8 @@ public class MainWindow extends JFrame {
     private LoginPanel loginPanel;
     private MainApplicationPanel mainApplicationPanel;
 
-
+    private AccommodationDao accommodationDao;
+    private AccommodationService accommodationService;
 
     public MainWindow() {
         setTitle("Student Accommodation Finder");
@@ -28,10 +31,18 @@ public class MainWindow extends JFrame {
 
 
         try {
+            // Database Connection
             databaseConnection = new DatabaseConnection();
             Connection connection = databaseConnection.getConnection();
+
+            // DAOs
             userDao = new UserDao(databaseConnection);
+            accommodationDao = new AccommodationDao(databaseConnection, userDao);
+
+            // Services
             userService = new UserService(userDao);
+            accommodationService = new AccommodationService(accommodationDao, userDao);
+
         } catch (SQLException e) {
             System.err.println("Error initialising database connection " + e.getMessage());
             e.printStackTrace();
@@ -41,20 +52,23 @@ public class MainWindow extends JFrame {
             return;
         }
 
-        this.mainApplicationPanel = new MainApplicationPanel(userService, this);
+        // Initialize UI Panels
+        this.mainApplicationPanel = new MainApplicationPanel(userService, accommodationService, this);
         this.registrationPanel = new RegistrationPanel(userService, this);
         this.loginPanel = new LoginPanel(userService, this);
 
+        // Initial Content Pane
         setContentPane(mainApplicationPanel.getMainPanel());
 
         boolean automaticLoginAttempted = false;
 
-        // Attempt Login on Startup
+        // Attempt Login Check
         String storedJwtToken = getJwtFromPreferences();
         if (storedJwtToken != null && !storedJwtToken.isEmpty()) {
             if (userService.validateJwtToken(storedJwtToken)) {
                 System.out.println("Automatic login successful (in background, for session persistence).");
-                // TODO: Update UI elements based on logged-in state here if needed.
+                // TODO: Update UI elements based on logged-in state here
+                // mainApplicationPanel.setUserLoggedIn(true); // Add such a method to MainApplicationPanel
             } else {
                 System.out.println("Stored JWT invalid, starting in guest mode.");
             }
