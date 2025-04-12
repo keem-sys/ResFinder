@@ -68,7 +68,7 @@ public class DatabaseConnection {
                 last_updated_date TIMESTAMP NOT NULL,
                 nsfas_accredited BOOLEAN DEFAULT FALSE NOT NULL,
                 listed_by_user_id BIGINT NOT NULL,
-                FOREIGN_KEY (listed_by_user_id) REFERENCES USERS(id) ON DELETE CASCADE 
+                FOREIGN_KEY (listed_by_user_id) REFERENCES USERS(id) ON DELETE CASCADE,
             );
         """;
 

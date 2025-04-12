@@ -131,7 +131,6 @@ public class UserService {
             throw new Exception("Invalid password."); // Or custom AuthenticationException
         }
 
-        // TODO: JWT Generation (Placeholder - Implement JWT generation)
 
         return generateJwtToken(user);
 
