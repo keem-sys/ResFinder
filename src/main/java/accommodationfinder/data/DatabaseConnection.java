@@ -15,6 +15,8 @@ public class DatabaseConnection {
         return connection;
     }
 
+
+    // Create Users Table
     private void createUsersTableIfNotExists(Connection connection) throws SQLException {
         String createTableSQL = """
             CREATE TABLE IF NOT EXISTS USERS (
@@ -33,6 +35,49 @@ public class DatabaseConnection {
         } catch (SQLException e) {
             System.err.println("Error creating USERS table: " + e.getMessage());
             throw e; // Re-throw exception if table creation fails
+        }
+    }
+
+    // Create Accommodations Table
+    private void createAccommodationsTableIfNotExists(Connection connection) throws SQLException {
+        String createTableSQL = """
+            CREATE TABLE IF NOT EXISTS ACCOMMODATIONS (
+                id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                description TEXT,
+                type VARCHAR(50) NOT NULL,
+                address VARCHAR(255),
+                city VARCHAR(100) NOT NULL,
+                postal_code VARCHAR(20),
+                latitude DOUBLE,
+                longitude DOUBLE,
+                price DECIMAL(10, 2) NOT NULL,
+                price_frequency VARCHAR(50) NOT NULL,
+                bedrooms INT,
+                bathrooms INT,
+                max_occupancy INT,
+                internet_included BOOLEAN DEFAULT FALSE NOT NULL,
+                utilities_included BOOLEAN DEFAULT FALSE NOT NULL,
+                parking_available BOOLEAN DEFAULT FALSE NOT NULL,
+                lease_term VARCHAR(255),
+                available_from TIMESTAMP,
+                available_until TIMESTAMP NULL,
+                image_urls TEXT,
+                status VARCHAR(50) NOT NULL,
+                listing_date TIMESTAMP NOT NULL,
+                last_updated_date TIMESTAMP NOT NULL,
+                nsfas_accredited BOOLEAN DEFAULT FALSE NOT NULL,
+                listed_by_user_id BIGINT NOT NULL,
+                FOREIGN_KEY (listed_by_user_id) REFERENCES USERS(id) ON DELETE CASCADE 
+            );
+        """;
+
+        try(Statement statement = connection.createStatement()) {
+            statement.execute(createTableSQL);
+            System.out.println("Accommodations Table created or executed");
+        } catch (SQLException e) {
+            System.err.println("Error creating ACCOMMODATIONS table");
+            throw e;
         }
     }
 }
