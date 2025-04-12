@@ -1,6 +1,6 @@
 package accommodationfinder.ui;
 
-import accommodationfinder.auth.UserService;
+import accommodationfinder.service.UserService;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;

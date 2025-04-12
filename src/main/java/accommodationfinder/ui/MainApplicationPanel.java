@@ -1,12 +1,10 @@
 package accommodationfinder.ui;
 
-import accommodationfinder.auth.UserService;
+import accommodationfinder.service.UserService;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder; // Import for padding
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class MainApplicationPanel {
 

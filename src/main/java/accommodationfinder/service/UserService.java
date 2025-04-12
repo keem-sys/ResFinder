@@ -1,5 +1,6 @@
-package accommodationfinder.auth;
+package accommodationfinder.service;
 
+import accommodationfinder.auth.User;
 import accommodationfinder.data.UserDao;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;

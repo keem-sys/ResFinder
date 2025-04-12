@@ -1,6 +1,6 @@
 package accommodationfinder.ui;
 
-import accommodationfinder.auth.UserService;
+import accommodationfinder.service.UserService;
 import accommodationfinder.data.DatabaseConnection;
 import accommodationfinder.data.UserDao;
 
@@ -18,6 +18,8 @@ public class MainWindow extends JFrame {
     private RegistrationPanel registrationPanel;
     private LoginPanel loginPanel;
     private MainApplicationPanel mainApplicationPanel;
+
+
 
     public MainWindow() {
         setTitle("Student Accommodation Finder");
