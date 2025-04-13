@@ -28,62 +28,71 @@ public class MainWindow extends JFrame {
         setTitle("Student Accommodation Finder");
         setSize(1280, 720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+        setLocationRelativeTo(null); // Center the window
 
         try {
-            // Database Connection
+            // 1. Create DatabaseConnection instance
             databaseConnection = new DatabaseConnection();
-            Connection connection = databaseConnection.getConnection();
 
-            // DAOs
+            // 2. Perform ONE-TIME Database Initialization
+            databaseConnection.initializeDatabase(); // <--- NEW: Call this first!
+
+            // 3. Now create DAOs - they will use the simple getConnection() internally
             userDao = new UserDao(databaseConnection);
-            accommodationDao = new AccommodationDao(databaseConnection, userDao);
+            accommodationDao = new AccommodationDao(databaseConnection, userDao); // Pass dependencies
 
-            // Services
+            // 4. Create Services
             userService = new UserService(userDao);
-            accommodationService = new AccommodationService(accommodationDao, userDao);
+            accommodationService = new AccommodationService(accommodationDao, userDao); // Pass dependencies
+
+            // 5. Initialize UI Panels (pass the ready services)
+            // Ensure MainApplicationPanel constructor uses the correct order if needed
+            this.mainApplicationPanel = new MainApplicationPanel(accommodationService, userService, this);
+            this.registrationPanel = new RegistrationPanel(userService, this);
+            this.loginPanel = new LoginPanel(userService, this);
+
+            // 6. Set initial content pane
+            setContentPane(mainApplicationPanel.getMainPanel());
+
+            // 7. JWT Check (no changes needed here)
+            String storedJwtToken = getJwtFromPreferences();
+            if (storedJwtToken != null && !storedJwtToken.isEmpty()) {
+                if (userService.validateJwtToken(storedJwtToken)) {
+                    System.out.println("Automatic login successful (session persisted).");
+                    // Update UI state if needed (e.g., show username, hide login/signup)
+                } else {
+                    System.out.println("Stored JWT invalid or expired.");
+                    // Optionally clear the invalid token
+                    // saveJwtToPreferences(null);
+                }
+            } else {
+                System.out.println("No stored session token found. Starting as guest.");
+            }
+
 
         } catch (SQLException e) {
-            System.err.println("Error initialising database connection " + e.getMessage());
+            System.err.println("FATAL ERROR during application startup: " + e.getMessage());
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error initialising database",
-                    "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Failed to initialize the application database.\nPlease check logs or contact support.\nError: " + e.getMessage(),
+                    "Initialization Error",
+                    JOptionPane.ERROR_MESSAGE);
+            System.exit(1); // Exit if database setup fails critically
+            return; // Keep compiler happy
+        } catch (Exception e) {
+            // Catch other potential startup errors
+            System.err.println("FATAL ERROR during application startup: " + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "An unexpected error occurred during startup.\nError: " + e.getMessage(),
+                    "Initialization Error",
+                    JOptionPane.ERROR_MESSAGE);
             System.exit(1);
             return;
         }
 
-        // Initialize UI Panels
-        this.mainApplicationPanel = new MainApplicationPanel(userService, accommodationService, this);
-        this.registrationPanel = new RegistrationPanel(userService, this);
-        this.loginPanel = new LoginPanel(userService, this);
-
-        // Initial Content Pane
-        setContentPane(mainApplicationPanel.getMainPanel());
-
-        boolean automaticLoginAttempted = false;
-
-        // Attempt Login Check
-        String storedJwtToken = getJwtFromPreferences();
-        if (storedJwtToken != null && !storedJwtToken.isEmpty()) {
-            if (userService.validateJwtToken(storedJwtToken)) {
-                System.out.println("Automatic login successful (in background, for session persistence).");
-                // TODO: Update UI elements based on logged-in state here
-                // mainApplicationPanel.setUserLoggedIn(true); // Add such a method to MainApplicationPanel
-            } else {
-                System.out.println("Stored JWT invalid, starting in guest mode.");
-            }
-        } else {
-            System.out.println("Starting in guest mode.");
-        }
-
-
-
-
-
-        JLabel titleLabel = new JLabel("Welcome to Res Finder!", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-
-        setLocationRelativeTo(null);
+        // Removed the duplicate title label - the panels handle their own titles
+        // setVisible(true); // Make the window visible at the end of the constructor
     }
 
     private String getJwtFromPreferences() {
