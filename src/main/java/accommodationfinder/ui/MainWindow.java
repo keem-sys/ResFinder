@@ -7,13 +7,10 @@ import accommodationfinder.data.DatabaseConnection;
 import accommodationfinder.data.UserDao;
 
 import javax.swing.*;
-import java.awt.*;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.prefs.Preferences;
 
 public class MainWindow extends JFrame {
-
     private DatabaseConnection databaseConnection;
     private UserDao userDao;
     private UserService userService;
@@ -31,39 +28,38 @@ public class MainWindow extends JFrame {
         setLocationRelativeTo(null); // Center the window
 
         try {
-            // 1. Create DatabaseConnection instance
+            // Create DatabaseConnection instance
             databaseConnection = new DatabaseConnection();
 
-            // 2. Perform ONE-TIME Database Initialization
-            databaseConnection.initializeDatabase(); // <--- NEW: Call this first!
+            // Perform ONE-TIME Database Initialization
+            databaseConnection.initializeDatabase();
 
-            // 3. Now create DAOs - they will use the simple getConnection() internally
+            // create DAOs
             userDao = new UserDao(databaseConnection);
             accommodationDao = new AccommodationDao(databaseConnection, userDao); // Pass dependencies
 
-            // 4. Create Services
+            // Create Services
             userService = new UserService(userDao);
             accommodationService = new AccommodationService(accommodationDao, userDao); // Pass dependencies
 
-            // 5. Initialize UI Panels (pass the ready services)
-            // Ensure MainApplicationPanel constructor uses the correct order if needed
+            // Initialize UI Panels
             this.mainApplicationPanel = new MainApplicationPanel(accommodationService, userService, this);
             this.registrationPanel = new RegistrationPanel(userService, this);
             this.loginPanel = new LoginPanel(userService, this);
 
-            // 6. Set initial content pane
+            // Set initial content pane
             setContentPane(mainApplicationPanel.getMainPanel());
 
-            // 7. JWT Check (no changes needed here)
+            // JWT Check
             String storedJwtToken = getJwtFromPreferences();
             if (storedJwtToken != null && !storedJwtToken.isEmpty()) {
                 if (userService.validateJwtToken(storedJwtToken)) {
                     System.out.println("Automatic login successful (session persisted).");
-                    // Update UI state if needed (e.g., show username, hide login/signup)
+                    // TODO: Update UI state (show username, hide login/signup)
                 } else {
                     System.out.println("Stored JWT invalid or expired.");
-                    // Optionally clear the invalid token
-                    // saveJwtToPreferences(null);
+                    // clear the invalid token
+                    saveJwtToPreferences(null);
                 }
             } else {
                 System.out.println("No stored session token found. Starting as guest.");
@@ -78,7 +74,7 @@ public class MainWindow extends JFrame {
                     "Initialization Error",
                     JOptionPane.ERROR_MESSAGE);
             System.exit(1); // Exit if database setup fails critically
-            return; // Keep compiler happy
+            return;
         } catch (Exception e) {
             // Catch other potential startup errors
             System.err.println("FATAL ERROR during application startup: " + e.getMessage());
@@ -90,9 +86,7 @@ public class MainWindow extends JFrame {
             System.exit(1);
             return;
         }
-
-        // Removed the duplicate title label - the panels handle their own titles
-        // setVisible(true); // Make the window visible at the end of the constructor
+        setVisible(true);
     }
 
     private String getJwtFromPreferences() {

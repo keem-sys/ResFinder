@@ -178,7 +178,7 @@ public class DatabaseConnection {
                 -33.927, 18.425, new BigDecimal("5500.00"), Accommodation.PriceFrequency.PER_MONTH,
                 1, 1, 1, true, true, true, "12-month lease",
                 LocalDateTime.now().plusDays(10), null, true, sampleUser1);
-        acc1.getImageUrls().add("https://i.imgur.com/mVtF82R.jpeg");
+        acc1.getImageUrls().add("https://properliving.co.za/static/b26f993800130e079b54ff6cbfbeac41/add31/HomePageHeroImage.jpg");
 
 
         Accommodation acc2 = new Accommodation(
@@ -187,7 +187,7 @@ public class DatabaseConnection {
                 -33.888, 18.630, new BigDecimal("3800.00"), Accommodation.PriceFrequency.PER_MONTH,
                 4, 2, 4, false, true, true, "Semester lease",
                 LocalDateTime.now().plusDays(5), null, false, sampleUser2); // Pass the User object
-        acc2.getImageUrls().add("https://i.imgur.com/buzBuYf.jpeg");
+        acc2.getImageUrls().add("https://106adderley.co.za/wp-content/uploads/2022/06/DSC09316.jpg");
 
         Accommodation acc3 = new Accommodation(
                 "Modern 2-Bed Apt - Mowbray Area", "Recently renovated apartment, close to transport.",
