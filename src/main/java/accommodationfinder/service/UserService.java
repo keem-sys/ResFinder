@@ -1,5 +1,6 @@
-package accommodationfinder.auth;
+package accommodationfinder.service;
 
+import accommodationfinder.auth.User;
 import accommodationfinder.data.UserDao;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
@@ -131,7 +132,6 @@ public class UserService {
             throw new Exception("Invalid password."); // Or custom AuthenticationException
         }
 
-        // TODO: JWT Generation (Placeholder - Implement JWT generation)
 
         return generateJwtToken(user);
 

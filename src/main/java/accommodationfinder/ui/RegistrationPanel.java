@@ -1,7 +1,7 @@
 package accommodationfinder.ui;
 
 import accommodationfinder.auth.User;
-import accommodationfinder.auth.UserService;
+import accommodationfinder.service.UserService;
 import com.jgoodies.forms.builder.FormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 

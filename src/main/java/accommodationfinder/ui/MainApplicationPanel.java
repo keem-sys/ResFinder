@@ -1,12 +1,22 @@
 package accommodationfinder.ui;
 
-import accommodationfinder.auth.UserService;
+import accommodationfinder.listing.Accommodation; // Import Accommodation class
+import accommodationfinder.service.AccommodationService;
+import accommodationfinder.service.UserService;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder; // Import for padding
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.sql.SQLException; // Import SQLException
+import java.text.NumberFormat; // For currency formatting
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter; // For date formatting
+import java.util.List; // Import List
+import java.util.Locale; // For currency formatting
+
 
 public class MainApplicationPanel {
 
@@ -22,13 +32,16 @@ public class MainApplicationPanel {
     private JButton filterButton;
 
     // Listing Area Components
-    private JPanel listingGridPanel;
+    private JPanel listingGridPanel; // Panel to hold the grid of listings
 
     // References
     private final UserService userService;
+    private final AccommodationService accommodationService;
     private final MainWindow mainWindow;
 
-    public MainApplicationPanel(UserService userService, MainWindow mainWindow) {
+
+    public MainApplicationPanel(AccommodationService accommodationService, UserService userService, MainWindow mainWindow) { // Corrected order to match MainWindow instantiation
+        this.accommodationService = accommodationService;
         this.userService = userService;
         this.mainWindow = mainWindow;
 
@@ -39,39 +52,77 @@ public class MainApplicationPanel {
         JPanel topBarPanel = createTopBar();
         mainPanel.add(topBarPanel, BorderLayout.NORTH);
 
-        // Create Center Content Area (Title, Search/Filter, Listings)
+        // Create Center Content Area
         JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
 
-        // Main Title
+        // --- Title and Search/Filter ---
         JLabel mainTitleLabel = new JLabel("Find Student Accommodation to Rent", SwingConstants.CENTER);
         mainTitleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         mainTitleLabel.setBorder(new EmptyBorder(10, 0, 10, 0));
-
-        // Search/Filter Bar
         JPanel searchFilterPanel = createSearchFilterBar();
-
-        // Combine Title and Search/Filter
         JPanel titleAndSearchPanel = new JPanel();
         titleAndSearchPanel.setLayout(new BoxLayout(titleAndSearchPanel, BoxLayout.Y_AXIS));
         titleAndSearchPanel.add(mainTitleLabel);
         titleAndSearchPanel.add(searchFilterPanel);
-
         centerPanel.add(titleAndSearchPanel, BorderLayout.NORTH);
+        // --- End Title and Search/Filter ---
 
-        // Listing Area
-        listingGridPanel = createListingGrid();
+
+        // --- Listing Area ---
+        // Initialize the grid panel first
+        // Using GridLayout: 0 rows means flexible, 2 columns, 15px hgap, 15px vgap
+        listingGridPanel = new JPanel(new GridLayout(0, 2, 15, 15));
+        listingGridPanel.setBorder(new EmptyBorder(15, 0, 0, 0)); // Padding above the grid
+
+        // Wrap in ScrollPane
         JScrollPane scrollPane = new JScrollPane(listingGridPanel);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16); // Improve scroll speed
+
         centerPanel.add(scrollPane, BorderLayout.CENTER);
+        // --- End Listing Area ---
 
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
+        // --- Load data AFTER UI components are initialized ---
+        loadAndDisplayListings();
+    }
+
+    // --- Method to Load and Display Listings ---
+    private void loadAndDisplayListings() {
+        listingGridPanel.removeAll();
+
+        try {
+            List<Accommodation> listings = accommodationService.getAllActiveListings();
+
+            if (listings.isEmpty()) {
+                listingGridPanel.setLayout(new FlowLayout());
+                listingGridPanel.add(new JLabel("No accommodation listings found."));
+            } else {
+                // Reset layout to Grid
+                listingGridPanel.setLayout(new GridLayout(0, 2, 15, 15));
+                for (Accommodation acc : listings) {
+                    // *** Use the new AccommodationCardPanel ***
+                    AccommodationCardPanel card = new AccommodationCardPanel(acc, mainWindow);
+                    listingGridPanel.add(card);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error loading accommodation listings: " + e.getMessage());
+            e.printStackTrace();
+            listingGridPanel.setLayout(new FlowLayout());
+            listingGridPanel.add(new JLabel("Error loading listings. Please try again later."));
+            JOptionPane.showMessageDialog(mainPanel, "Error loading listings.", "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+        listingGridPanel.revalidate();
+        listingGridPanel.repaint();
     }
 
     // Helper method to create the Top Bar
     private JPanel createTopBar() {
         JPanel topBarPanel = new JPanel(new BorderLayout());
-
         JLabel appTitleLabel = new JLabel("ResFinder");
         appTitleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         appTitleLabel.setBorder(new EmptyBorder(0, 10, 0, 0));
@@ -89,14 +140,13 @@ public class MainApplicationPanel {
 
         topBarPanel.add(appTitleLabel, BorderLayout.WEST);
         topBarPanel.add(authButtonsPanel, BorderLayout.EAST);
-
         return topBarPanel;
     }
 
     // Helper method to create the Search/Filter Bar
     private JPanel createSearchFilterBar() {
         JPanel searchFilterPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
-
+        // ... (rest of search/filter bar code is the same) ...
         // Search Area
         searchField = new JTextField(20);
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
@@ -122,58 +172,11 @@ public class MainApplicationPanel {
 
         // Add action listeners for search, order, filter later
         filterButton.addActionListener(e -> System.out.println("Filter button clicked"));
-
         return searchFilterPanel;
     }
-
-    // Helper method to create the Listing Grid (with placeholders)
-    private JPanel createListingGrid() {
-        JPanel gridPanel = new JPanel(new GridLayout(0, 2, 15, 15));
-        gridPanel.setBorder(new EmptyBorder(15, 0, 0, 0));
-
-        // TODO: Replace placeholder with actual data
-        for (int i = 0; i < 6; i++) { // Create 6 placeholders as in the wireframe
-            gridPanel.add(createListingCardPlaceholder());
-        }
-
-        return gridPanel;
-    }
-
-    // Helper method to create a single placeholder listing card
-    private JPanel createListingCardPlaceholder() {
-        JPanel cardPanel = new JPanel(new BorderLayout(5, 5));
-        cardPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-
-        // Placeholder for the image
-        JPanel imagePlaceholder = new JPanel();
-        imagePlaceholder.setBackground(Color.LIGHT_GRAY);
-        imagePlaceholder.setPreferredSize(new Dimension(150, 120));
-
-        // Placeholder for availability info
-        JLabel availableLabel = new JLabel("Available: ..........");
-        availableLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
-        availableLabel.setOpaque(true);
-        availableLabel.setBackground(Color.WHITE);
-
-        cardPanel.add(imagePlaceholder, BorderLayout.CENTER);
-        cardPanel.add(availableLabel, BorderLayout.SOUTH);
-
-        // Add mouse listener later for clicking on a card
-        cardPanel.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                System.out.println("Listing card clicked!");
-                // TODO: Show detailed view for this listing
-            }
-        });
-
-
-        return cardPanel;
-    }
-
 
     // Method to return the main panel for MainWindow to display
     public JPanel getMainPanel() {
         return mainPanel;
     }
-
 }
