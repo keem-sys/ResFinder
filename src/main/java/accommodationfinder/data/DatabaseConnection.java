@@ -177,7 +177,7 @@ public class DatabaseConnection {
                 Accommodation.AccommodationType.STUDIO, "12 Chapel St", "Cape Town", "8001",
                 -33.927, 18.425, new BigDecimal("5500.00"), Accommodation.PriceFrequency.PER_MONTH,
                 1, 1, 1, true, true, true, "12-month lease",
-                LocalDateTime.now().plusDays(10), null, true, sampleUser1); // Pass the User object
+                LocalDateTime.now().plusDays(10), null, true, sampleUser1);
         acc1.getImageUrls().add("https://i.imgur.com/mVtF82R.jpeg");
 
 
@@ -188,21 +188,33 @@ public class DatabaseConnection {
                 4, 2, 4, false, true, true, "Semester lease",
                 LocalDateTime.now().plusDays(5), null, false, sampleUser2); // Pass the User object
         acc2.getImageUrls().add("https://i.imgur.com/buzBuYf.jpeg");
-        acc2.getImageUrls().add("https://i.imgur.com/xfBlucv.jpeg");
 
         Accommodation acc3 = new Accommodation(
                 "Modern 2-Bed Apt - Mowbray Area", "Recently renovated apartment, close to transport.",
                 Accommodation.AccommodationType.APARTMENT, "77 Main Rd", "Mowbray", "7700",
                 -33.947, 18.477, new BigDecimal("9500.00"), Accommodation.PriceFrequency.PER_MONTH,
                 2, 1, 2, true, false, true, "Annual lease",
-                LocalDateTime.now().plusMonths(1), null, true, sampleUser1); // Pass the User object
+                LocalDateTime.now().plusMonths(1), null, true, sampleUser1);
+
+        acc3.getImageUrls().add("https://youthopportunitieshub.com/wp-content/uploads/2025/01/student24-accomodation-2025-01-14T123023.533.png");
 
 
-        // Use the DAO to insert them
+
+        Accommodation acc4 = new Accommodation(
+                "Independent Dorm Room", "Single dorm room available",
+                Accommodation.AccommodationType.DORM, "Residence Block C", "Cape Town Centre", "7535",
+                -33.885, 18.635, new BigDecimal("3200.00"), Accommodation.PriceFrequency.PER_SEMESTER,
+                1, 0, 1, true, true, false, "Academic Year",
+                LocalDateTime.now().plusWeeks(2), LocalDateTime.now().plusMonths(6),
+                true, sampleUser2);
+        acc4.getImageUrls().add("https://campuskey.co.za/wp-content/uploads/2024/07/Independent-Silver-Bedroom-1-scaled.jpg");
+
+        // DAO to insert accommodations
         try {
             accommodationDao.createAccommodation(acc1);
             accommodationDao.createAccommodation(acc2);
             accommodationDao.createAccommodation(acc3);
+            accommodationDao.createAccommodation(acc4);
             System.out.println("Sample accommodation data inserted successfully.");
         } catch (SQLException e) {
             System.err.println("Error inserting sample accommodation data: " + e.getMessage());
