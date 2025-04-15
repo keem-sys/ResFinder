@@ -1,17 +1,16 @@
 package accommodationfinder.ui;
 
-import accommodationfinder.auth.UserService;
+import accommodationfinder.data.AccommodationDao;
+import accommodationfinder.service.AccommodationService;
+import accommodationfinder.service.UserService;
 import accommodationfinder.data.DatabaseConnection;
 import accommodationfinder.data.UserDao;
 
 import javax.swing.*;
-import java.awt.*;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.prefs.Preferences;
 
 public class MainWindow extends JFrame {
-
     private DatabaseConnection databaseConnection;
     private UserDao userDao;
     private UserService userService;
@@ -19,55 +18,75 @@ public class MainWindow extends JFrame {
     private LoginPanel loginPanel;
     private MainApplicationPanel mainApplicationPanel;
 
+    private AccommodationDao accommodationDao;
+    private AccommodationService accommodationService;
+
     public MainWindow() {
         setTitle("Student Accommodation Finder");
         setSize(1280, 720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+        setLocationRelativeTo(null); // Center the window
 
         try {
+            // Create DatabaseConnection instance
             databaseConnection = new DatabaseConnection();
-            Connection connection = databaseConnection.getConnection();
+
+            // Perform ONE-TIME Database Initialization
+            databaseConnection.initializeDatabase();
+
+            // create DAOs
             userDao = new UserDao(databaseConnection);
+            accommodationDao = new AccommodationDao(databaseConnection, userDao); // Pass dependencies
+
+            // Create Services
             userService = new UserService(userDao);
+            accommodationService = new AccommodationService(accommodationDao, userDao); // Pass dependencies
+
+            // Initialize UI Panels
+            this.mainApplicationPanel = new MainApplicationPanel(accommodationService, userService, this);
+            this.registrationPanel = new RegistrationPanel(userService, this);
+            this.loginPanel = new LoginPanel(userService, this);
+
+            // Set initial content pane
+            setContentPane(mainApplicationPanel.getMainPanel());
+
+            // JWT Check
+            String storedJwtToken = getJwtFromPreferences();
+            if (storedJwtToken != null && !storedJwtToken.isEmpty()) {
+                if (userService.validateJwtToken(storedJwtToken)) {
+                    System.out.println("Automatic login successful (session persisted).");
+                    // TODO: Update UI state (show username, hide login/signup)
+                } else {
+                    System.out.println("Stored JWT invalid or expired.");
+                    // clear the invalid token
+                    saveJwtToPreferences(null);
+                }
+            } else {
+                System.out.println("No stored session token found. Starting as guest.");
+            }
+
+
         } catch (SQLException e) {
-            System.err.println("Error initialising database connection " + e.getMessage());
+            System.err.println("FATAL ERROR during application startup: " + e.getMessage());
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error initialising database",
-                    "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Failed to initialize the application database.\nPlease check logs or contact support.\nError: " + e.getMessage(),
+                    "Initialization Error",
+                    JOptionPane.ERROR_MESSAGE);
+            System.exit(1); // Exit if database setup fails critically
+            return;
+        } catch (Exception e) {
+            // Catch other potential startup errors
+            System.err.println("FATAL ERROR during application startup: " + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "An unexpected error occurred during startup.\nError: " + e.getMessage(),
+                    "Initialization Error",
+                    JOptionPane.ERROR_MESSAGE);
             System.exit(1);
             return;
         }
-
-        this.mainApplicationPanel = new MainApplicationPanel(userService, this);
-        this.registrationPanel = new RegistrationPanel(userService, this);
-        this.loginPanel = new LoginPanel(userService, this);
-
-        setContentPane(mainApplicationPanel.getMainPanel());
-
-        boolean automaticLoginAttempted = false;
-
-        // Attempt Login on Startup
-        String storedJwtToken = getJwtFromPreferences();
-        if (storedJwtToken != null && !storedJwtToken.isEmpty()) {
-            if (userService.validateJwtToken(storedJwtToken)) {
-                System.out.println("Automatic login successful (in background, for session persistence).");
-                // TODO: Update UI elements based on logged-in state here if needed.
-            } else {
-                System.out.println("Stored JWT invalid, starting in guest mode.");
-            }
-        } else {
-            System.out.println("Starting in guest mode.");
-        }
-
-
-
-
-
-        JLabel titleLabel = new JLabel("Welcome to Res Finder!", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-
-        setLocationRelativeTo(null);
+        setVisible(true);
     }
 
     private String getJwtFromPreferences() {

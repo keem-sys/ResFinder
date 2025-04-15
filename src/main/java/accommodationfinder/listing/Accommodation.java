@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Accommodation {
 
@@ -333,5 +334,21 @@ public class Accommodation {
                 '}';
     }
 
-    // TODO: Implement equals() and hashCode() if needed.
+    // equals() and hashCode() override
+    @Override
+    public boolean equals(Object object) {
+        if (this == object)
+            return  true;
+
+        if (object == null || getClass() != object.getClass())
+            return false;
+
+        Accommodation that = (Accommodation) object;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
