@@ -8,7 +8,6 @@ import accommodationfinder.listing.Accommodation;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class AccommodationService {
 
@@ -37,7 +36,7 @@ public class AccommodationService {
             throw new IllegalArgumentException("A valid logged-in user is required to create a listing.");
         }
 
-        // --- Validation Logic ---
+        // Validation Logic
         if (accommodation.getTitle() == null || accommodation.getTitle().trim().isEmpty()) {
             throw new IllegalArgumentException("Listing title cannot be empty.");
         }
@@ -47,7 +46,7 @@ public class AccommodationService {
         // TODO: Add more validation rules as needed (description length, city, etc.)
 
 
-        // --- Set Service-Managed Fields ---
+        // Set Service-Managed Fields
         accommodation.setListedBy(listingUser);
         accommodation.setListingDate(LocalDateTime.now());
         accommodation.setLastUpdatedDate(LocalDateTime.now());
@@ -56,7 +55,7 @@ public class AccommodationService {
         }
 
 
-        // --- Delegate to DAO ---
+        // Delegate to DAO
         return accommodationDao.createAccommodation(accommodation);
     }
 
@@ -68,7 +67,6 @@ public class AccommodationService {
      * @throws SQLException If a database error occurs.
      */
     public Accommodation getListingById(Long id) throws SQLException {
-        // Potentially add logic here later (e.g., check if status is ACTIVE)
         return accommodationDao.getAccommodationById(id);
     }
 
@@ -80,13 +78,8 @@ public class AccommodationService {
      * @throws SQLException If a database error occurs.
      */
     public List<Accommodation> getAllActiveListings() throws SQLException {
-        // List<Accommodation> all = accommodationDao.getAllAccommodations();
-        // return all.stream()
-        //        .filter(acc -> acc.getStatus() == Accommodation.AccommodationStatus.ACTIVE)
-        //       .collect(Collectors.toList());
 
-
-        return accommodationDao.getAllAccommodations(); // TODO: Refine to fetch only active or implement search
+        return accommodationDao.getAllAccommodations(); // TODO: Implement search
     }
 
     /**
@@ -108,29 +101,29 @@ public class AccommodationService {
             throw new SecurityException("User must be logged in to update listings.");
         }
 
-        // --- Permission Check (Example) ---
+        // Permission Check
         Accommodation existingListing = accommodationDao.getAccommodationById(accommodation.getId());
         if (existingListing == null) {
             throw new IllegalArgumentException("Accommodation with ID " + accommodation.getId() + " not found.");
         }
-        // Simple check: only the user who listed it can update
+        // Only the user who listed it can update
         if (!existingListing.getListedBy().getId().equals(currentUser.getId())) {
             throw new SecurityException("You do not have permission to update this listing.");
         }
 
 
-        // --- Validation Logic (similar to create) ---
+        // Validation Logic
         if (accommodation.getTitle() == null || accommodation.getTitle().trim().isEmpty()) {
             throw new IllegalArgumentException("Listing title cannot be empty.");
         }
 
 
-        // --- Prepare for Update ---
+        // Prepare for Update
         accommodation.setListedBy(existingListing.getListedBy());
         accommodation.setListingDate(existingListing.getListingDate());
         accommodation.setLastUpdatedDate(LocalDateTime.now());
 
-        // --- Delegate to DAO ---
+        // Delegate to DAO
         return accommodationDao.updateAccommodation(accommodation);
     }
 
@@ -152,7 +145,7 @@ public class AccommodationService {
             throw new SecurityException("User must be logged in to delete listings.");
         }
 
-        // --- Permission Check ---
+        // Permission Check
         Accommodation existingListing = accommodationDao.getAccommodationById(accommodationId);
         if (existingListing == null) {
             return false;
@@ -160,9 +153,8 @@ public class AccommodationService {
         if (!existingListing.getListedBy().getId().equals(currentUser.getId())) {
             throw new SecurityException("You do not have permission to delete this listing.");
         }
-        // --- End Permission Check ---
 
-        // --- Delegate to DAO ---
+        // Delegate to DAO
         return accommodationDao.deleteAccommodation(accommodationId);
     }
 

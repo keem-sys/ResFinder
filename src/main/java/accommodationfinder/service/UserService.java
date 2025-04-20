@@ -40,7 +40,7 @@ public class UserService {
                 throw new IllegalStateException("Unable to find application.properties file!");
             }
             properties.load(input);
-            String secretKeyBase64 = properties.getProperty("jwt.secretKey"); // get Base64 encoded key
+            String secretKeyBase64 = properties.getProperty("jwt.secretKey");
             if (secretKeyBase64 == null || secretKeyBase64.isEmpty()) {
                 throw new IllegalStateException("jwt.secretKey property not found in application.properties!");
             }
@@ -111,6 +111,8 @@ public class UserService {
         try {
             user = userDao.getUserByUsername(usernameOrEmail);
         } catch (SQLException e) {
+            System.out.println("Unable to get user username");
+            e.printStackTrace();
         }
 
         //  If not found by username, try to find by email
@@ -118,23 +120,23 @@ public class UserService {
             try {
                 user = userDao.getUserByEmail(usernameOrEmail);
             } catch (SQLException e) {
+                System.out.println("Unable to get user email");
+                e.printStackTrace();
             }
         }
 
 
         // User not found by either username or email
         if (user == null) {
-            throw new Exception("Invalid username or email."); // Or custom AuthenticationException
+            throw new Exception("Invalid username or email."); // TODO: Custom AuthenticationException
         }
 
         // Password Verification (using Argon2-jvm)
         if (!verifyPassword(plainTextPassword, user.getPasswordHash())) {
-            throw new Exception("Invalid password."); // Or custom AuthenticationException
+            throw new Exception("Invalid password."); // TODO: Custom AuthenticationException
         }
 
-
         return generateJwtToken(user);
-
     }
 
 
@@ -143,6 +145,7 @@ public class UserService {
         Map<String, Object> claims = new HashMap<>();
         claims.put("username", user.getUsername());
         claims.put("userId", user.getId());
+        claims.put("userEmail", user.getEmail());
 
         return Jwts.builder()
                 .claims(claims)
@@ -150,14 +153,14 @@ public class UserService {
                 .subject(user.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION_MS))
-                .signWith(jwtSecretKey) // Use the key directly (recommended approach)
+                .signWith(jwtSecretKey)
                 .compact();
     }
 
     // JWT method validation using JJWT
-    public boolean validateJwtToken(String jwtToken) { // Make public
+    public boolean validateJwtToken(String jwtToken) {
         try {
-            Jwts.parser() // Use parserBuilder
+            Jwts.parser()
                     .setSigningKey(jwtSecretKey)
                     .build()
                     .parseClaimsJws(jwtToken);
@@ -169,21 +172,21 @@ public class UserService {
     }
 
 
-    //  Password Verification Method (using Argon2-jvm)**
+    //  Password Verification Method (using Argon2-jvm)
     private boolean verifyPassword(String plainTextPassword, String hashedPassword) {
         Argon2 argon2 = Argon2Factory.create();
         try {
             return argon2.verify(hashedPassword, plainTextPassword.toCharArray());
         } catch (Exception e) {
-            // Password verification failed (exception during verification process - could be Argon2 exceptions)
-            System.err.println("Password verification error: " + e.getMessage()); // Log verification error
+            // Password verification failed
+            System.err.println("Password verification error: " + e.getMessage());
             return false; // Verification failed
         }
     }
 
 
     private String hashPassword (String plainTextPassword){
-        int iterations = 2;
+        int iterations =  3;
         int memory = 65536;
         int parallelism = 1;
 
