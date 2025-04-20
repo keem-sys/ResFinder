@@ -167,7 +167,20 @@ public class UserService {
             return false;
         }
     }
-
+    //extracts the username from a valid JWT
+    public String getUsernameFromJwt(String jwtToken) {
+        try {
+            return Jwts.parser()
+                    .setSigningKey(jwtSecretKey)
+                    .build()
+                    .parseClaimsJws(jwtToken)
+                    .getBody()
+                    .get("username", String.class); // Extracts the "username" claim
+        } catch (Exception e) {
+            System.err.println("Failed to extract username from JWT: " + e.getMessage());
+            return "User"; // Fallback
+        }
+    }
 
     //  Password Verification Method (using Argon2-jvm)**
     private boolean verifyPassword(String plainTextPassword, String hashedPassword) {

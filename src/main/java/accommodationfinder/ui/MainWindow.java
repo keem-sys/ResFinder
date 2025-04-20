@@ -5,6 +5,7 @@ import accommodationfinder.service.AccommodationService;
 import accommodationfinder.service.UserService;
 import accommodationfinder.data.DatabaseConnection;
 import accommodationfinder.data.UserDao;
+import accommodationfinder.listing.Accommodation;
 
 import javax.swing.*;
 import java.sql.SQLException;
@@ -20,6 +21,8 @@ public class MainWindow extends JFrame {
 
     private AccommodationDao accommodationDao;
     private AccommodationService accommodationService;
+
+    private DetailedAccommodationViewPanel detailedViewPanel;
 
     public MainWindow() {
         setTitle("Student Accommodation Finder");
@@ -50,21 +53,28 @@ public class MainWindow extends JFrame {
             // Set initial content pane
             setContentPane(mainApplicationPanel.getMainPanel());
 
+            this.detailedViewPanel = new DetailedAccommodationViewPanel(this);
+
             // JWT Check
             String storedJwtToken = getJwtFromPreferences();
             if (storedJwtToken != null && !storedJwtToken.isEmpty()) {
                 if (userService.validateJwtToken(storedJwtToken)) {
                     System.out.println("Automatic login successful (session persisted).");
-                    // TODO: Update UI state (show username, hide login/signup)
+
+                    //Update UI state
+                    String username = userService.getUsernameFromJwt(storedJwtToken); // implement in UserService
+                    mainApplicationPanel.updateLoginStatus( username);
+
+                    setContentPane(mainApplicationPanel.getMainPanel());
+                    revalidate();
+                    repaint();
                 } else {
                     System.out.println("Stored JWT invalid or expired.");
-                    // clear the invalid token
                     saveJwtToPreferences(null);
                 }
             } else {
                 System.out.println("No stored session token found. Starting as guest.");
             }
-
 
         } catch (SQLException e) {
             System.err.println("FATAL ERROR during application startup: " + e.getMessage());
@@ -73,10 +83,9 @@ public class MainWindow extends JFrame {
                     "Failed to initialize the application database.\nPlease check logs or contact support.\nError: " + e.getMessage(),
                     "Initialization Error",
                     JOptionPane.ERROR_MESSAGE);
-            System.exit(1); // Exit if database setup fails critically
+            System.exit(1);
             return;
         } catch (Exception e) {
-            // Catch other potential startup errors
             System.err.println("FATAL ERROR during application startup: " + e.getMessage());
             e.printStackTrace();
             JOptionPane.showMessageDialog(this,
@@ -93,7 +102,6 @@ public class MainWindow extends JFrame {
         java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(getClass());
         return prefs.get("jwtToken", null);
     }
-
 
     public void switchToRegistrationPanel() {
         setContentPane(registrationPanel.getRegistrationPanel());
@@ -117,6 +125,22 @@ public class MainWindow extends JFrame {
             prefs.remove("jwtToken"); // Remove if null (logout)
         }
     }
+    public void switchToDetailedView(Long accommodationId) {
+        try {
+            Accommodation selectedAccommodation = accommodationService.getListingById(accommodationId);
+            if (selectedAccommodation != null) {
+                detailedViewPanel.displayAccommodation(selectedAccommodation);
+                setContentPane(detailedViewPanel);
+                revalidate();
+                repaint();
+            } else {
+                JOptionPane.showMessageDialog(this, "Accommodation not found.");
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error loading accommodation details.");
+            e.printStackTrace();
+        }
+    }
 
     public void showMainApplicationView() {
         setContentPane(mainApplicationPanel.getMainPanel());
@@ -124,7 +148,4 @@ public class MainWindow extends JFrame {
         repaint();
         System.out.println("Switched to Main Application Panel");
     }
-
-
-
 }
