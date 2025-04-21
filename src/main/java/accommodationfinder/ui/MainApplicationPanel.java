@@ -32,6 +32,7 @@ public class MainApplicationPanel {
     private final AccommodationService accommodationService;
     private final MainWindow mainWindow;
 
+    private JLabel loginStatusLabel;
 
     public MainApplicationPanel(AccommodationService accommodationService, UserService userService, MainWindow mainWindow) {
         this.accommodationService = accommodationService;
@@ -110,6 +111,7 @@ public class MainApplicationPanel {
     // Helper method to create the Top Bar
     private JPanel createTopBar() {
         JPanel topBarPanel = new JPanel(new BorderLayout());
+
         JLabel appTitleLabel = new JLabel("ResFinder");
         appTitleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         appTitleLabel.setBorder(new EmptyBorder(0, 10, 0, 0));
@@ -117,19 +119,30 @@ public class MainApplicationPanel {
         signUpButton = new JButton("Sign Up");
         loginButton = new JButton("Login");
 
-        // Add Action Listeners
+        loginStatusLabel = new JLabel(); // Blank initially
+        loginStatusLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        loginStatusLabel.setVisible(false); // Hidden at first
+
+        // Action listeners
         signUpButton.addActionListener(e -> mainWindow.switchToRegistrationPanel());
         loginButton.addActionListener(e -> mainWindow.switchToLoginPanel());
 
         JPanel authButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        authButtonsPanel.add(loginStatusLabel); // Show only after login
         authButtonsPanel.add(signUpButton);
         authButtonsPanel.add(loginButton);
 
         topBarPanel.add(appTitleLabel, BorderLayout.WEST);
         topBarPanel.add(authButtonsPanel, BorderLayout.EAST);
+
         return topBarPanel;
     }
-
+    public void updateLoginStatus(String username) {
+        loginStatusLabel.setText("Welcome, " + username + "!");
+        loginStatusLabel.setVisible(true);
+        signUpButton.setVisible(false);
+        loginButton.setVisible(false);
+    }
     // Helper method to create the Search/Filter Bar
     private JPanel createSearchFilterBar() {
         JPanel searchFilterPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
