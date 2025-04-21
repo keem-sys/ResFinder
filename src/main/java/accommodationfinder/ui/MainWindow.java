@@ -1,11 +1,13 @@
 package accommodationfinder.ui;
 
+import accommodationfinder.auth.User;
 import accommodationfinder.data.AccommodationDao;
 import accommodationfinder.listing.Accommodation;
 import accommodationfinder.service.AccommodationService;
 import accommodationfinder.service.UserService;
 import accommodationfinder.data.DatabaseConnection;
 import accommodationfinder.data.UserDao;
+import org.assertj.core.internal.bytebuddy.jar.asm.Handle;
 
 import javax.swing.*;
 import java.sql.SQLException;
@@ -22,6 +24,9 @@ public class MainWindow extends JFrame {
 
     private AccommodationDao accommodationDao;
     private AccommodationService accommodationService;
+
+    private String currentJwtToken = null;
+    private User currentUser = null;
 
     public MainWindow() {
         setTitle("Student Accommodation Finder");
@@ -54,17 +59,17 @@ public class MainWindow extends JFrame {
 
             // JWT Check
             String storedJwtToken = getJwtFromPreferences();
+            System.out.println("Stored JWT on startup: " + (storedJwtToken != null ? "[PRESENT]" : "[NONE]"));
+
             if (storedJwtToken != null && !storedJwtToken.isEmpty()) {
-                if (userService.validateJwtToken(storedJwtToken)) {
-                    System.out.println("Automatic login successful (session persisted).");
-                    // TODO: Update UI state (show username, hide login/signup)
-                } else {
-                    System.out.println("Stored JWT invalid or expired.");
-                    // clear the invalid token
-                    saveJwtToPreferences(null);
-                }
+                // Attempt to validate and log in using the stored token
+                handleLoginSuccess(storedJwtToken, false);
             } else {
                 System.out.println("No stored session token found. Starting as guest.");
+                // Ensure UI is in logged-out state (should be default, but belt-and-suspenders)
+                if (mainApplicationPanel != null) {
+                    mainApplicationPanel.showLoggedOutState();
+                }
             }
 
 
@@ -89,6 +94,57 @@ public class MainWindow extends JFrame {
             return;
         }
         setVisible(true);
+    }
+
+    // Handle successful login ---
+    public void handleLoginSuccess(String jwtToken, boolean showSuccessMessage) {
+        if (jwtToken == null) return;
+
+        User user = userService.getUserFromToken(jwtToken);
+
+        if (user != null) {
+            this.currentJwtToken = jwtToken;
+            this.currentUser = user;
+            System.out.println("Login successful for user: " + currentUser.getUsername() + " (ID: " + currentUser.getId() + ")");
+
+            // Update the UI in MainApplicationPanel
+            if (mainApplicationPanel != null) {
+                mainApplicationPanel.showLoggedInState(currentUser.getUsername());
+            }
+
+            // Navigate to the main application view
+            showMainApplicationView();
+
+            if (showSuccessMessage) {
+                // Optional: Show a brief success message if desired for manual login
+                // JOptionPane.showMessageDialog(this, "Login Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            System.err.println("Login success handled, but failed to retrieve user details from token.");
+            // Token might be valid but user fetch failed, or token structure issue
+            // Clear invalid persisted token if this happened on startup from preferences
+            if (getJwtFromPreferences() != null && getJwtFromPreferences().equals(jwtToken)) {
+                saveJwtToPreferences(null); // Clear bad token
+            }
+            handleLogout(); // Revert to logged-out state
+        }
+    }
+
+    // NEW: Handle logout
+    public void handleLogout() {
+        System.out.println("Handling logout.");
+        this.currentJwtToken = null;
+        this.currentUser = null;
+        saveJwtToPreferences(null); // Clear persisted token
+
+        // Update the UI in MainApplicationPanel
+        if (mainApplicationPanel != null) {
+            mainApplicationPanel.showLoggedOutState();
+        }
+
+        // Optional: Navigate to a specific view on logout (e.g., main view or login view)
+        showMainApplicationView(); // Go back to main listings view is common
+        // Or: switchToLoginPanel();
     }
 
     private String getJwtFromPreferences() {
@@ -121,12 +177,28 @@ public class MainWindow extends JFrame {
     }
 
     public void showMainApplicationView() {
+
+        // Ensure the main panel itself exists
+        if (mainApplicationPanel == null) {
+            System.err.println("Error: MainApplicationPanel is null when trying to show it.");
+            // Handle this error appropriately, maybe recreate or exit
+            return;
+        }
+
+        // Update the auth state just in case (e.g., token expired between views)
+        if (currentUser != null) {
+            mainApplicationPanel.showLoggedInState(currentUser.getUsername());
+        } else {
+            mainApplicationPanel.showLoggedOutState();
+        }
+
+
         setContentPane(mainApplicationPanel.getMainPanel());
-        accommodationDetailPanel = null; // Discard old detail panel instance
         revalidate();
         repaint();
         System.out.println("Switched to Main Application Panel");
     }
+
 
     /**
      * Switches the main window content to show the detailed view for a specific accommodation.
@@ -146,7 +218,8 @@ public class MainWindow extends JFrame {
                 revalidate();
                 repaint();
                 System.out.println("Successfully switched to detailed view for: " + accommodation.getTitle());
-            } else {
+            }
+            else {
                 // Handle case where listing is not found
                 System.err.println("Accommodation with ID " + accommodationId + " not found.");
                 JOptionPane.showMessageDialog(this,
@@ -156,6 +229,14 @@ public class MainWindow extends JFrame {
                 // Switch back to main view
                 showMainApplicationView();
             }
+
+            // Update auth state in main panel BEFORE potentially switching away
+            if (mainApplicationPanel != null) {
+                if (currentUser != null) mainApplicationPanel.showLoggedInState(currentUser.getUsername());
+                else mainApplicationPanel.showLoggedOutState();
+            }
+
+
         } catch (SQLException e) {
             // Handle database errors during fetch
             System.err.println("Database error fetching accommodation details for ID " + accommodationId + ": " + e.getMessage());
@@ -168,6 +249,15 @@ public class MainWindow extends JFrame {
             showMainApplicationView();
         }
     }
+
+    public User getCurrentUser() {
+        return currentUser;
+    }
+
+    public String getCurrentJwtToken() {
+        return currentJwtToken;
+    }
+
 
 
     // Getter for the main frame if needed by child components

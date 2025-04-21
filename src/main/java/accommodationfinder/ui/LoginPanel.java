@@ -160,38 +160,48 @@ public class LoginPanel extends JPanel {
                 String password = new String(passwordChars);
                 boolean rememberMe = rememberMeChkBox.isSelected();
 
-                System.out.println("Username or Email: " + usernameOrEmail);
+                System.out.println("Attempting login for: " + usernameOrEmail);
                 System.out.println("Remember me: " + rememberMe);
 
-                // Input validation
                 if (usernameOrEmail.isEmpty() || password.isEmpty()) {
                     setErrorMessage("Username/Email and Password are required");
                     return;
                 } else {
-                    setErrorMessage(" ");
+                    setErrorMessage(" "); // Clear previous error
                 }
 
                 try {
+                    // Attempt login via service
                     String jwtToken = userService.loginUser(usernameOrEmail, password);
 
+                    // If login is successful (no exception thrown)
+                    System.out.println("Login attempt successful via UserService. Token received.");
+
+                    // Handle 'Remember Me' BEFORE calling MainWindow's success handler
                     if (rememberMe) {
                         mainWindow.saveJwtToPreferences(jwtToken);
-                        System.out.println("JWT token saved due to 'Remember Me' being checked.");
+                        System.out.println("JWT token marked for saving (Remember Me checked).");
                     } else {
-                        mainWindow.saveJwtToPreferences(null);
-                        System.out.println("JWT token cleared as 'Remember Me' is not checked.");
+                        mainWindow.saveJwtToPreferences(null); // Ensure cleared if not checked
+                        System.out.println("JWT token marked for clearing (Remember Me not checked).");
                     }
 
-                    mainWindow.showMainApplicationView();
-                    System.out.println("Login Successful!");
+                    // *** Tell MainWindow about the success ***
+                    mainWindow.handleLoginSuccess(jwtToken, true); // true = show success message if desired
+
+                    // Clear input fields ONLY on success AFTER handling login
                     clearInputs();
 
-
                 } catch (Exception authenticationException) {
+                    // Handle login failure
                     System.err.println("Login failed: " + authenticationException.getMessage());
                     setErrorMessage("Login failed: Invalid credentials.");
-                } finally {
+                    // Ensure password field is cleared on failure too
                     passwordField.setText("");
+                    // Do NOT clear the token in preferences here, only on explicit logout or if rememberMe is unchecked
+                } finally {
+                    // Maybe clear password chars array for security
+                    java.util.Arrays.fill(passwordChars, ' ');
                 }
             }
         });

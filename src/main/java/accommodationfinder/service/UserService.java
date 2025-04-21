@@ -4,10 +4,13 @@ import accommodationfinder.auth.User;
 import accommodationfinder.data.UserDao;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+
+import javax.crypto.SecretKey;
 import java.security.Key;
 
 import java.io.IOException;
@@ -126,6 +129,8 @@ public class UserService {
         }
 
 
+
+
         // User not found by either username or email
         if (user == null) {
             throw new Exception("Invalid username or email."); // TODO: Custom AuthenticationException
@@ -170,6 +175,66 @@ public class UserService {
             return false;
         }
     }
+
+    /**
+     * Validates the JWT token and extracts user claims if valid.
+     *
+     * @param jwtToken The JWT token string.
+     * @return A map of claims (like userId, username) if the token is valid, null otherwise.
+     */
+    public Claims validateAndExtractClaims(String jwtToken) {
+        if (jwtToken == null || jwtToken.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return Jwts.parser()
+                    .verifyWith((SecretKey) jwtSecretKey)
+                    .build()
+                    .parseSignedClaims(jwtToken) // Use parseSignedClaims
+                    .getPayload(); // Get claims from payload
+        } catch (JwtException | IllegalArgumentException e) { // Catch potential errors
+            System.err.println("JWT validation/parsing failed: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Retrieves the User object based on the ID stored within a valid JWT token.
+     *
+     * @param jwtToken The JWT token string.
+     * @return The User object if the token is valid and the user exists, null otherwise.
+     */
+    public User getUserFromToken(String jwtToken) {
+        Claims claims = validateAndExtractClaims(jwtToken);
+        if (claims != null) {
+            try {
+                // Extract user ID from claims (ensure it's stored as Long or Integer)
+                Object userIdObj = claims.get("userId");
+                Long userId = null;
+                if (userIdObj instanceof Integer) {
+                    userId = ((Integer) userIdObj).longValue();
+                } else if (userIdObj instanceof Long) {
+                    userId = (Long) userIdObj;
+                }
+
+                if (userId != null) {
+                    // Fetch user from DAO using the ID
+                    return userDao.getUserById(userId);
+                } else {
+                    System.err.println("User ID not found or invalid type in JWT claims.");
+                    return null;
+                }
+            } catch (SQLException e) {
+                System.err.println("Database error fetching user from token ID: " + e.getMessage());
+                return null;
+            } catch (Exception e) {
+                System.err.println("Error processing claims from token: " + e.getMessage());
+                return null;
+            }
+        }
+        return null; // Token invalid or claims couldn't be extracted
+    }
+
 
 
     //  Password Verification Method (using Argon2-jvm)

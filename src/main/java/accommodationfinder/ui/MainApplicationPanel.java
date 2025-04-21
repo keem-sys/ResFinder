@@ -16,8 +16,11 @@ public class MainApplicationPanel {
     private JPanel mainPanel;
 
     // Top Bar Components
+    private JPanel authAreaPanel; // Panel to hold dynamic login/logout component
     private JButton signUpButton;
+    private JLabel welcomeLabel;
     private JButton loginButton;
+    private JButton logoutButton;
 
     // Search/Filter Components
     private JTextField searchField;
@@ -31,6 +34,7 @@ public class MainApplicationPanel {
     private final UserService userService;
     private final AccommodationService accommodationService;
     private final MainWindow mainWindow;
+
 
 
     public MainApplicationPanel(AccommodationService accommodationService, UserService userService, MainWindow mainWindow) {
@@ -74,6 +78,8 @@ public class MainApplicationPanel {
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
         loadAndDisplayListings();
+        // Set initial state of the auth area (logged out by default)
+        showLoggedOutState();
     }
 
     // Method to Load and Display Listings
@@ -111,8 +117,43 @@ public class MainApplicationPanel {
     private JPanel createTopBar() {
         JPanel topBarPanel = new JPanel(new BorderLayout());
         JLabel appTitleLabel = new JLabel("ResFinder");
-        appTitleLabel.setFont(new Font("Arial", Font.BOLD, 28));
+        appTitleLabel.setFont(new Font("Arial", Font.BOLD, 36));
         appTitleLabel.setBorder(new EmptyBorder(0, 10, 0, 0));
+
+        // Create the panel that will hold Sign Up/Login OR Welcome/Logout
+        authAreaPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        authAreaPanel.setOpaque(false);
+
+        topBarPanel.add(appTitleLabel, BorderLayout.WEST);
+        topBarPanel.add(authAreaPanel, BorderLayout.EAST);
+
+
+        return topBarPanel;
+    }
+
+    // --- Method to update UI for Logged In state ---
+    public void showLoggedInState(String username) {
+        authAreaPanel.removeAll(); // Clear previous components
+
+        welcomeLabel = new JLabel("Welcome, " + username);
+        welcomeLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        logoutButton = new JButton("Logout");
+        logoutButton.addActionListener(e -> mainWindow.handleLogout()); // Call logout method in MainWindow
+
+        // Optional: Add profile icon/button later here
+
+        authAreaPanel.add(welcomeLabel);
+        authAreaPanel.add(Box.createRigidArea(new Dimension(10, 0))); // Spacer
+        authAreaPanel.add(logoutButton);
+
+        authAreaPanel.revalidate();
+        authAreaPanel.repaint();
+    }
+
+    // --- Method to update UI for Logged Out state ---
+    public void showLoggedOutState() {
+        authAreaPanel.removeAll(); // Clear previous components
 
         signUpButton = new JButton("Sign Up");
         loginButton = new JButton("Login");
@@ -121,14 +162,13 @@ public class MainApplicationPanel {
         signUpButton.addActionListener(e -> mainWindow.switchToRegistrationPanel());
         loginButton.addActionListener(e -> mainWindow.switchToLoginPanel());
 
-        JPanel authButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        authButtonsPanel.add(signUpButton);
-        authButtonsPanel.add(loginButton);
+        authAreaPanel.add(signUpButton);
+        authAreaPanel.add(loginButton);
 
-        topBarPanel.add(appTitleLabel, BorderLayout.WEST);
-        topBarPanel.add(authButtonsPanel, BorderLayout.EAST);
-        return topBarPanel;
+        authAreaPanel.revalidate();
+        authAreaPanel.repaint();
     }
+
 
     // Helper method to create the Search/Filter Bar
     private JPanel createSearchFilterBar() {
