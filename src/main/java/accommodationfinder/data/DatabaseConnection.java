@@ -25,7 +25,7 @@ public class DatabaseConnection {
     /**
      * Initializes the database schema (creates tables if they don't exist)
      * and populates sample data if the tables are empty.
-     * This should be called ONCE during application startup.
+     * It is called ONCE during application startup.
      *
      * @throws SQLException if a database access error occurs during initialization.
      */
@@ -34,7 +34,7 @@ public class DatabaseConnection {
             System.out.println("Initializing database schema and data...");
             createUsersTableIfNotExists(connection);
             createAccommodationsTableIfNotExists(connection);
-            initializeSampleDataIfEmpty(connection); // Pass the connection
+            initializeSampleDataIfEmpty(connection);
             System.out.println("Database initialization complete.");
         } catch (SQLException e) {
             System.err.println("FATAL: Database initialization failed: " + e.getMessage());
@@ -108,7 +108,7 @@ public class DatabaseConnection {
         }
     }
 
-    // Initialize Sample Data (Keep this private, called by initializeDatabase)
+    // Initialize Sample Data
     private void initializeSampleDataIfEmpty(Connection connection) {
         // Check if accommodations table is empty
         String checkSql = "SELECT COUNT(*) FROM ACCOMMODATIONS";
@@ -116,7 +116,6 @@ public class DatabaseConnection {
              ResultSet rs = checkStmt.executeQuery(checkSql)) {
             if (rs.next() && rs.getInt(1) == 0) {
                 System.out.println("ACCOMMODATIONS table is empty. Initializing sample data...");
-                // Pass the existing connection to the insert method
                 insertSampleData(connection);
             } else {
                 System.out.println("ACCOMMODATIONS table already has data. Skipping sample data insertion.");
@@ -127,7 +126,6 @@ public class DatabaseConnection {
     }
 
     // Insert Sample Data
-    // his method uses the passed-in connection for DAO operations
     private void insertSampleData(Connection connection) throws SQLException {
 
         UserDao userDao = new UserDao(this);
@@ -141,9 +139,9 @@ public class DatabaseConnection {
             sampleUser1 = userDao.getUserByUsername("landlord1");
             if (sampleUser1 == null) {
                 System.out.println("Creating sample user 'landlord1'");
-                // TODO: implement placeholder.
-                String placeholderHash = "$argon2id$v=19$m=65536,t=2,p=1$placeholderSalt$placeholderHash"; // REPLACE
-                sampleUser1 = new User(null, "Sample Landlord", "landlord1", "landlord1@test.com", placeholderHash);
+                // TODO: implement HashPassword.
+                String placeholderHash = "$argon2id$v=19$m=65536,t=2,p=1$placeholderSalt$placeholderHash";
+                sampleUser1 = new User(null, "Peter Xolani", "landlord1", "landlord1@gmail.com", placeholderHash);
                 sampleUser1.setId(userDao.createUser(sampleUser1));
             }
         } catch (SQLException e) {
@@ -155,9 +153,9 @@ public class DatabaseConnection {
             sampleUser2 = userDao.getUserByUsername("agent2");
             if (sampleUser2 == null) {
                 System.out.println("Creating sample user 'agent2'");
-                // TODO  proper password hasher
-                String placeholderHash = "$argon2id$v=19$m=65536,t=2,p=1$placeholderSalt2$placeholderHash2"; // REPLACE
-                sampleUser2 = new User(null, "Sample Agent", "agent2", "agent2@test.com", placeholderHash);
+                // TODO: proper password hasher
+                String placeholderHash = "$argon2id$v=19$m=65536,t=2,p=1$placeholderSalt2$placeholderHash2";
+                sampleUser2 = new User(null, "Makunyane Dean", "agent2", "agent2@gmail.com", placeholderHash);
                 sampleUser2.setId(userDao.createUser(sampleUser2));
             }
         } catch (SQLException e) {
@@ -165,7 +163,7 @@ public class DatabaseConnection {
             throw e;
         }
 
-        // Ensure users were actually created/found before proceeding
+        // Ensure users are actually created before proceeding
         if (sampleUser1 == null || sampleUser1.getId() == null || sampleUser2 == null || sampleUser2.getId() == null) {
             throw new SQLException("Failed to obtain valid sample user IDs for sample data insertion.");
         }

@@ -1,6 +1,8 @@
 package accommodationfinder.ui;
 
+import accommodationfinder.auth.User;
 import accommodationfinder.data.AccommodationDao;
+import accommodationfinder.listing.Accommodation;
 import accommodationfinder.service.AccommodationService;
 import accommodationfinder.service.UserService;
 import accommodationfinder.data.DatabaseConnection;
@@ -17,9 +19,13 @@ public class MainWindow extends JFrame {
     private RegistrationPanel registrationPanel;
     private LoginPanel loginPanel;
     private MainApplicationPanel mainApplicationPanel;
+    private AccommodationDetailPanel accommodationDetailPanel;
 
     private AccommodationDao accommodationDao;
     private AccommodationService accommodationService;
+
+    private String currentJwtToken = null;
+    private User currentUser = null;
 
     public MainWindow() {
         setTitle("Student Accommodation Finder");
@@ -31,16 +37,16 @@ public class MainWindow extends JFrame {
             // Create DatabaseConnection instance
             databaseConnection = new DatabaseConnection();
 
-            // Perform ONE-TIME Database Initialization
+            // Perform Database Initialization
             databaseConnection.initializeDatabase();
 
             // create DAOs
             userDao = new UserDao(databaseConnection);
-            accommodationDao = new AccommodationDao(databaseConnection, userDao); // Pass dependencies
+            accommodationDao = new AccommodationDao(databaseConnection, userDao);
 
             // Create Services
             userService = new UserService(userDao);
-            accommodationService = new AccommodationService(accommodationDao, userDao); // Pass dependencies
+            accommodationService = new AccommodationService(accommodationDao, userDao);
 
             // Initialize UI Panels
             this.mainApplicationPanel = new MainApplicationPanel(accommodationService, userService, this);
@@ -52,17 +58,16 @@ public class MainWindow extends JFrame {
 
             // JWT Check
             String storedJwtToken = getJwtFromPreferences();
+            System.out.println("Stored JWT on startup: " + (storedJwtToken != null ? "[PRESENT]" : "[NONE]"));
+
             if (storedJwtToken != null && !storedJwtToken.isEmpty()) {
-                if (userService.validateJwtToken(storedJwtToken)) {
-                    System.out.println("Automatic login successful (session persisted).");
-                    // TODO: Update UI state (show username, hide login/signup)
-                } else {
-                    System.out.println("Stored JWT invalid or expired.");
-                    // clear the invalid token
-                    saveJwtToPreferences(null);
-                }
+                // Attempt to validate and log in using the stored token
+                handleLoginSuccess(storedJwtToken, false);
             } else {
                 System.out.println("No stored session token found. Starting as guest.");
+                if (mainApplicationPanel != null) {
+                    mainApplicationPanel.showLoggedOutState();
+                }
             }
 
 
@@ -87,6 +92,53 @@ public class MainWindow extends JFrame {
             return;
         }
         setVisible(true);
+    }
+
+    // Handle successful login
+    public void handleLoginSuccess(String jwtToken, boolean showSuccessMessage) {
+        if (jwtToken == null) return;
+
+        User user = userService.getUserFromToken(jwtToken);
+
+        if (user != null) {
+            this.currentJwtToken = jwtToken;
+            this.currentUser = user;
+            System.out.println("Login successful for user: " + currentUser.getUsername() + " (ID: " + currentUser.getId() + ")");
+
+            // Update the UI in MainApplicationPanel
+            if (mainApplicationPanel != null) {
+                mainApplicationPanel.showLoggedInState(currentUser.getUsername());
+            }
+
+            // Navigate to the main application view
+            showMainApplicationView();
+
+            if (showSuccessMessage) {
+                JOptionPane.showMessageDialog(this, "Login Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            System.err.println("Login success handled, but failed to retrieve user details from token.");
+            // Clear invalid persisted token if userFetch failed
+            if (getJwtFromPreferences() != null && getJwtFromPreferences().equals(jwtToken)) {
+                saveJwtToPreferences(null); // Clear bad token
+            }
+            handleLogout(); // Revert to logged-out state
+        }
+    }
+
+    // Handle logout
+    public void handleLogout() {
+        System.out.println("Handling logout.");
+        this.currentJwtToken = null;
+        this.currentUser = null;
+        saveJwtToPreferences(null); // Clear persisted token
+
+        // Update the UI in MainApplicationPanel
+        if (mainApplicationPanel != null) {
+            mainApplicationPanel.showLoggedOutState();
+        }
+
+        showMainApplicationView();
     }
 
     private String getJwtFromPreferences() {
@@ -114,15 +166,97 @@ public class MainWindow extends JFrame {
         if (jwtToken != null) {
             prefs.put("jwtToken", jwtToken);
         } else {
-            prefs.remove("jwtToken"); // Remove if null (logout)
+            prefs.remove("jwtToken");
         }
     }
 
     public void showMainApplicationView() {
+
+        // Ensure the main panel itself exists
+        if (mainApplicationPanel == null) {
+            System.err.println("Error: MainApplicationPanel is null when trying to show it.");
+            // TODO: Handle error exit or throw Exception
+            return;
+        }
+
+        // Update the auth state just in case token expired between views
+        if (currentUser != null) {
+            mainApplicationPanel.showLoggedInState(currentUser.getUsername());
+        } else {
+            mainApplicationPanel.showLoggedOutState();
+        }
+
+
         setContentPane(mainApplicationPanel.getMainPanel());
         revalidate();
         repaint();
         System.out.println("Switched to Main Application Panel");
+    }
+
+
+    /**
+     * Switches the main window content to show the detailed view for a specific accommodation.
+     * Fetches the accommodation data using the provided ID.
+     *
+     * @param accommodationId The ID of the accommodation to display.
+     */
+    public void switchToDetailedView(Long accommodationId) {
+        System.out.println("Attempting to switch to detailed view for ID: " + accommodationId);
+        try {
+            Accommodation accommodation = accommodationService.getListingById(accommodationId);
+
+            if (accommodation != null) {
+                // Create a NEW instance of the detail panel each time
+                accommodationDetailPanel = new AccommodationDetailPanel(accommodationService, this, accommodationId);
+                setContentPane(accommodationDetailPanel.getDetailPanel());
+                revalidate();
+                repaint();
+                System.out.println("Successfully switched to detailed view for: " + accommodation.getTitle());
+            }
+            else {
+                // Handle case where listing is not found
+                System.err.println("Accommodation with ID " + accommodationId + " not found.");
+                JOptionPane.showMessageDialog(this,
+                        "Could not find details for the selected accommodation.",
+                        "Listing Not Found",
+                        JOptionPane.WARNING_MESSAGE);
+                // Switch back to main view
+                showMainApplicationView();
+            }
+
+            // Update auth state in main panel BEFORE switching away
+            if (mainApplicationPanel != null) {
+                if (currentUser != null) mainApplicationPanel.showLoggedInState(currentUser.getUsername());
+                else mainApplicationPanel.showLoggedOutState();
+            }
+
+
+        } catch (SQLException e) {
+            // Handle database errors during fetch
+            System.err.println("Database error fetching accommodation details for ID " + accommodationId + ": " + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "An error occurred while retrieving accommodation details.\nPlease try again later.",
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
+            // Switch back to main view
+            showMainApplicationView();
+        }
+    }
+
+    public User getCurrentUser() {
+        return currentUser;
+    }
+
+    public String getCurrentJwtToken() {
+        return currentJwtToken;
+    }
+
+
+
+    // Getter for the main frame if needed by child components
+    public JFrame getMainFrame() {
+        return this;
     }
 
 

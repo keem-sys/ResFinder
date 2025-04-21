@@ -159,13 +159,7 @@ public class AccommodationCardPanel extends JPanel {
     private void handleCardClick() {
         // TODO: trigger navigation to the detailed view
         System.out.println("Card clicked - Navigate to details for Listing ID: " + accommodation.getId());
-        // Placeholder action using mainWindow reference
-        JOptionPane.showMessageDialog(null, // Use mainWindow's frame
-                "Should show details for: " + accommodation.getTitle(),
-                "View More Clicked (Placeholder)",
-                JOptionPane.INFORMATION_MESSAGE);
-
-        // TODO: mainWindow.switchToDetailedView(accommodation.getId());
+        mainWindow.switchToDetailedView(accommodation.getId());
     }
 
     // --- Helper Methods specific to this card ---

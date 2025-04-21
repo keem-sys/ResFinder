@@ -36,7 +36,7 @@ public class LoginPanel extends JPanel {
 
         SwingUtilities.invokeLater(() -> usernameOrEmailField.requestFocusInWindow());
 
-        // --- Title ---
+        // Title
         titleLabel = new JLabel("Login!");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         gbc.gridx = 0;
@@ -49,7 +49,7 @@ public class LoginPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        // --- Username/Email Row ---
+        // Username/Email Row
         usernameOrEmailLabel = new JLabel("Username or Email:");
         gbc.gridx = 0;
         gbc.gridy = 1;
@@ -63,7 +63,7 @@ public class LoginPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(usernameOrEmailField, gbc);
 
-        // --- Password Row ---
+        // Password Row
         passwordLabel = new JLabel("Password:");
         gbc.gridx = 0;
         gbc.gridy = 2;
@@ -78,7 +78,7 @@ public class LoginPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(passwordField, gbc);
 
-        // --- Remember Me Checkbox ---
+        // Remember Me Checkbox
         rememberMeChkBox = new JCheckBox("Remember me");
         rememberMeChkBox.setOpaque(false);
         gbc.gridx = 1;
@@ -87,7 +87,7 @@ public class LoginPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(rememberMeChkBox, gbc);
 
-        // --- Error Message Label (Initially hidden) ---
+        // Error Message Label (Initially hidden)-
         errorMessageLabel = new JLabel(" ");
         errorMessageLabel.setForeground(Color.RED);
         errorMessageLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -101,7 +101,7 @@ public class LoginPanel extends JPanel {
         gbc.gridwidth = 1;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        // --- Login Button ---
+        // Login Button
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
         buttonPanel.setBackground(PANEL_BACKGROUND_COLOR);
         buttonPanel.setOpaque(false);
@@ -125,7 +125,7 @@ public class LoginPanel extends JPanel {
         gbc.gridwidth = 1;
         gbc.fill = GridBagConstraints.NONE;
 
-        // --- Sign Up Prompt ---
+        // Sign Up Prompt
         JPanel registerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
         registerPanel.setOpaque(false);
         registerPromptLabel = new JLabel("Are you a new user?");
@@ -160,38 +160,46 @@ public class LoginPanel extends JPanel {
                 String password = new String(passwordChars);
                 boolean rememberMe = rememberMeChkBox.isSelected();
 
-                System.out.println("Username or Email: " + usernameOrEmail);
+                System.out.println("Attempting login for: " + usernameOrEmail);
                 System.out.println("Remember me: " + rememberMe);
 
-                // Input validation
                 if (usernameOrEmail.isEmpty() || password.isEmpty()) {
                     setErrorMessage("Username/Email and Password are required");
                     return;
                 } else {
-                    setErrorMessage(" ");
+                    setErrorMessage(" "); // Clear previous error
                 }
 
                 try {
+                    // Attempt login via service
                     String jwtToken = userService.loginUser(usernameOrEmail, password);
 
+                    // If login is successful (no exception thrown)
+                    System.out.println("Login attempt successful via UserService. Token received.");
+
+                    //  'Remember Me'
                     if (rememberMe) {
                         mainWindow.saveJwtToPreferences(jwtToken);
-                        System.out.println("JWT token saved due to 'Remember Me' being checked.");
+                        System.out.println("JWT token marked for saving (Remember Me checked).");
                     } else {
-                        mainWindow.saveJwtToPreferences(null);
-                        System.out.println("JWT token cleared as 'Remember Me' is not checked.");
+                        mainWindow.saveJwtToPreferences(null); // Ensure cleared if not checked
+                        System.out.println("JWT token marked for clearing (Remember Me not checked).");
                     }
 
-                    mainWindow.showMainApplicationView();
-                    System.out.println("Login Successful!");
+                    mainWindow.handleLoginSuccess(jwtToken, true); // true = show success message if desired
+
+                    // Clear input fields
                     clearInputs();
 
-
                 } catch (Exception authenticationException) {
+                    // Handle login failure
                     System.err.println("Login failed: " + authenticationException.getMessage());
                     setErrorMessage("Login failed: Invalid credentials.");
-                } finally {
+                    // Ensure password field is cleared on failure too
                     passwordField.setText("");
+                } finally {
+                    // Clear password chars array for security
+                    java.util.Arrays.fill(passwordChars, ' ');
                 }
             }
         });

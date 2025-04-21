@@ -48,12 +48,18 @@
             <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency>
+
+
+        <!-- JJWT Jackson Binding (Handles JSON serialization/deserialization for JWT) -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
-            <version>0.12.6</version>
+            <version>0.12.6</version> <!-- Use the same version as jjwt-api/impl -->
             <scope>runtime</scope>
         </dependency>
+
+
+
 
         <!-- JUnit Dependency -->
         <dependency>
