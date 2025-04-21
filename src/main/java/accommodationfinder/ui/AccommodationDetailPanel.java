@@ -1,737 +1,548 @@
 package accommodationfinder.ui;
 
-import accommodationfinder.auth.User; // Import User class
 import accommodationfinder.listing.Accommodation;
 import accommodationfinder.service.AccommodationService;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.border.TitledBorder; // For section borders
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.NumberFormat;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
-/**
- * Displays the detailed view of a single accommodation listing.
- */
-public class AccommodationDetailPanel {
+public class AccommodationDetailPanel extends JPanel {
 
-    private JPanel mainPanel;
-    private final Accommodation accommodation;
-    private final MainWindow mainWindow;
     private final AccommodationService accommodationService;
+    private final MainWindow mainWindow;
+    private final Long accommodationId;
 
-    // --- UI Components ---
-    // ... (Keep component declarations as before) ...
-    private JButton backButton;
-    private JButton signUpButton;
-    private JButton loginButton;
-    private JTextField searchField;
-    private JLabel titleLabel; // Will use HTML now
-    private JPanel imagePanel; // Panel containing the image label
+    // UI Components
+    private JLabel titleLabel;
     private JLabel imageLabel;
-    private JLabel priceLabel;
-    private JLabel addressLabel; // Will use HTML now
-    private JLabel bedsBathsLabel;
-    private JLabel nsfasLabel;
-    private JLabel typeLabel;
-    private JLabel occupancyLabel;
-    private JLabel availabilityLabel;
-    private JLabel leaseTermLabel;
-    private JTextArea descriptionTextArea;
-    private JPanel amenitiesPanel;
-    private JLabel contactTitleLabel;
-    private JLabel listedByLabel;
-    private JTextField nameField;
-    private JTextField emailField;
-    private JTextField phoneField;
+    private JTextArea detailsTextArea;
+    private JPanel imageContainerPanel;
+    private JButton prevImageButton;
+    private JButton nextImageButton;
+    private JLabel imageCountLabel;
+
+    // Contact Form Components
+    private JTextField contactNameField;
+    private JTextField contactEmailField;
+    private JTextField contactPhoneField;
     private JButton sendMessageButton;
+    private JLabel listerInfoLabel;
 
+    // State for Image Gallery
+    private List<String> currentImageUrls;
+    private int currentImageIndex = 0;
 
-    // Formatting Helpers
+    // Formatters
     private static final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("en", "ZA"));
-    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
+    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy 'at' HH:mm");
 
-    // Colors - Make section background slightly different
+    // Constants
     private static final Color BACKGROUND_COLOR = new Color(253, 251, 245);
-    private static final Color SECTION_BG_COLOR = new Color(248, 248, 248); // Slightly distinct
-    private static final Color BORDER_COLOR = new Color(200, 200, 200); // Lighter border
+    private static final Color PLACEHOLDER_COLOR = new Color(230, 230, 230);
+    private static final int IMG_WIDTH = 550;
+    private static final int IMG_HEIGHT = 400;
 
-
-    public AccommodationDetailPanel(Accommodation accommodation, AccommodationService accommodationService, MainWindow mainWindow) {
-        if (accommodation == null) {
-            throw new IllegalArgumentException("Accommodation cannot be null");
-        }
-        this.accommodation = accommodation;
-        this.mainWindow = mainWindow;
+    public AccommodationDetailPanel(AccommodationService accommodationService, MainWindow mainWindow, Long accommodationId) {
         this.accommodationService = accommodationService;
+        this.mainWindow = mainWindow;
+        this.accommodationId = accommodationId;
+
+        setLayout(new BorderLayout(10, 10));
+        setBorder(new EmptyBorder(15, 25, 15, 25));
+        setBackground(BACKGROUND_COLOR);
+
         initComponents();
-        populateData();
+        setupContactFormListeners();
+        //prefillContactForm();      // Prefill form if user is logged in
+        loadAccommodationDetails();
     }
 
     private void initComponents() {
-        mainPanel = new JPanel(new BorderLayout(10, 10)); // Reduced VGap slightly
-        mainPanel.setBackground(BACKGROUND_COLOR);
-        mainPanel.setBorder(new EmptyBorder(10, 15, 10, 15));
+        // --- Top Section (Back Button + Title) ---
+        JPanel topPanel = new JPanel(new BorderLayout(10, 0));
+        topPanel.setOpaque(false);
 
-        mainPanel.add(createTopBar(), BorderLayout.NORTH);
-
-        JPanel centerContent = createCenterContent();
-        JScrollPane scrollPane = new JScrollPane(centerContent);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        // scrollPane.setBackground(BACKGROUND_COLOR); // Let viewport handle background
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        scrollPane.getHorizontalScrollBar().setUnitIncrement(16);
-        scrollPane.setOpaque(false);
-        scrollPane.getViewport().setOpaque(false);
-        scrollPane.getViewport().setBackground(BACKGROUND_COLOR); // Set viewport background
-
-
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
-
-        // populateData(); // Moved population call to constructor end
-    }
-
-    // --- Top Bar --- (No changes needed)
-    private JPanel createTopBar() {
-        JPanel topBarPanel = new JPanel(new BorderLayout(10, 0));
-        topBarPanel.setBackground(BACKGROUND_COLOR);
-        topBarPanel.setBorder(new EmptyBorder(0, 0, 10, 0)); // Bottom margin
-
-        // Left side: Back Button and Title
-        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        leftPanel.setOpaque(false);
-        backButton = new JButton("<- Back");
-        backButton.setToolTipText("Back to Listings");
-        backButton.setFocusPainted(false); // Improve look
+        JButton backButton = new JButton("<- Back to Listings");
         backButton.addActionListener(e -> mainWindow.showMainApplicationView());
-        JLabel appTitleLabel = new JLabel("ResFinder");
-        appTitleLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        leftPanel.add(backButton);
-        leftPanel.add(appTitleLabel);
+        topPanel.add(backButton, BorderLayout.WEST);
 
-        // Right side: Auth Buttons
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        rightPanel.setOpaque(false);
-        signUpButton = new JButton("Sign Up");
-        loginButton = new JButton("Login");
-        signUpButton.addActionListener(e -> mainWindow.switchToRegistrationPanel());
-        loginButton.addActionListener(e -> mainWindow.switchToLoginPanel());
-        rightPanel.add(signUpButton);
-        rightPanel.add(loginButton);
+        titleLabel = new JLabel("Loading...", SwingConstants.LEFT);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setBorder(new EmptyBorder(0, 10, 10, 0));
+        topPanel.add(titleLabel, BorderLayout.CENTER);
 
-        topBarPanel.add(leftPanel, BorderLayout.WEST);
-        topBarPanel.add(rightPanel, BorderLayout.EAST);
-        return topBarPanel;
-    }
+        add(topPanel, BorderLayout.NORTH);
 
-    // --- Center Content (Search + Main Area) --- (No changes needed)
-    private JPanel createCenterContent() {
-        JPanel centerPanel = new JPanel(new BorderLayout(0, 15)); // Vertical gap
-        centerPanel.setOpaque(false);
+        // Center Section (Image Gallery + Details + Contact)
+        JPanel centerContentPanel = new JPanel(new BorderLayout(20, 10));
+        centerContentPanel.setOpaque(false);
 
-        centerPanel.add(createSearchPanel(), BorderLayout.NORTH);
-        centerPanel.add(createMainDetailArea(), BorderLayout.CENTER);
-
-        return centerPanel;
-    }
-
-    // --- Search Panel --- (No changes needed)
-    private JPanel createSearchPanel() {
-        JPanel searchPanel = new JPanel(new BorderLayout(10, 0));
-        searchPanel.setBackground(new Color(235, 235, 235)); // Lighter gray
-        searchPanel.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(BORDER_COLOR), // Use lighter border
-                new EmptyBorder(5, 10, 5, 10)
-        ));
-        searchField = new JTextField("Search listings (not implemented)"); // Placeholder text
-        searchField.setForeground(Color.GRAY);
-        searchField.setEditable(false); // Make non-editable for now
-
-        JButton searchButton = new JButton("Search");
-        searchButton.setEnabled(false); // Disabled for now
-
-        searchPanel.add(searchField, BorderLayout.CENTER);
-        searchPanel.add(searchButton, BorderLayout.EAST);
-        return searchPanel;
-    }
-
-    // --- Main Detail Area (Left/Right Split) --- (No changes needed)
-    private JPanel createMainDetailArea() {
-        JPanel mainAreaPanel = new JPanel(new GridBagLayout());
-        mainAreaPanel.setOpaque(false); // Transparent, mainPanel provides background
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.BOTH; // Fill space allocated
-        gbc.insets = new Insets(0, 0, 0, 15); // Right margin for left panel
-
-        // Left Column (Details)
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 0.65; // Keep weights
-        gbc.weighty = 1.0;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        mainAreaPanel.add(createLeftPanel(), gbc);
-
-        // Right Column (Contact)
-        gbc.gridx = 1;
-        gbc.insets = new Insets(0, 0, 0, 0); // No margin for right panel
-        gbc.weightx = 0.35;
-        gbc.fill = GridBagConstraints.VERTICAL; // Only fill vertically needed space
-        gbc.anchor = GridBagConstraints.NORTHEAST; // Anchor top-right
-        mainAreaPanel.add(createRightPanel(), gbc);
-
-        return mainAreaPanel;
-    }
-
-
-    // --- Left Panel (Listing Details) ---
-    private JPanel createLeftPanel() {
-        JPanel leftPanel = new JPanel();
-        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+        // Left Side (Image Gallery + Details below)
+        JPanel leftPanel = new JPanel(new BorderLayout(10, 15));
         leftPanel.setOpaque(false);
 
-        // 1. Title (Use HTML for wrapping)
-        titleLabel = new JLabel("<html>Listing Title Placeholder</html>"); // Use HTML
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20)); // Slightly smaller title
-        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        titleLabel.setBorder(new EmptyBorder(0, 0, 8, 0)); // Adjust spacing
-        leftPanel.add(titleLabel);
-
-        // 2. Primary Info Panel
-        leftPanel.add(createPrimaryInfoPanel());
-        leftPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Adjust spacing
-
-        // 3. Image Panel (Container for the label)
-        imagePanel = createImagePanel(); // Assign to field
-        leftPanel.add(imagePanel);
-        leftPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Adjust spacing
-
-        // 4. Features Panel
-        leftPanel.add(createFeaturesPanel());
-        leftPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Adjust spacing
-
-        // 5. Amenities Panel
-        leftPanel.add(createAmenitiesPanel());
-        leftPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Adjust spacing
-
-        // 6. Description Panel
-        leftPanel.add(createDescriptionPanel());
-
-        leftPanel.add(Box.createVerticalGlue());
-
-        return leftPanel;
-    }
-
-    // --- Helper for Primary Info Section ---
-    private JPanel createPrimaryInfoPanel() {
-        JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-        infoPanel.setOpaque(false);
-        infoPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        // Set Maximum Size to prevent horizontal stretching beyond GridBag allocation
-        infoPanel.setMaximumSize(new Dimension(Short.MAX_VALUE, 100)); // Height arbitrary, width is key
-
-        priceLabel = createInfoLabel();
-        addressLabel = createInfoLabel(); // Will use HTML
-        bedsBathsLabel = createInfoLabel();
-        nsfasLabel = createInfoLabel();
-
-        priceLabel.setFont(new Font("Arial", Font.BOLD, 16)); // Slightly smaller
-        addressLabel.setFont(new Font("Arial", Font.PLAIN, 13));
-        bedsBathsLabel.setFont(new Font("Arial", Font.PLAIN, 13));
-        nsfasLabel.setFont(new Font("Arial", Font.PLAIN, 13));
-
-
-        infoPanel.add(priceLabel);
-        infoPanel.add(Box.createRigidArea(new Dimension(0, 4)));
-        infoPanel.add(addressLabel);
-        infoPanel.add(Box.createRigidArea(new Dimension(0, 4)));
-        infoPanel.add(bedsBathsLabel);
-        infoPanel.add(Box.createRigidArea(new Dimension(0, 4)));
-        infoPanel.add(nsfasLabel);
-
-        return infoPanel;
-    }
-
-    // --- Helper for Image Section ---
-    private JPanel createImagePanel() {
-        JPanel imgContainer = new JPanel(new BorderLayout());
-        imgContainer.setBackground(Color.DARK_GRAY); // Background while loading
-        imgContainer.setBorder(new LineBorder(BORDER_COLOR));
-        imgContainer.setAlignmentX(Component.LEFT_ALIGNMENT);
-        // Set a reasonable maximum size, the image scaling will handle the rest
-        imgContainer.setMaximumSize(new Dimension(Short.MAX_VALUE, 400)); // Limit height
-        imgContainer.setMinimumSize(new Dimension(200, 150)); // Prevent collapsing too small
-
+        // Image Gallery Panel
+        imageContainerPanel = new JPanel(new BorderLayout());
+        imageContainerPanel.setBackground(PLACEHOLDER_COLOR);
+        imageContainerPanel.setPreferredSize(new Dimension(IMG_WIDTH, IMG_HEIGHT + 40));
 
         imageLabel = new JLabel("Loading image...", SwingConstants.CENTER);
-        // Don't set preferred size here, let scaling handle it
-        imageLabel.setOpaque(true); // Make background visible
-        imageLabel.setBackground(Color.LIGHT_GRAY);
-        imageLabel.setForeground(Color.BLACK);
+        imageLabel.setOpaque(true);
+        imageLabel.setBackground(PLACEHOLDER_COLOR);
+        imageLabel.setPreferredSize(new Dimension(IMG_WIDTH, IMG_HEIGHT));
+        imageLabel.setVerticalAlignment(SwingConstants.CENTER);
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        imageLabel.setVerticalAlignment(SwingConstants.CENTER); // Center placeholder text vertically
+        imageContainerPanel.add(imageLabel, BorderLayout.CENTER);
 
-        imgContainer.add(imageLabel, BorderLayout.CENTER);
-        return imgContainer;
-    }
+        // Image Navigation Controls
+        JPanel imageNavPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        imageNavPanel.setOpaque(false);
+        prevImageButton = new JButton("< Prev");
+        nextImageButton = new JButton("Next >");
+        imageCountLabel = new JLabel("Image 0 of 0");
+        imageCountLabel.setFont(new Font("Arial", Font.PLAIN, 12));
 
-    // --- Helper for Titled Border Sections (Features, Amenities, Description) ---
-    private TitledBorder createSectionBorder(String title) {
-        return BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(BORDER_COLOR), // Use lighter border
-                " " + title + " ", TitledBorder.LEFT, TitledBorder.TOP, // Add spaces around title
-                new Font("Arial", Font.BOLD, 13), // Slightly smaller title font
-                Color.DARK_GRAY);
-    }
 
-    private void styleSectionPanel(JPanel panel) {
-        panel.setBackground(SECTION_BG_COLOR);
-        panel.setOpaque(true); // Ensure background color is shown
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        // Constrain width by setting MaximumSize - height can be preferred size
-        panel.setMaximumSize(new Dimension(Short.MAX_VALUE, panel.getPreferredSize().height));
-        // Add internal padding
-        panel.setBorder(BorderFactory.createCompoundBorder(
-                panel.getBorder(), // Keep the TitledBorder
-                new EmptyBorder(5, 8, 8, 8) // Add internal padding (top, left, bottom, right)
+        prevImageButton.addActionListener(e -> showImageAtIndex(currentImageIndex - 1));
+        nextImageButton.addActionListener(e -> showImageAtIndex(currentImageIndex + 1));
+
+        imageNavPanel.add(prevImageButton);
+        imageNavPanel.add(imageCountLabel);
+        imageNavPanel.add(nextImageButton);
+        imageContainerPanel.add(imageNavPanel, BorderLayout.SOUTH);
+
+        leftPanel.add(imageContainerPanel, BorderLayout.NORTH);
+
+        // Details Area
+        detailsTextArea = new JTextArea("Loading details...");
+        detailsTextArea.setEditable(false);
+        detailsTextArea.setLineWrap(true);
+        detailsTextArea.setWrapStyleWord(true);
+        detailsTextArea.setFont(new Font("Arial", Font.PLAIN, 14));
+        detailsTextArea.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Details"),
+                new EmptyBorder(5, 5, 5, 5)
         ));
+        detailsTextArea.setBackground(BACKGROUND_COLOR);
+
+        JScrollPane detailsScrollPane = new JScrollPane(detailsTextArea);
+
+        detailsScrollPane.setBorder(null);
+        detailsScrollPane.getViewport().setBackground(BACKGROUND_COLOR);
+
+        leftPanel.add(detailsScrollPane, BorderLayout.CENTER);
+
+        centerContentPanel.add(leftPanel, BorderLayout.CENTER);
+
+        // --- Right Side (Contact Form) ---
+        JPanel contactPanel = createContactPanel();
+        centerContentPanel.add(contactPanel, BorderLayout.EAST);
+
+        add(centerContentPanel, BorderLayout.CENTER);
     }
 
+    private JPanel createContactPanel() {
+        JPanel contactPanel = new JPanel();
+        contactPanel.setLayout(new GridBagLayout());
+        contactPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Contact Lister"),
+                new EmptyBorder(10, 10, 10, 10)
+        ));
+        contactPanel.setOpaque(false);
+        contactPanel.setBackground(BACKGROUND_COLOR);
 
-    // --- Helper for Features Section ---
-    private JPanel createFeaturesPanel() {
-        JPanel featuresPanel = new JPanel();
-        featuresPanel.setLayout(new BoxLayout(featuresPanel, BoxLayout.Y_AXIS));
-        featuresPanel.setBorder(createSectionBorder("Features")); // Use helper
-        styleSectionPanel(featuresPanel); // Apply common styling
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 5, 5, 5);
 
+        // Lister Info
+        listerInfoLabel = new JLabel("Listed by: Loading...");
+        listerInfoLabel.setFont(new Font("Arial", Font.ITALIC, 12));
+        gbc.gridwidth = 2;
+        contactPanel.add(listerInfoLabel, gbc);
+        gbc.gridwidth = 1;
 
-        typeLabel = createInfoLabel("Type: ");
-        occupancyLabel = createInfoLabel("Max Occupancy: ");
-        availabilityLabel = createInfoLabel("Available: ");
-        leaseTermLabel = createInfoLabel("Lease Term: ");
+        gbc.gridy++;
+        contactPanel.add(new JLabel("Your Name: *"), gbc); // Indicate required
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        contactNameField = new JTextField(15);
+        contactPanel.add(contactNameField, gbc);
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
 
-        featuresPanel.add(typeLabel);
-        featuresPanel.add(Box.createRigidArea(new Dimension(0, 3)));
-        featuresPanel.add(occupancyLabel);
-        featuresPanel.add(Box.createRigidArea(new Dimension(0, 3)));
-        featuresPanel.add(availabilityLabel);
-        featuresPanel.add(Box.createRigidArea(new Dimension(0, 3)));
-        featuresPanel.add(leaseTermLabel);
+        gbc.gridy++;
+        gbc.gridx = 0;
+        contactPanel.add(new JLabel("Your Email: *"), gbc); // Indicate required
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        contactEmailField = new JTextField(15);
+        contactPanel.add(contactEmailField, gbc);
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
 
-        // Re-set maximum height after adding components
-        featuresPanel.setMaximumSize(new Dimension(Short.MAX_VALUE, featuresPanel.getPreferredSize().height));
+        gbc.gridy++;
+        gbc.gridx = 0;
+        contactPanel.add(new JLabel("Your Phone:"), gbc);
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        contactPhoneField = new JTextField(15);
+        contactPanel.add(contactPhoneField, gbc);
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
 
-        return featuresPanel;
-    }
-
-    // --- Helper for Amenities Section ---
-    private JPanel createAmenitiesPanel() {
-        amenitiesPanel = new JPanel(new GridLayout(0, 2, 10, 5)); // Grid layout for amenities
-        amenitiesPanel.setBorder(createSectionBorder("Amenities")); // Use helper
-        styleSectionPanel(amenitiesPanel); // Apply common styling
-        amenitiesPanel.setOpaque(true); // Needs opaque for grid layout background
-
-        // Re-set maximum height after potential content changes
-        amenitiesPanel.setMaximumSize(new Dimension(Short.MAX_VALUE, amenitiesPanel.getPreferredSize().height));
-        return amenitiesPanel;
-    }
-
-    // --- Helper for Description Section ---
-    private JPanel createDescriptionPanel() {
-        JPanel descriptionPanel = new JPanel(new BorderLayout());
-        descriptionPanel.setBorder(createSectionBorder("Description")); // Use helper
-        styleSectionPanel(descriptionPanel); // Apply common styling
-
-        descriptionTextArea = new JTextArea("Loading description...");
-        descriptionTextArea.setFont(new Font("Arial", Font.PLAIN, 13));
-        descriptionTextArea.setEditable(false);
-        descriptionTextArea.setLineWrap(true);
-        descriptionTextArea.setWrapStyleWord(true);
-        descriptionTextArea.setOpaque(false); // Show panel background
-
-        // *** Apply padding directly to the JTextArea ***
-        descriptionTextArea.setBorder(new EmptyBorder(5, 5, 5, 5)); // Add padding here
-
-        JScrollPane scrollPane = new JScrollPane(descriptionTextArea);
-        scrollPane.setBorder(null); // Remove scrollpane border (this is fine)
-        scrollPane.setOpaque(false);
-        scrollPane.getViewport().setOpaque(false);
-
-        // *** Remove the illegal line that sets border on viewport ***
-        // scrollPane.getViewport().setBorder(new EmptyBorder(0, 0, 0, 0)); // REMOVE THIS LINE
-
-        scrollPane.setPreferredSize(new Dimension(400, 120)); // Adjust preferred height
-
-        descriptionPanel.add(scrollPane, BorderLayout.CENTER);
-
-        // Re-set maximum height
-        descriptionPanel.setMaximumSize(new Dimension(Short.MAX_VALUE, descriptionPanel.getPreferredSize().height));
-
-        return descriptionPanel;
-    }
-
-
-    // --- Right Panel (Contact Form / Lister Info) ---
-    private JPanel createRightPanel() {
-        JPanel rightPanel = new JPanel();
-        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-        rightPanel.setBackground(BACKGROUND_COLOR);
-        rightPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(BORDER_COLOR), // Use lighter border
-                new EmptyBorder(15, 15, 15, 15))
-        );
-        // Remove setAlignmentY - let GridBag handle vertical alignment
-        // rightPanel.setAlignmentY(Component.TOP_ALIGNMENT);
-
-        contactTitleLabel = new JLabel("Contact Lister");
-        contactTitleLabel.setFont(new Font("Arial", Font.BOLD, 16)); // Slightly smaller
-        contactTitleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        contactTitleLabel.setBorder(new EmptyBorder(0, 0, 8, 0));
-
-        listedByLabel = createInfoLabel("Listed by: ");
-        listedByLabel.setFont(new Font("Arial", Font.ITALIC, 12));
-        listedByLabel.setBorder(new EmptyBorder(0,0,12,0));
-
-        JPanel namePanel = createFieldPanel(new JLabel("Your Name:"), nameField = new JTextField());
-        JPanel emailPanel = createFieldPanel(new JLabel("Your Email:"), emailField = new JTextField());
-        JPanel phonePanel = createFieldPanel(new JLabel("Your Phone:"), phoneField = new JTextField());
-        styleContactField(nameField);
-        styleContactField(emailField);
-        styleContactField(phoneField);
-
-
+        gbc.gridy++;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
         sendMessageButton = new JButton("Send Message");
-        sendMessageButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-        styleButton(sendMessageButton);
         sendMessageButton.addActionListener(e -> handleSendMessage());
+        sendMessageButton.setEnabled(false); // Initially disabled
+        contactPanel.add(sendMessageButton, gbc);
 
+        // Vertical glue
+        gbc.gridy++;
+        gbc.weighty = 1.0;
+        contactPanel.add(Box.createVerticalGlue(), gbc);
 
-        rightPanel.add(contactTitleLabel);
-        rightPanel.add(listedByLabel);
-        rightPanel.add(namePanel);
-        rightPanel.add(Box.createRigidArea(new Dimension(0, 6)));
-        rightPanel.add(emailPanel);
-        rightPanel.add(Box.createRigidArea(new Dimension(0, 6)));
-        rightPanel.add(phonePanel);
-        rightPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        rightPanel.add(sendMessageButton);
-        rightPanel.add(Box.createVerticalGlue()); // Pushes content up
-
-        // Set preferred width, let height be determined by content
-        rightPanel.setPreferredSize(new Dimension(280, 0)); // Request width, height 0 means preferred
-        rightPanel.setMaximumSize(new Dimension(320, Short.MAX_VALUE)); // Allow height growth, limit width
-
-
-        return rightPanel;
+        return contactPanel;
     }
 
-    // Helper to create label + field row for contact form (no changes)
-    private JPanel createFieldPanel(JLabel label, JTextField field) {
-        JPanel panel = new JPanel(new BorderLayout(5, 0));
-        panel.setOpaque(false); // Transparent background
-        label.setFont(new Font("Arial", Font.PLAIN, 12));
-        panel.add(label, BorderLayout.NORTH); // Label above field
-        panel.add(field, BorderLayout.CENTER);
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50)); // Limit height
-        return panel;
+    // Prefill contact form if user is logged in
+//    private void prefillContactForm() {
+//        if (loggedInUser != null) {
+//            contactNameField.setText(loggedInUser.getUsername()); // Or a dedicated name field if User has one
+//            contactEmailField.setText(loggedInUser.getEmail());
+//            // Optionally prefill phone if available
+//            // contactPhoneField.setText(loggedInUser.getPhoneNumber());
+//            updateSendButtonState(); // Check if prefilled fields are valid
+//        }
+//    }
+
+    // Setup listeners to enable/disable send button
+    private void setupContactFormListeners() {
+        DocumentListener listener = new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updateSendButtonState();
+            }
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updateSendButtonState();
+            }
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+            }
+        };
+        contactNameField.getDocument().addDocumentListener(listener);
+        contactEmailField.getDocument().addDocumentListener(listener);
     }
 
-    // Helper to style contact form fields (no changes)
-    private void styleContactField(JTextField field) {
-        field.setFont(new Font("Arial", Font.PLAIN, 13));
-        field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.GRAY),
-                new EmptyBorder(4, 4, 4, 4)
-        ));
-    }
-
-    // Helper to style buttons consistently (no changes)
-    private void styleButton(JButton button) {
-        Dimension buttonSize = new Dimension(150, 30);
-        button.setPreferredSize(buttonSize);
-        button.setMinimumSize(buttonSize);
-        button.setMaximumSize(buttonSize); // Prevent stretching
-        button.setFocusPainted(false);
-    }
-
-    // Helper to create standard info labels (slightly smaller font)
-    private JLabel createInfoLabel() {
-        return createInfoLabel("");
-    }
-    private JLabel createInfoLabel(String prefix) {
-        JLabel label = new JLabel(prefix + "..."); // Default text
-        label.setFont(new Font("Arial", Font.PLAIN, 13)); // Slightly smaller default
-        label.setAlignmentX(Component.LEFT_ALIGNMENT);
-        // Set maximum size to allow wrapping if HTML is used, or just prevent excessive width
-        label.setMaximumSize(new Dimension(Short.MAX_VALUE, label.getPreferredSize().height));
-        return label;
+    // Enable send button only if Name and Email are filled
+    private void updateSendButtonState() {
+        boolean enabled = !contactNameField.getText().trim().isEmpty()
+                && !contactEmailField.getText().trim().isEmpty();
+        // Basic email format check
+        enabled = enabled && contactEmailField.getText().trim().contains("@");
+        sendMessageButton.setEnabled(enabled);
     }
 
 
-    // --- Data Population ---
-    private void populateData() {
-        // Use HTML for title and address to allow wrapping
-        // Estimate a width for the wrapping (adjust based on layout weight)
-        int approxLeftPanelWidth = 550; // Estimate based on 65% weight and typical window size
-        titleLabel.setText("<html><body style='width: " + (approxLeftPanelWidth - 20) + "px'>" + accommodation.getTitle() + "</body></html>");
-        priceLabel.setText(formatPrice(accommodation.getPrice(), accommodation.getPriceFrequency()));
-        addressLabel.setText("<html><body style='width: " + (approxLeftPanelWidth - 20) + "px'>" + formatAddress(accommodation.getAddress(), accommodation.getCity()) + "</body></html>");
-
-        // Other simple labels
-        bedsBathsLabel.setText(String.format("%d Beds | %d Baths", accommodation.getBedrooms(), accommodation.getBathrooms()));
-        nsfasLabel.setText("NSFAS Accredited: " + formatBoolean(accommodation.isNsfasAccredited()));
-        nsfasLabel.setForeground(accommodation.isNsfasAccredited() ? new Color(0, 100, 50) : Color.DARK_GRAY);
-
-        typeLabel.setText("Type: " + (accommodation.getType() != null ? accommodation.getType().name().replace("_", " ") : "N/A")); // Replace underscore
-        occupancyLabel.setText("Max Occupancy: " + (accommodation.getMaxOccupancy() > 0 ? accommodation.getMaxOccupancy() + " person(s)" : "N/A"));
-        availabilityLabel.setText("Available: " + formatAvailability(accommodation.getAvailableFrom()));
-        leaseTermLabel.setText("Lease Term: " + (accommodation.getLeaseTerm() != null && !accommodation.getLeaseTerm().isEmpty() ? accommodation.getLeaseTerm() : "Not specified"));
-
-        // Amenities
-        amenitiesPanel.removeAll(); // Clear previous if any
-        addAmenityLabel("Internet Included", accommodation.isInternetIncluded());
-        addAmenityLabel("Utilities Included", accommodation.isUtilitiesIncluded());
-        addAmenityLabel("Parking Available", accommodation.isParkingAvailable());
-        if (amenitiesPanel.getComponentCount() == 0) {
-            amenitiesPanel.add(new JLabel("No specific amenities listed.")); // Handle case with no boolean amenities
-        }
-        // Crucial: Update max size *after* adding components to prevent layout issues
-        amenitiesPanel.setMaximumSize(new Dimension(Short.MAX_VALUE, amenitiesPanel.getPreferredSize().height));
-        amenitiesPanel.revalidate();
-        amenitiesPanel.repaint();
-
-
-        // Description
-        descriptionTextArea.setText(accommodation.getDescription() != null && !accommodation.getDescription().trim().isEmpty() ? accommodation.getDescription() : "No description provided.");
-        descriptionTextArea.setCaretPosition(0);
-
-        // Image - Pass the container panel for width calculation
-        loadImageAsync(imageLabel, imagePanel);
-
-        // Contact Info / Lister
-        User lister = accommodation.getListedBy();
-        if (lister != null) {
-            // Check if getFullName is available, otherwise use getFirstName
-            String listerName = lister.getFullName();
-            listedByLabel.setText("Listed by: " + lister.getUsername() + (listerName != null ? " ("+listerName+")":""));
-        } else {
-            listedByLabel.setText("Listed by: Unknown User");
-        }
-
-        nameField.setText("");
-        emailField.setText("");
-        phoneField.setText("");
-    }
-
-    private void addAmenityLabel(String name, boolean isAvailable) {
-        if (isAvailable) { // Only show amenities that are true/available? Or show Yes/No? Showing Yes/No as before.
-            JLabel amenityLabel = new JLabel(name + ": " + formatBoolean(isAvailable));
-            amenityLabel.setFont(new Font("Arial", Font.PLAIN, 12)); // Smaller font for amenities
-            amenitiesPanel.add(amenityLabel);
-        } else {
-            // Optionally add amenities marked as "No" or just omit them
-            JLabel amenityLabel = new JLabel(name + ": " + formatBoolean(isAvailable));
-            amenityLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-            amenityLabel.setForeground(Color.GRAY); // Dim unavailable amenities
-            amenitiesPanel.add(amenityLabel);
-        }
-    }
-
-    // --- Formatting Helpers --- (No changes needed in formatPrice, formatAddress, etc.)
-    private String formatPrice(java.math.BigDecimal price, Accommodation.PriceFrequency freq) {
-        String formattedPrice = (price != null) ? currencyFormatter.format(price) : "N/A";
-        String frequencyStr = "";
-        if (freq != null) {
-            frequencyStr = switch (freq) {
-                case PER_MONTH -> "/ Month";
-                case PER_WEEK -> "/ Week";
-                case PER_SEMESTER -> "/ Semester";
-                case PER_NIGHT -> "/ Night";
-                case OTHER -> "";
-            };
-        }
-        return formattedPrice + frequencyStr;
-    }
-
-    private String formatAddress(String street, String city) {
-        StringBuilder sb = new StringBuilder();
-        if (street != null && !street.isEmpty()) {
-            sb.append(street);
-        }
-        if (city != null && !city.isEmpty()) {
-            if (sb.length() > 0) sb.append(", ");
-            sb.append(city);
-        }
-        return sb.length() > 0 ? sb.toString() : "Address not specified";
-    }
-
-    private String formatAvailability(LocalDateTime availableFrom) {
-        if (availableFrom == null) {
-            return "Contact Lister";
-        }
-        if (availableFrom.isAfter(LocalDateTime.now())) {
-            return "From " + availableFrom.format(dateFormatter);
-        } else {
-            return "Now";
-        }
-    }
-
-    private String formatBoolean(boolean value) {
-        return value ? "Yes" : "No";
-    }
-
-
-    // --- Action Handlers --- (No changes needed)
     private void handleSendMessage() {
-        String name = nameField.getText().trim();
-        String email = emailField.getText().trim();
-        String phone = phoneField.getText().trim();
+        String name = contactNameField.getText().trim();
+        String email = contactEmailField.getText().trim();
+        String phone = contactPhoneField.getText().trim();
 
+        // Re-check just in case
         if (name.isEmpty() || email.isEmpty()) {
-            JOptionPane.showMessageDialog(mainPanel, "Please enter your name and email.", "Incomplete Information", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please enter your name and email.", "Missing Information", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        if (!email.contains("@") || !email.contains(".")) {
-            JOptionPane.showMessageDialog(mainPanel, "Please enter a valid email address.", "Invalid Email", JOptionPane.WARNING_MESSAGE);
+        if (!email.contains("@") || !email.contains(".")) { // Very basic validation
+            JOptionPane.showMessageDialog(this, "Please enter a valid email address.", "Invalid Email", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        System.out.println("Send Message Action:");
-        System.out.println("  From Name: " + name);
-        System.out.println("  From Email: " + email);
-        System.out.println("  From Phone: " + phone);
-        System.out.println("  Regarding Listing ID: " + accommodation.getId());
-        System.out.println("  Lister User: " + (accommodation.getListedBy() != null ? accommodation.getListedBy().getUsername() : "N/A"));
+        // TODO: Retrieve the lister's actual email address or contact mechanism
+        //       from the 'accommodation' object (fetched in loadAccommodationDetails)
+        //       or via another service call if needed.
+        String listerContactInfo = "Lister's Email/ID (Not Implemented Yet)";
+        if (listerInfoLabel.getText().startsWith("Listed by: ") && !listerInfoLabel.getText().endsWith("Unknown User")) {
+            // Ideally fetch email associated with the username
+            // listerContactInfo = fetchListerEmail(listerInfoLabel.getText().substring("Listed by: ".length()));
+        }
 
-        JOptionPane.showMessageDialog(mainPanel,
-                "Message sending functionality is not yet implemented.\nDetails logged to console.",
-                "Send Message (Placeholder)",
-                JOptionPane.INFORMATION_MESSAGE);
+        System.out.println("--- Sending Message (Placeholder) ---");
+        System.out.println("To Lister: " + listerContactInfo);
+        System.out.println("From Name: " + name);
+        System.out.println("From Email: " + email);
+        System.out.println("From Phone: " + phone);
+        System.out.println("Regarding Listing ID: " + accommodationId);
+        System.out.println("-------------------------------------");
+
+        JOptionPane.showMessageDialog(this, "Message sent (placeholder).\nActual implementation needed.", "Message Sent", JOptionPane.INFORMATION_MESSAGE);
+
+        // contactNameField.setText("");
+        // contactEmailField.setText("");
+        // contactPhoneField.setText("");
+        // updateSendButtonState(); // Disable button again if fields are cleared
+    }
+
+    private void loadAccommodationDetails() {
+        SwingWorker<Accommodation, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Accommodation doInBackground() throws Exception {
+                return accommodationService.getListingById(accommodationId);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    Accommodation accommodation = get();
+                    if (accommodation != null) {
+                        populateUI(accommodation);
+                        currentImageUrls = accommodation.getImageUrls(); // Store URLs
+                        currentImageIndex = 0;
+                        showImageAtIndex(currentImageIndex); // Load the first image
+                    } else {
+                        displayError("Accommodation Not Found", "The requested accommodation listing could not be found.");
+                        sendMessageButton.setEnabled(false);
+                        prevImageButton.setEnabled(false);
+                        nextImageButton.setEnabled(false);
+                        imageCountLabel.setText("Image 0 of 0");
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    Throwable cause = e.getCause() != null ? e.getCause() : e;
+                    e.printStackTrace();
+                    displayError("Error Loading", "An error occurred while loading accommodation details:\n" + cause.getMessage());
+                    sendMessageButton.setEnabled(false);
+                    prevImageButton.setEnabled(false);
+                    nextImageButton.setEnabled(false);
+                    imageCountLabel.setText("Image 0 of 0");
+                } catch (Exception e) { // Catch other potential runtime exceptions during UI update
+                    e.printStackTrace();
+                    displayError("UI Update Error", "An unexpected error occurred while displaying details:\n" + e.getMessage());
+                    sendMessageButton.setEnabled(false);
+                    prevImageButton.setEnabled(false);
+                    nextImageButton.setEnabled(false);
+                    imageCountLabel.setText("Image 0 of 0");
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    private void displayError(String title, String message) {
+        titleLabel.setText(title);
+        detailsTextArea.setText(message);
+        imageLabel.setText("Error");
+        imageLabel.setIcon(null);
+        JOptionPane.showMessageDialog(AccommodationDetailPanel.this,
+                message, title, JOptionPane.ERROR_MESSAGE);
     }
 
 
-    // --- **REVISED Image Loading** ---
-    // Pass the container panel to calculate available width
-    private void loadImageAsync(JLabel imgLabel, JPanel imgContainer) {
-        imgLabel.setIcon(null);
-        imgLabel.setText("Loading image...");
-        imgLabel.setPreferredSize(null); // Let layout manager decide initially
+    private void populateUI(Accommodation acc) {
+        titleLabel.setText(acc.getTitle());
 
-        List<String> imageUrls = accommodation.getImageUrls();
-        if (imageUrls != null && !imageUrls.isEmpty() &&
-                imageUrls.get(0) != null && !imageUrls.get(0).trim().isEmpty()) {
+        StringBuilder details = new StringBuilder();
+        details.append("Address:\n").append(acc.getAddress()).append(", ").append(acc.getCity())
+                .append(acc.getPostalCode() != null ? ", " + acc.getPostalCode() : "").append("\n\n");
 
-            String imageUrlString = imageUrls.get(0).trim();
+        details.append("Price: ").append(currencyFormatter.format(acc.getPrice()))
+                .append(" ").append(formatPriceFrequency(acc.getPriceFrequency())).append("\n");
+        details.append("Type: ").append(acc.getType()).append("\n");
+        details.append("Beds: ").append(acc.getBedrooms()).append(" | Baths: ").append(acc.getBathrooms())
+                .append(" | Max Occupancy: ").append(acc.getMaxOccupancy()).append("\n\n");
 
-            SwingWorker<ImageIcon, Void> imageLoader = new SwingWorker<>() {
-                @Override
-                protected ImageIcon doInBackground() throws Exception {
-                    // Only load the original image here
-                    try {
-                        URL imageUrl = new URL(imageUrlString);
-                        // Load into memory fully
-                        BufferedImage loadedImage = javax.imageio.ImageIO.read(imageUrl);
-                        if (loadedImage == null) {
-                            System.err.println("Failed to decode image: " + imageUrlString);
-                            return null;
-                        }
-                        return new ImageIcon(loadedImage); // Return icon with original image
-                    } catch (MalformedURLException e) {
-                        System.err.println("Invalid image URL: " + imageUrlString + " - " + e.getMessage());
-                        return null;
-                    } catch (Exception e) {
-                        System.err.println("Error loading image: " + imageUrlString + " - " + e.getMessage());
-                        return null;
-                    }
-                }
+        details.append("Description:\n").append(acc.getDescription()).append("\n\n");
 
-                @Override
-                protected void done() {
-                    try {
-                        ImageIcon originalIcon = get(); // Get the original icon (or null)
-                        int availableWidth = 0;
-                        if (originalIcon != null && originalIcon.getImageLoadStatus() == MediaTracker.COMPLETE) {
+        details.append("Features:\n");
+        details.append("- Internet Included: ").append(acc.isInternetIncluded() ? "Yes" : "No").append("\n");
+        details.append("- Utilities Included: ").append(acc.isUtilitiesIncluded() ? "Yes" : "No").append("\n");
+        details.append("- Parking Available: ").append(acc.isParkingAvailable() ? "Yes" : "No").append("\n");
+        details.append("- NSFAS Accredited: ").append(acc.isNsfasAccredited() ? "Yes" : "No").append("\n\n");
 
-                            // Get container width (subtract borders/insets if any)
-                            availableWidth = imgContainer.getWidth();
-                            if (availableWidth <= 0) { // If container not yet laid out, use a default guess
-                                availableWidth = 600;
-                            }
-                            // Adjust for container's borders if they exist
-                            Insets borders = imgContainer.getInsets();
-                            availableWidth -= (borders.left + borders.right);
+        if (acc.getLeaseTerm() != null && !acc.getLeaseTerm().isEmpty()){
+            details.append("Lease Term: ").append(acc.getLeaseTerm()).append("\n");
+        }
 
+        details.append("Available From: ")
+                .append(acc.getAvailableFrom() != null ? acc.getAvailableFrom().format(dateFormatter) : "N/A").append("\n");
+        if (acc.getAvailableUntil() != null) {
+            details.append("Available Until: ")
+                    .append(acc.getAvailableUntil().format(dateFormatter)).append("\n");
+        }
 
-                            int originalWidth = originalIcon.getIconWidth();
-                            int originalHeight = originalIcon.getIconHeight();
+        detailsTextArea.setText(details.toString());
+        detailsTextArea.setCaretPosition(0);
 
-                            if (originalWidth <= 0 || availableWidth <= 0) {
-                                throw new Exception("Invalid image or container dimensions");
-                            }
-
-                            // Calculate scaled height maintaining aspect ratio
-                            int scaledHeight = (int) (((double) originalHeight / originalWidth) * availableWidth);
-
-                            // Scale the image smoothly
-                            Image scaledImage = originalIcon.getImage().getScaledInstance(availableWidth, scaledHeight, Image.SCALE_SMOOTH);
-                            ImageIcon scaledIcon = new ImageIcon(scaledImage);
-
-                            imgLabel.setIcon(scaledIcon);
-                            imgLabel.setText(null);
-                            // Set preferred size of label to scaled size now
-                            imgLabel.setPreferredSize(new Dimension(availableWidth, scaledHeight));
-
-                        } else {
-                            imgLabel.setText("No Image Available");
-                            imgLabel.setPreferredSize(new Dimension(availableWidth > 0 ? availableWidth : 300, 200)); // Fallback size
-                        }
-                    } catch (Exception e) {
-                        System.err.println("Error processing/scaling image: " + e.getMessage());
-                        // e.printStackTrace(); // Debugging
-                        imgLabel.setText("Error Displaying Image");
-                        imgLabel.setPreferredSize(new Dimension(300, 200)); // Fallback size
-                        imgLabel.setIcon(null);
-                    } finally {
-                        // Ensure layout is updated after setting icon/text/size
-                        imgContainer.revalidate();
-                        imgContainer.repaint();
-                        // Sometimes revalidating the parent scrollpane helps too
-                        SwingUtilities.invokeLater(() -> {
-                            JScrollPane scrollPane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, mainPanel);
-                            if (scrollPane != null) {
-                                scrollPane.revalidate();
-                                scrollPane.repaint();
-                            } else {
-                                mainPanel.revalidate();
-                                mainPanel.repaint();
-                            }
-                        });
-                    }
-                }
-            };
-            imageLoader.execute();
+        // Populate Lister Info
+        if (acc.getListedBy() != null) {
+            listerInfoLabel.setText("Listed by: " + acc.getListedBy().getUsername());
         } else {
-            imgLabel.setText("No Image Available");
-            imgLabel.setPreferredSize(new Dimension(300, 200)); // Default size when no URL
-            imgContainer.revalidate();
-            imgContainer.repaint();
+            listerInfoLabel.setText("Listed by: Unknown User");
         }
     }
 
+    // Method to show image at a specific index
+    private void showImageAtIndex(int index) {
+        if (currentImageUrls == null || currentImageUrls.isEmpty()) {
+            imageLabel.setText("No Images Available");
+            imageLabel.setIcon(null);
+            imageCountLabel.setText("Image 0 of 0");
+            prevImageButton.setEnabled(false);
+            nextImageButton.setEnabled(false);
+            return;
+        }
 
-    // --- Getter for the main panel ---
-    public JPanel getMainPanel() {
-        return mainPanel;
+        // Validate index
+        if (index < 0 || index >= currentImageUrls.size()) {
+            System.err.println("showImageAtIndex: Invalid index " + index);
+            return; // Index out of bounds
+        }
+
+        currentImageIndex = index;
+        loadImageAsync(currentImageIndex, IMG_WIDTH, IMG_HEIGHT);
+
+        // Update navigation state
+        int totalImages = currentImageUrls.size();
+        imageCountLabel.setText("Image " + (currentImageIndex + 1) + " of " + totalImages);
+        prevImageButton.setEnabled(currentImageIndex > 0);
+        nextImageButton.setEnabled(currentImageIndex < totalImages - 1);
+    }
+
+
+    // Enhanced image loading with better scaling
+    private void loadImageAsync(int imageIndex, int targetWidth, int targetHeight) {
+        imageLabel.setIcon(null);
+        imageLabel.setText("Loading image...");
+
+        if (currentImageUrls == null || imageIndex < 0 || imageIndex >= currentImageUrls.size()) {
+            imageLabel.setText("No Image Available");
+            return;
+        }
+
+        String imageUrlString = currentImageUrls.get(imageIndex);
+        if (imageUrlString == null || imageUrlString.trim().isEmpty()) {
+            imageLabel.setText("No Image Available");
+            return;
+        }
+
+        SwingWorker<ImageIcon, Void> imageLoader = new SwingWorker<>() {
+            @Override
+            protected ImageIcon doInBackground() throws Exception {
+                try {
+                    URL imageUrl = new URL(imageUrlString.trim());
+                    ImageIcon originalIcon = new ImageIcon(imageUrl);
+
+                    if (originalIcon.getImageLoadStatus() != MediaTracker.COMPLETE) {
+                        System.err.println("Failed to load image: " + imageUrlString + " (Status: " +
+                                originalIcon.getImageLoadStatus() + ")");
+                        return null;
+                    }
+
+                    Image originalImage = originalIcon.getImage();
+                    int originalWidth = originalImage.getWidth(null);
+                    int originalHeight = originalImage.getHeight(null);
+
+                    if (originalWidth <= 0 || originalHeight <= 0) {
+                        System.err.println("Invalid image dimensions for: " + imageUrlString);
+                        return null; // Invalid image dimensions
+                    }
+
+                    // Calculate scaled dimensions maintaining aspect ratio
+                    double scale = Math.min((double) targetWidth / originalWidth, (double) targetHeight / originalHeight);
+                    int scaledWidth = (int) (originalWidth * scale);
+                    int scaledHeight = (int) (originalHeight * scale);
+
+                    // Create a BufferedImage for higher quality scaling
+                    BufferedImage scaledBI = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB); // Use ARGB for transparency
+                    Graphics2D g2d = scaledBI.createGraphics();
+
+                    // Apply rendering hints for better quality
+                    g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                    g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                    g2d.drawImage(originalImage, 0, 0, scaledWidth, scaledHeight, null);
+                    g2d.dispose();
+
+                    return new ImageIcon(scaledBI);
+
+                } catch (MalformedURLException e) {
+                    System.err.println("Invalid image URL: " + imageUrlString + " - " + e.getMessage());
+                    return null;
+                } catch (Exception e) {
+                    // Catch broader exceptions during image processing
+                    System.err.println("Error loading/scaling image: " + imageUrlString + " - " + e.getMessage());
+                    e.printStackTrace(); // Print stack trace for debugging
+                    return null;
+                }
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    ImageIcon scaledIcon = get();
+                    if (scaledIcon != null) {
+                        imageLabel.setIcon(scaledIcon);
+                        imageLabel.setText(null); // Remove text
+                        imageLabel.setBackground(BACKGROUND_COLOR); // Match background if image smaller than label
+                    } else {
+                        imageLabel.setText("Image Unavailable");
+                        imageLabel.setIcon(null);
+                        imageLabel.setBackground(PLACEHOLDER_COLOR);
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    System.err.println("Error updating detail image label: " + e.getMessage());
+                    e.printStackTrace();
+                    imageLabel.setText("Error Loading Image");
+                    imageLabel.setIcon(null);
+                    imageLabel.setBackground(PLACEHOLDER_COLOR);
+                } catch (Exception e) { // Catch other potential runtime exceptions
+                    System.err.println("Unexpected error updating image label: " + e.getMessage());
+                    e.printStackTrace();
+                    imageLabel.setText("Error");
+                    imageLabel.setIcon(null);
+                    imageLabel.setBackground(PLACEHOLDER_COLOR);
+                }
+            }
+        };
+        imageLoader.execute();
+    }
+
+
+    // Helper for formatting price frequency (same as before)
+    private String formatPriceFrequency(Accommodation.PriceFrequency frequency) {
+        if (frequency == null) return "";
+        return switch (frequency) {
+            case PER_MONTH -> "/ Month";
+            case PER_WEEK -> "/ week";
+            case PER_SEMESTER -> "/ semester";
+            case PER_NIGHT -> "/ night";
+            case OTHER -> "";
+        };
+    }
+
+    // Method to return this panel for MainWindow (same as before)
+    public JPanel getDetailPanel() {
+        return this;
     }
 }

@@ -141,8 +141,8 @@ public class MainWindow extends JFrame {
 
             if (accommodation != null) {
                 // Create a NEW instance of the detail panel each time
-                accommodationDetailPanel = new AccommodationDetailPanel(accommodation, accommodationService, this);
-                setContentPane(accommodationDetailPanel.getMainPanel());
+                accommodationDetailPanel = new AccommodationDetailPanel(accommodationService, this, accommodationId);
+                setContentPane(accommodationDetailPanel.getDetailPanel());
                 revalidate();
                 repaint();
                 System.out.println("Successfully switched to detailed view for: " + accommodation.getTitle());
@@ -168,6 +168,7 @@ public class MainWindow extends JFrame {
             showMainApplicationView();
         }
     }
+
 
     // Getter for the main frame if needed by child components
     public JFrame getMainFrame() {

@@ -159,7 +159,6 @@ public class AccommodationCardPanel extends JPanel {
     private void handleCardClick() {
         // TODO: trigger navigation to the detailed view
         System.out.println("Card clicked - Navigate to details for Listing ID: " + accommodation.getId());
-
         mainWindow.switchToDetailedView(accommodation.getId());
     }
 
