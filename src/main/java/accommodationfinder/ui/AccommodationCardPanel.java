@@ -1,7 +1,6 @@
 package accommodationfinder.ui;
 
-import accommodationfinder.listing.Accommodation; // Import Accommodation class
-
+import accommodationfinder.listing.Accommodation;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
@@ -40,19 +39,19 @@ public class AccommodationCardPanel extends JPanel {
         setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         setBackground(new Color(253, 251, 245)); // Match background
 
-        // --- Image Panel (Top) ---
+        // Image Panel (Top)
         JPanel imageContainerPanel = createImagePanel();
         add(imageContainerPanel, BorderLayout.NORTH);
 
-        // --- Details Panel (Center) ---
+        // Details Panel (Center)
         JPanel detailsPanel = createDetailsPanel();
         add(detailsPanel, BorderLayout.CENTER);
 
-        // --- Bottom Bar (South) ---
+        // Bottom Bar (South)
         JPanel bottomBarPanel = createBottomBar();
         add(bottomBarPanel, BorderLayout.SOUTH);
 
-        // --- Click Listener for the whole card ---
+        // Click Listener for the whole card
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         addMouseListener(new MouseAdapter() {
             @Override
@@ -92,7 +91,8 @@ public class AccommodationCardPanel extends JPanel {
         titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
         titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel priceLabel = new JLabel(currencyFormatter.format(accommodation.getPrice()) + " " + formatPriceFrequency(accommodation.getPriceFrequency()));
+        JLabel priceLabel = new JLabel(currencyFormatter.format(accommodation.getPrice()) + " " +
+                formatPriceFrequency(accommodation.getPriceFrequency()));
         priceLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         priceLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -168,7 +168,7 @@ public class AccommodationCardPanel extends JPanel {
         // TODO: mainWindow.switchToDetailedView(accommodation.getId());
     }
 
-    // --- Helper Methods specific to this card ---
+    // Helper Methods specific to this card
 
     private void loadImageAsync(JLabel imageLabel, int targetWidth, int targetHeight) {
         // Reset label state
@@ -201,7 +201,7 @@ public class AccommodationCardPanel extends JPanel {
                         return null;
                     } catch (Exception e) {
                         System.err.println("Error loading/scaling image: " + imageUrlString + " - " + e.getMessage());
-                        // e.printStackTrace(); // Optionally print stack trace during development
+                        // e.printStackTrace();
                         return null;
                     }
                 }
