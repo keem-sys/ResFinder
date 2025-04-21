@@ -140,8 +140,8 @@ public class DatabaseConnection {
             if (sampleUser1 == null) {
                 System.out.println("Creating sample user 'landlord1'");
                 // TODO: implement HashPassword.
-                String placeholderHash = "$argon2id$v=19$m=65536,t=2,p=1$placeholderSalt$placeholderHash"; // REPLACE
-                sampleUser1 = new User(null, "Sample Landlord", "landlord1", "landlord1@test.com", placeholderHash);
+                String placeholderHash = "$argon2id$v=19$m=65536,t=2,p=1$placeholderSalt$placeholderHash";
+                sampleUser1 = new User(null, "Peter Xolani", "landlord1", "landlord1@gmail.com", placeholderHash);
                 sampleUser1.setId(userDao.createUser(sampleUser1));
             }
         } catch (SQLException e) {
@@ -154,8 +154,8 @@ public class DatabaseConnection {
             if (sampleUser2 == null) {
                 System.out.println("Creating sample user 'agent2'");
                 // TODO: proper password hasher
-                String placeholderHash = "$argon2id$v=19$m=65536,t=2,p=1$placeholderSalt2$placeholderHash2"; // REPLACE
-                sampleUser2 = new User(null, "Sample Agent", "agent2", "agent2@test.com", placeholderHash);
+                String placeholderHash = "$argon2id$v=19$m=65536,t=2,p=1$placeholderSalt2$placeholderHash2";
+                sampleUser2 = new User(null, "Makunyane Dean", "agent2", "agent2@gmail.com", placeholderHash);
                 sampleUser2.setId(userDao.createUser(sampleUser2));
             }
         } catch (SQLException e) {

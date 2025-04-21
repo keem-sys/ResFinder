@@ -73,7 +73,7 @@ public class AccommodationDetailPanel extends JPanel {
         JPanel topPanel = new JPanel(new BorderLayout(10, 0));
         topPanel.setOpaque(false);
 
-        JButton backButton = new JButton("<- Back to Listings");
+        JButton backButton = new JButton("<- Back to Main View");
         backButton.addActionListener(e -> mainWindow.showMainApplicationView());
         topPanel.add(backButton, BorderLayout.WEST);
 
@@ -171,12 +171,12 @@ public class AccommodationDetailPanel extends JPanel {
         // Lister Info
         listerInfoLabel = new JLabel("Listed by: Loading...");
         listerInfoLabel.setFont(new Font("Arial", Font.ITALIC, 12));
-        gbc.gridwidth = 2;
+        gbc.gridwidth = 3;
         contactPanel.add(listerInfoLabel, gbc);
         gbc.gridwidth = 1;
 
         gbc.gridy++;
-        contactPanel.add(new JLabel("Your Name: *"), gbc); // Indicate required
+        contactPanel.add(new JLabel("Your Name: *"), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -187,7 +187,7 @@ public class AccommodationDetailPanel extends JPanel {
 
         gbc.gridy++;
         gbc.gridx = 0;
-        contactPanel.add(new JLabel("Your Email: *"), gbc); // Indicate required
+        contactPanel.add(new JLabel("Your Email: *"), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -198,7 +198,7 @@ public class AccommodationDetailPanel extends JPanel {
 
         gbc.gridy++;
         gbc.gridx = 0;
-        contactPanel.add(new JLabel("Your Phone:"), gbc);
+        contactPanel.add(new JLabel("Your Phone: "), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -213,7 +213,6 @@ public class AccommodationDetailPanel extends JPanel {
         gbc.anchor = GridBagConstraints.CENTER;
         sendMessageButton = new JButton("Send Message");
         sendMessageButton.addActionListener(e -> handleSendMessage());
-        sendMessageButton.setEnabled(false); // Initially disabled
         contactPanel.add(sendMessageButton, gbc);
 
         // Vertical glue
@@ -335,7 +334,7 @@ public class AccommodationDetailPanel extends JPanel {
                     prevImageButton.setEnabled(false);
                     nextImageButton.setEnabled(false);
                     imageCountLabel.setText("Image 0 of 0");
-                } catch (Exception e) { // Catch other potential runtime exceptions during UI update
+                } catch (Exception e) {
                     e.printStackTrace();
                     displayError("UI Update Error", "An unexpected error occurred while displaying details:\n" + e.getMessage());
                     sendMessageButton.setEnabled(false);
@@ -395,7 +394,7 @@ public class AccommodationDetailPanel extends JPanel {
 
         // Populate Lister Info
         if (acc.getListedBy() != null) {
-            listerInfoLabel.setText("Listed by: " + acc.getListedBy().getUsername());
+            listerInfoLabel.setText("Listed by: " + acc.getListedBy().getFullName());
         } else {
             listerInfoLabel.setText("Listed by: Unknown User");
         }
