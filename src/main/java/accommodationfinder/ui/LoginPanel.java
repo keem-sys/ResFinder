@@ -36,7 +36,7 @@ public class LoginPanel extends JPanel {
 
         SwingUtilities.invokeLater(() -> usernameOrEmailField.requestFocusInWindow());
 
-        // --- Title ---
+        // Title
         titleLabel = new JLabel("Login!");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         gbc.gridx = 0;
@@ -49,7 +49,7 @@ public class LoginPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        // --- Username/Email Row ---
+        // Username/Email Row
         usernameOrEmailLabel = new JLabel("Username or Email:");
         gbc.gridx = 0;
         gbc.gridy = 1;
@@ -63,7 +63,7 @@ public class LoginPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(usernameOrEmailField, gbc);
 
-        // --- Password Row ---
+        // Password Row
         passwordLabel = new JLabel("Password:");
         gbc.gridx = 0;
         gbc.gridy = 2;
@@ -78,7 +78,7 @@ public class LoginPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(passwordField, gbc);
 
-        // --- Remember Me Checkbox ---
+        // Remember Me Checkbox
         rememberMeChkBox = new JCheckBox("Remember me");
         rememberMeChkBox.setOpaque(false);
         gbc.gridx = 1;
@@ -87,7 +87,7 @@ public class LoginPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(rememberMeChkBox, gbc);
 
-        // --- Error Message Label (Initially hidden) ---
+        // Error Message Label (Initially hidden)-
         errorMessageLabel = new JLabel(" ");
         errorMessageLabel.setForeground(Color.RED);
         errorMessageLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -101,7 +101,7 @@ public class LoginPanel extends JPanel {
         gbc.gridwidth = 1;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        // --- Login Button ---
+        // Login Button
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
         buttonPanel.setBackground(PANEL_BACKGROUND_COLOR);
         buttonPanel.setOpaque(false);
@@ -125,7 +125,7 @@ public class LoginPanel extends JPanel {
         gbc.gridwidth = 1;
         gbc.fill = GridBagConstraints.NONE;
 
-        // --- Sign Up Prompt ---
+        // Sign Up Prompt
         JPanel registerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
         registerPanel.setOpaque(false);
         registerPromptLabel = new JLabel("Are you a new user?");
@@ -177,7 +177,7 @@ public class LoginPanel extends JPanel {
                     // If login is successful (no exception thrown)
                     System.out.println("Login attempt successful via UserService. Token received.");
 
-                    // Handle 'Remember Me' BEFORE calling MainWindow's success handler
+                    //  'Remember Me'
                     if (rememberMe) {
                         mainWindow.saveJwtToPreferences(jwtToken);
                         System.out.println("JWT token marked for saving (Remember Me checked).");
@@ -186,10 +186,9 @@ public class LoginPanel extends JPanel {
                         System.out.println("JWT token marked for clearing (Remember Me not checked).");
                     }
 
-                    // *** Tell MainWindow about the success ***
                     mainWindow.handleLoginSuccess(jwtToken, true); // true = show success message if desired
 
-                    // Clear input fields ONLY on success AFTER handling login
+                    // Clear input fields
                     clearInputs();
 
                 } catch (Exception authenticationException) {
@@ -198,9 +197,8 @@ public class LoginPanel extends JPanel {
                     setErrorMessage("Login failed: Invalid credentials.");
                     // Ensure password field is cleared on failure too
                     passwordField.setText("");
-                    // Do NOT clear the token in preferences here, only on explicit logout or if rememberMe is unchecked
                 } finally {
-                    // Maybe clear password chars array for security
+                    // Clear password chars array for security
                     java.util.Arrays.fill(passwordChars, ' ');
                 }
             }

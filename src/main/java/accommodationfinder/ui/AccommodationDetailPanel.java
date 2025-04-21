@@ -69,7 +69,7 @@ public class AccommodationDetailPanel extends JPanel {
     }
 
     private void initComponents() {
-        // --- Top Section (Back Button + Title) ---
+        // Top Section (Back Button + Title)
         JPanel topPanel = new JPanel(new BorderLayout(10, 0));
         topPanel.setOpaque(false);
 
@@ -268,7 +268,7 @@ public class AccommodationDetailPanel extends JPanel {
         String email = contactEmailField.getText().trim();
         String phone = contactPhoneField.getText().trim();
 
-        // Re-check just in case
+        // Re-check
         if (name.isEmpty() || email.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter your name and email.", "Missing Information", JOptionPane.WARNING_MESSAGE);
             return;
@@ -278,13 +278,10 @@ public class AccommodationDetailPanel extends JPanel {
             return;
         }
 
-        // TODO: Retrieve the lister's actual email address or contact mechanism
-        //       from the 'accommodation' object (fetched in loadAccommodationDetails)
-        //       or via another service call if needed.
+        // TODO: Retrieve the lister's actual email address
+        // listerContactInfo = fetchListerEmail(listerInfoLabel.getText().substring("Listed by: ".length()));
         String listerContactInfo = "Lister's Email/ID (Not Implemented Yet)";
         if (listerInfoLabel.getText().startsWith("Listed by: ") && !listerInfoLabel.getText().endsWith("Unknown User")) {
-            // Ideally fetch email associated with the username
-            // listerContactInfo = fetchListerEmail(listerInfoLabel.getText().substring("Listed by: ".length()));
         }
 
         System.out.println("--- Sending Message (Placeholder) ---");
@@ -300,7 +297,7 @@ public class AccommodationDetailPanel extends JPanel {
         // contactNameField.setText("");
         // contactEmailField.setText("");
         // contactPhoneField.setText("");
-        // updateSendButtonState(); // Disable button again if fields are cleared
+        // updateSendButtonState();
     }
 
     private void loadAccommodationDetails() {
@@ -490,8 +487,9 @@ public class AccommodationDetailPanel extends JPanel {
                     return null;
                 } catch (Exception e) {
                     // Catch broader exceptions during image processing
+                    // TODO: Add Custom Exceptions
                     System.err.println("Error loading/scaling image: " + imageUrlString + " - " + e.getMessage());
-                    e.printStackTrace(); // Print stack trace for debugging
+                    e.printStackTrace();
                     return null;
                 }
             }
@@ -528,7 +526,7 @@ public class AccommodationDetailPanel extends JPanel {
     }
 
 
-    // Helper for formatting price frequency (same as before)
+    // Helper for formatting price frequency
     private String formatPriceFrequency(Accommodation.PriceFrequency frequency) {
         if (frequency == null) return "";
         return switch (frequency) {
@@ -540,7 +538,7 @@ public class AccommodationDetailPanel extends JPanel {
         };
     }
 
-    // Method to return this panel for MainWindow (same as before)
+    // Method to return this panel for MainWindow
     public JPanel getDetailPanel() {
         return this;
     }

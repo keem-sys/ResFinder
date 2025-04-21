@@ -120,7 +120,7 @@ public class MainApplicationPanel {
         appTitleLabel.setFont(new Font("Arial", Font.BOLD, 36));
         appTitleLabel.setBorder(new EmptyBorder(0, 10, 0, 0));
 
-        // Create the panel that will hold Sign Up/Login OR Welcome/Logout
+        // Panel that will hold Sign Up/Login OR Welcome/Logout
         authAreaPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         authAreaPanel.setOpaque(false);
 
@@ -131,7 +131,7 @@ public class MainApplicationPanel {
         return topBarPanel;
     }
 
-    // --- Method to update UI for Logged In state ---
+    // Method to update UI for Logged In state
     public void showLoggedInState(String username) {
         authAreaPanel.removeAll(); // Clear previous components
 
@@ -151,7 +151,7 @@ public class MainApplicationPanel {
         authAreaPanel.repaint();
     }
 
-    // --- Method to update UI for Logged Out state ---
+    // Method to update UI for Logged Out state
     public void showLoggedOutState() {
         authAreaPanel.removeAll(); // Clear previous components
 

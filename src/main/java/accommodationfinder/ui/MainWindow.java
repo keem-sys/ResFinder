@@ -7,7 +7,6 @@ import accommodationfinder.service.AccommodationService;
 import accommodationfinder.service.UserService;
 import accommodationfinder.data.DatabaseConnection;
 import accommodationfinder.data.UserDao;
-import org.assertj.core.internal.bytebuddy.jar.asm.Handle;
 
 import javax.swing.*;
 import java.sql.SQLException;
@@ -38,16 +37,16 @@ public class MainWindow extends JFrame {
             // Create DatabaseConnection instance
             databaseConnection = new DatabaseConnection();
 
-            // Perform ONE-TIME Database Initialization
+            // Perform Database Initialization
             databaseConnection.initializeDatabase();
 
             // create DAOs
             userDao = new UserDao(databaseConnection);
-            accommodationDao = new AccommodationDao(databaseConnection, userDao); // Pass dependencies
+            accommodationDao = new AccommodationDao(databaseConnection, userDao);
 
             // Create Services
             userService = new UserService(userDao);
-            accommodationService = new AccommodationService(accommodationDao, userDao); // Pass dependencies
+            accommodationService = new AccommodationService(accommodationDao, userDao);
 
             // Initialize UI Panels
             this.mainApplicationPanel = new MainApplicationPanel(accommodationService, userService, this);
@@ -66,7 +65,6 @@ public class MainWindow extends JFrame {
                 handleLoginSuccess(storedJwtToken, false);
             } else {
                 System.out.println("No stored session token found. Starting as guest.");
-                // Ensure UI is in logged-out state (should be default, but belt-and-suspenders)
                 if (mainApplicationPanel != null) {
                     mainApplicationPanel.showLoggedOutState();
                 }
@@ -96,7 +94,7 @@ public class MainWindow extends JFrame {
         setVisible(true);
     }
 
-    // Handle successful login ---
+    // Handle successful login
     public void handleLoginSuccess(String jwtToken, boolean showSuccessMessage) {
         if (jwtToken == null) return;
 
@@ -116,13 +114,11 @@ public class MainWindow extends JFrame {
             showMainApplicationView();
 
             if (showSuccessMessage) {
-                // Optional: Show a brief success message if desired for manual login
-                // JOptionPane.showMessageDialog(this, "Login Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Login Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
             }
         } else {
             System.err.println("Login success handled, but failed to retrieve user details from token.");
-            // Token might be valid but user fetch failed, or token structure issue
-            // Clear invalid persisted token if this happened on startup from preferences
+            // Clear invalid persisted token if userFetch failed
             if (getJwtFromPreferences() != null && getJwtFromPreferences().equals(jwtToken)) {
                 saveJwtToPreferences(null); // Clear bad token
             }
@@ -130,7 +126,7 @@ public class MainWindow extends JFrame {
         }
     }
 
-    // NEW: Handle logout
+    // Handle logout
     public void handleLogout() {
         System.out.println("Handling logout.");
         this.currentJwtToken = null;
@@ -142,9 +138,7 @@ public class MainWindow extends JFrame {
             mainApplicationPanel.showLoggedOutState();
         }
 
-        // Optional: Navigate to a specific view on logout (e.g., main view or login view)
-        showMainApplicationView(); // Go back to main listings view is common
-        // Or: switchToLoginPanel();
+        showMainApplicationView();
     }
 
     private String getJwtFromPreferences() {
@@ -172,7 +166,7 @@ public class MainWindow extends JFrame {
         if (jwtToken != null) {
             prefs.put("jwtToken", jwtToken);
         } else {
-            prefs.remove("jwtToken"); // Remove if null (logout)
+            prefs.remove("jwtToken");
         }
     }
 
@@ -181,11 +175,11 @@ public class MainWindow extends JFrame {
         // Ensure the main panel itself exists
         if (mainApplicationPanel == null) {
             System.err.println("Error: MainApplicationPanel is null when trying to show it.");
-            // Handle this error appropriately, maybe recreate or exit
+            // TODO: Handle error exit or throw Exception
             return;
         }
 
-        // Update the auth state just in case (e.g., token expired between views)
+        // Update the auth state just in case token expired between views
         if (currentUser != null) {
             mainApplicationPanel.showLoggedInState(currentUser.getUsername());
         } else {
@@ -230,7 +224,7 @@ public class MainWindow extends JFrame {
                 showMainApplicationView();
             }
 
-            // Update auth state in main panel BEFORE potentially switching away
+            // Update auth state in main panel BEFORE switching away
             if (mainApplicationPanel != null) {
                 if (currentUser != null) mainApplicationPanel.showLoggedInState(currentUser.getUsername());
                 else mainApplicationPanel.showLoggedOutState();

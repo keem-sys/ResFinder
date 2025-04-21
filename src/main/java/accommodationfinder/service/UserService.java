@@ -190,8 +190,8 @@ public class UserService {
             return Jwts.parser()
                     .verifyWith((SecretKey) jwtSecretKey)
                     .build()
-                    .parseSignedClaims(jwtToken) // Use parseSignedClaims
-                    .getPayload(); // Get claims from payload
+                    .parseSignedClaims(jwtToken)
+                    .getPayload();
         } catch (JwtException | IllegalArgumentException e) { // Catch potential errors
             System.err.println("JWT validation/parsing failed: " + e.getMessage());
             return null;
@@ -208,7 +208,7 @@ public class UserService {
         Claims claims = validateAndExtractClaims(jwtToken);
         if (claims != null) {
             try {
-                // Extract user ID from claims (ensure it's stored as Long or Integer)
+                // Extract user ID from claims
                 Object userIdObj = claims.get("userId");
                 Long userId = null;
                 if (userIdObj instanceof Integer) {
