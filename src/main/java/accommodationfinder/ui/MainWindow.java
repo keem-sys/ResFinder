@@ -22,7 +22,6 @@ public class MainWindow extends JFrame {
     private AccommodationDao accommodationDao;
     private AccommodationService accommodationService;
 
-    private DetailedAccommodationViewPanel detailedViewPanel;
 
     public MainWindow() {
         setTitle("Student Accommodation Finder");
@@ -53,7 +52,6 @@ public class MainWindow extends JFrame {
             // Set initial content pane
             setContentPane(mainApplicationPanel.getMainPanel());
 
-            this.detailedViewPanel = new DetailedAccommodationViewPanel(this);
 
             // JWT Check
             String storedJwtToken = getJwtFromPreferences();
@@ -125,22 +123,7 @@ public class MainWindow extends JFrame {
             prefs.remove("jwtToken"); // Remove if null (logout)
         }
     }
-    public void switchToDetailedView(Long accommodationId) {
-        try {
-            Accommodation selectedAccommodation = accommodationService.getListingById(accommodationId);
-            if (selectedAccommodation != null) {
-                detailedViewPanel.displayAccommodation(selectedAccommodation);
-                setContentPane(detailedViewPanel);
-                revalidate();
-                repaint();
-            } else {
-                JOptionPane.showMessageDialog(this, "Accommodation not found.");
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error loading accommodation details.");
-            e.printStackTrace();
-        }
-    }
+
 
     public void showMainApplicationView() {
         setContentPane(mainApplicationPanel.getMainPanel());

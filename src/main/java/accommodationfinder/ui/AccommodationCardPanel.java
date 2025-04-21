@@ -166,7 +166,6 @@ public class AccommodationCardPanel extends JPanel {
                 "View More Clicked (Placeholder)",
                 JOptionPane.INFORMATION_MESSAGE);
 
-        mainWindow.switchToDetailedView(accommodation.getId());
     }
 
     // Helper Methods specific to this card
