@@ -1,6 +1,7 @@
 package accommodationfinder.ui;
 
 import accommodationfinder.data.AccommodationDao;
+import accommodationfinder.listing.Accommodation;
 import accommodationfinder.service.AccommodationService;
 import accommodationfinder.service.UserService;
 import accommodationfinder.data.DatabaseConnection;
@@ -17,6 +18,7 @@ public class MainWindow extends JFrame {
     private RegistrationPanel registrationPanel;
     private LoginPanel loginPanel;
     private MainApplicationPanel mainApplicationPanel;
+    private AccommodationDetailPanel accommodationDetailPanel;
 
     private AccommodationDao accommodationDao;
     private AccommodationService accommodationService;
@@ -120,9 +122,56 @@ public class MainWindow extends JFrame {
 
     public void showMainApplicationView() {
         setContentPane(mainApplicationPanel.getMainPanel());
+        accommodationDetailPanel = null; // Discard old detail panel instance
         revalidate();
         repaint();
         System.out.println("Switched to Main Application Panel");
+    }
+
+    /**
+     * Switches the main window content to show the detailed view for a specific accommodation.
+     * Fetches the accommodation data using the provided ID.
+     *
+     * @param accommodationId The ID of the accommodation to display.
+     */
+    public void switchToDetailedView(Long accommodationId) {
+        System.out.println("Attempting to switch to detailed view for ID: " + accommodationId);
+        try {
+            Accommodation accommodation = accommodationService.getListingById(accommodationId);
+
+            if (accommodation != null) {
+                // Create a NEW instance of the detail panel each time
+                accommodationDetailPanel = new AccommodationDetailPanel(accommodation, accommodationService, this);
+                setContentPane(accommodationDetailPanel.getMainPanel());
+                revalidate();
+                repaint();
+                System.out.println("Successfully switched to detailed view for: " + accommodation.getTitle());
+            } else {
+                // Handle case where listing is not found
+                System.err.println("Accommodation with ID " + accommodationId + " not found.");
+                JOptionPane.showMessageDialog(this,
+                        "Could not find details for the selected accommodation.",
+                        "Listing Not Found",
+                        JOptionPane.WARNING_MESSAGE);
+                // Switch back to main view
+                showMainApplicationView();
+            }
+        } catch (SQLException e) {
+            // Handle database errors during fetch
+            System.err.println("Database error fetching accommodation details for ID " + accommodationId + ": " + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "An error occurred while retrieving accommodation details.\nPlease try again later.",
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
+            // Switch back to main view
+            showMainApplicationView();
+        }
+    }
+
+    // Getter for the main frame if needed by child components
+    public JFrame getMainFrame() {
+        return this;
     }
 
 
