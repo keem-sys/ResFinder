@@ -111,6 +111,49 @@ public class MainApplicationPanel {
 
         listingGridPanel.revalidate();
         listingGridPanel.repaint();
+
+        SwingWorker<List<Accommodation>, Void> worker = new SwingWorker<List<Accommodation>, Void>() {
+            @Override
+            protected List<Accommodation> doInBackground() throws SQLException {
+                return accommodationService.getAllActiveListings();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    allFetchedListings = get();
+                    // Default: sort by newest date listed
+                    allFetchedListings.sort(Comparator.comparing(Accommodation::getListingDate,
+                            Comparator.nullsLast(Comparator.reverseOrder())));  // Newest first, nulls last
+
+                    currentlyDisplayedListings = new ArrayList<>(allFetchedListings);
+
+                    refreshListingGrid(currentlyDisplayedListings);
+                } catch (InterruptedException | ExecutionException e) {
+                    Throwable cause = e.getCause();
+                    System.err.println("Error loading accommodation listings: " + (cause != null ? cause.getMessage()
+                            : e.getMessage()));
+                    e.printStackTrace();
+
+                    displayLoadingError("Error loading listings. Please try again later.");
+                    if (cause instanceof SQLException) {
+                        JOptionPane.showMessageDialog(mainPanel, "Database error loading listings.",
+                                "Database Error", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(mainPanel,
+                                "An unexpected error occurred while loading listings.",
+                                "Loading Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception e) { // Catch other potential runtime errors during get() or UI update
+                    System.err.println("Unexpected error during listing load completion: " + e.getMessage());
+                    e.printStackTrace();
+                    displayLoadingError("An unexpected error occurred.");
+                    JOptionPane.showMessageDialog(mainPanel, "An unexpected error occurred.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        };
+        worker.execute();
     }
 
     // Helper method to create the Top Bar
