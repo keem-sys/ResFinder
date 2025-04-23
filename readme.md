@@ -24,38 +24,51 @@ CPUT students often encounter significant difficulties in finding appropriate ac
 - Access comprehensive details about accommodation listings (accreditation type, address, pricing, rules, images).
 - Directly contact accommodation providers.
 
-## Key Features (Term 1 & Planned)
+## Key Features 
 
-**Currently Implemented (Term 1 Deliverables):**
+**Currently Implemented :**
 
 - **User Authentication:**
-    - Secure user registration (Full Name, Username, Email, Password).
-    - Secure login using Username/Email and Password.
-    - Secure password hashing using Argon2-jvm.
+    -  user registration (Full Name, Username, Email, Password).
+    -  login using Username/Email and Password.
+    -  password hashing using Argon2-jvm.
     - JWT (JSON Web Token) based session management (JWT generation implemented).
     - "Remember Me" functionality using Java Preferences API for persistent JWT storage (basic implementation).
     - Client-side and server-side input validation for registration and login forms.
     - Basic error handling and user feedback in UI.
-- **Basic UI Structure:**
-    - Login Panel (using JGoodies FormLayout).
-    - Registration Panel (using JGoodies FormLayout).
-    - Panel switching between Login and Registration forms.
+      <br><br/>
+- **Accommodation Listing Management:**
+    - Display of accommodation listings.
+    - Detailed view for individual accommodation listings.
+<br><br/>
+  
+- **Sorting**:
+    - Sorting listings by price and date added
+      <br><br/>
+- **UI Structure:**
+    - Login Panel.
+    - Registration Panel.
+    - Main Application Panel
+    - Detail view of Listing Panel
 
 **Planned Features (Future Terms):**
 
-- **Accommodation Listing Management:**
-    - Display a list of pre-populated accommodation listings.
-    - Detailed view for individual accommodation listings.
-    - Display listings with comprehensive details (accreditation, address, pricing, rules, images).
+
 - **Search, Filtering, and Sorting:**
     - Keyword search functionality.
     - Filtering by accommodation type, campus location, room type, accreditation, and availability.
-    - Sorting listings by price, distance to campus, and relevance.
+    - sorting by distance to campus, and relevance.
+      <br><br/>
+
 - **Map Integration:**
     - Display accommodation listings on an interactive map.
     - Indicate campus locations.
+<br><br/>
+
 - **Contact Us Feature:**
     - Basic "Contact Us" form for user inquiries.
+      <br><br/>
+
 - **System and User Documentation:**
     - Comprehensive system documentation.
     - User manual/guide.
