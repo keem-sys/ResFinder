@@ -7,20 +7,17 @@ import accommodationfinder.service.UserService;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-
-public class MainApplicationPanel  {
+public class MainApplicationPanel {
 
     private JPanel mainPanel;
 
     // Top Bar Components
-    private JPanel authAreaPanel; // Panel to hold dynamic login/logout component
+    private JPanel authAreaPanel;
     private JButton signUpButton;
     private JLabel welcomeLabel;
     private JButton loginButton;
@@ -35,11 +32,11 @@ public class MainApplicationPanel  {
     private List<Accommodation> allFetchedListings = new ArrayList<>();
     private List<Accommodation> currentlyDisplayedListings = new ArrayList<>();
 
-    // Constants for Combo Box
-    private static final String ORDER_BY_DEFAULT = "Default(Newest)";
-    private static final String ORDER_BY_PRICE_ASC = "Price: Low to High";
-    private static final String ORDER_BY_PRICE_DESC = "Price: High to Low";
-    private static final String ORDER_BY_DATE_OLDEST = "Date Listed: Oldest";
+
+    public static final String ORDER_BY_DEFAULT = "Default(Newest)";
+    public static final String ORDER_BY_PRICE_ASC = "Price: Low to High";
+    public static final String ORDER_BY_PRICE_DESC = "Price: High to Low";
+    public static final String ORDER_BY_DATE_OLDEST = "Date Listed: Oldest";
 
     // Listing Area Components
     private JPanel listingGridPanel;
@@ -48,8 +45,6 @@ public class MainApplicationPanel  {
     private final UserService userService;
     private final AccommodationService accommodationService;
     private final MainWindow mainWindow;
-
-
 
     public MainApplicationPanel(AccommodationService accommodationService, UserService userService,
                                 MainWindow mainWindow) {
@@ -60,14 +55,10 @@ public class MainApplicationPanel  {
         mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // Create Top Bar
+        // UI Setup remains the same
         JPanel topBarPanel = createTopBar();
         mainPanel.add(topBarPanel, BorderLayout.NORTH);
-
-        // Create Center Content Area
         JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
-
-        // Title and Search/Filter
         JLabel mainTitleLabel = new JLabel("Find Student Accommodation to Rent", SwingConstants.CENTER);
         mainTitleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         mainTitleLabel.setBorder(new EmptyBorder(10, 0, 10, 0));
@@ -77,24 +68,17 @@ public class MainApplicationPanel  {
         titleAndSearchPanel.add(mainTitleLabel);
         titleAndSearchPanel.add(searchFilterPanel);
         centerPanel.add(titleAndSearchPanel, BorderLayout.NORTH);
-
-
-        // Listing Area
         listingGridPanel = new JPanel(new GridLayout(0, 2, 15, 15));
         listingGridPanel.setBorder(new EmptyBorder(15, 0, 0, 0));
-
-        // Wrap in ScrollPane
         this.scrollPane = new JScrollPane(listingGridPanel);
         this.scrollPane.setBorder(BorderFactory.createEmptyBorder());
         this.scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-
         centerPanel.add(this.scrollPane, BorderLayout.CENTER);
-
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
-        loadAndDisplayListings();
-        // Set initial state of the auth area (logged out by default)
-        showLoggedOutState();
+
+        loadAndDisplayListings(); // Load data
+        showLoggedOutState(); // Set initial auth state
     }
 
     // Method to Load and Display Listings
@@ -105,7 +89,7 @@ public class MainApplicationPanel  {
         listingGridPanel.revalidate();
         listingGridPanel.repaint();
 
-        SwingWorker<List<Accommodation>, Void> worker = new SwingWorker<List<Accommodation>, Void>() {
+        SwingWorker<List<Accommodation>, Void> worker = new SwingWorker<>() {
             @Override
             protected List<Accommodation> doInBackground() throws SQLException {
                 return accommodationService.getAllActiveListings();
@@ -114,35 +98,35 @@ public class MainApplicationPanel  {
             @Override
             protected void done() {
                 try {
-                    allFetchedListings = get();
-                    // Default: sort by newest date listed
-                    allFetchedListings.sort(Comparator.comparing(Accommodation::getListingDate,
-                            Comparator.nullsLast(Comparator.reverseOrder())));  // Newest first, nulls last
+                    allFetchedListings = get(); // Fetch all
 
-                    currentlyDisplayedListings = new ArrayList<>(allFetchedListings);
+                    // Uses sorter for the initial default sort
+                    currentlyDisplayedListings = AccommodationSorter.sort(allFetchedListings, ORDER_BY_DEFAULT);
 
+                    // Refresh the UI with the initially sorted list
                     refreshListingGrid(currentlyDisplayedListings);
+
                 } catch (InterruptedException | ExecutionException e) {
                     Throwable cause = e.getCause();
-                    System.err.println("Error loading accommodation listings: " + (cause != null ? cause.getMessage()
-                            : e.getMessage()));
+                    String errorMsg = "Error loading accommodation listings: " + (cause != null ? cause.getMessage()
+                            : e.getMessage());
+                    System.err.println(errorMsg);
                     e.printStackTrace();
-
                     displayLoadingError("Error loading listings. Please try again later.");
+                    // Show specific dialog based on cause
                     if (cause instanceof SQLException) {
                         JOptionPane.showMessageDialog(mainPanel, "Database error loading listings.",
                                 "Database Error", JOptionPane.ERROR_MESSAGE);
                     } else {
-                        JOptionPane.showMessageDialog(mainPanel,
-                                "An unexpected error occurred while loading listings.",
-                                "Loading Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(mainPanel, "An unexpected error occurred while " +
+                                "loading listings.", "Loading Error", JOptionPane.ERROR_MESSAGE);
                     }
-                } catch (Exception e) { // Catch other potential runtime errors during get() or UI update
+                } catch (Exception e) {
                     System.err.println("Unexpected error during listing load completion: " + e.getMessage());
                     e.printStackTrace();
                     displayLoadingError("An unexpected error occurred.");
-                    JOptionPane.showMessageDialog(mainPanel, "An unexpected error occurred.",
-                            "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainPanel, "An unexpected error occurred.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             }
         };
@@ -151,56 +135,42 @@ public class MainApplicationPanel  {
 
     // Helper method to create the Top Bar
     private JPanel createTopBar() {
+        // ... (same as before)
         JPanel topBarPanel = new JPanel(new BorderLayout());
         JLabel appTitleLabel = new JLabel("ResFinder");
         appTitleLabel.setFont(new Font("Arial", Font.BOLD, 36));
         appTitleLabel.setBorder(new EmptyBorder(0, 10, 0, 0));
-
-        // Panel that will hold Sign Up/Login OR Welcome/Logout
         authAreaPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         authAreaPanel.setOpaque(false);
-
         topBarPanel.add(appTitleLabel, BorderLayout.WEST);
         topBarPanel.add(authAreaPanel, BorderLayout.EAST);
-
-
         return topBarPanel;
     }
 
     // Method to update UI for Logged In state
     public void showLoggedInState(String username) {
-        authAreaPanel.removeAll(); // Clear previous components
-
+        // ... (same as before)
+        authAreaPanel.removeAll();
         welcomeLabel = new JLabel("Welcome, " + username);
         welcomeLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-
         logoutButton = new JButton("Logout");
-        logoutButton.addActionListener(e -> mainWindow.handleLogout()); // Call logout method in MainWindow
-
-        // Optional: Add profile icon/button later here
-
+        logoutButton.addActionListener(e -> mainWindow.handleLogout());
         authAreaPanel.add(welcomeLabel);
-        authAreaPanel.add(Box.createRigidArea(new Dimension(10, 0))); // Spacer
+        authAreaPanel.add(Box.createRigidArea(new Dimension(10, 0)));
         authAreaPanel.add(logoutButton);
-
         authAreaPanel.revalidate();
         authAreaPanel.repaint();
     }
 
     // Method to update UI for Logged Out state
     public void showLoggedOutState() {
-        authAreaPanel.removeAll(); // Clear previous components
-
+        authAreaPanel.removeAll();
         signUpButton = new JButton("Sign Up");
         loginButton = new JButton("Login");
-
-        // Add Action Listeners
         signUpButton.addActionListener(e -> mainWindow.switchToRegistrationPanel());
         loginButton.addActionListener(e -> mainWindow.switchToLoginPanel());
-
         authAreaPanel.add(signUpButton);
         authAreaPanel.add(loginButton);
-
         authAreaPanel.revalidate();
         authAreaPanel.repaint();
     }
@@ -209,13 +179,10 @@ public class MainApplicationPanel  {
     // Helper method to create the Search/Filter Bar
     private JPanel createSearchFilterBar() {
         JPanel searchFilterPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
-        // Search Area
         searchField = new JTextField(20);
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         searchPanel.add(new JLabel("Search area:"));
         searchPanel.add(searchField);
-
-        // Order By
         String[] orderByOptions = {
                 ORDER_BY_DEFAULT,
                 ORDER_BY_PRICE_ASC,
@@ -228,59 +195,43 @@ public class MainApplicationPanel  {
         JPanel orderByPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         orderByPanel.add(new JLabel("Sort by:"));
         orderByPanel.add(orderByComboBox);
-
-
-        // Filter
         filterButton = new JButton("Filter:");
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         filterPanel.add(filterButton);
-
-        // Add components to the main search/filter panel
         searchFilterPanel.add(searchPanel);
         searchFilterPanel.add(orderByPanel);
         searchFilterPanel.add(filterPanel);
-
-        // Add action listeners for search, order, filter later
         filterButton.addActionListener(e -> System.out.println("Filter button clicked"));
         return searchFilterPanel;
     }
 
-    /**
-     * Clears and repopulates the listing grid panel with the provided list of accommodations.
-     * This method should be called on the Event Dispatch Thread (EDT).
-     * @param listings The list of accommodations to display.
-     */
+    // refreshListingGrid
     private void refreshListingGrid(List<Accommodation> listings) {
-        listingGridPanel.removeAll(); // Clear previous listings
-
+        listingGridPanel.removeAll();
         if (listings == null || listings.isEmpty()) {
             listingGridPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
             listingGridPanel.add(new JLabel("No accommodation listings found matching your criteria."));
         } else {
-
             listingGridPanel.setLayout(new GridLayout(0, 2, 15, 15));
             for (Accommodation acc : listings) {
                 AccommodationCardPanel card = new AccommodationCardPanel(acc, mainWindow);
                 listingGridPanel.add(card);
             }
         }
-
         SwingUtilities.invokeLater(() -> {
                     if (scrollPane != null && scrollPane.getViewport() != null) {
                         scrollPane.getViewport().setViewPosition(new Point(0, 0));
                     } else {
-                        System.err.println("Warning: scrollPane or its viewport was null during refreshListingGrid " +
-                                "scroll reset.");
+                        System.err.println("Warning: scrollPane or its viewport was null during " +
+                                "refreshListingGrid scroll reset.");
                     }
                 }
         );
-
-
         listingGridPanel.revalidate();
         listingGridPanel.repaint();
     }
 
-    // Displays an error message in the listing panel
+    // displayLoadingError
     private void displayLoadingError(String message) {
         listingGridPanel.removeAll();
         listingGridPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
@@ -292,52 +243,19 @@ public class MainApplicationPanel  {
     }
 
     /**
-     * Applies sorting based on the combo box selection and refreshes the UI.
-     * This is called by the ActionListener on the orderByComboBox.
+     * Applies sorting using AccommodationSorter based on the combo box selection
+     * and refreshes the UI.
      */
     private void applySortingAndRefreshUI() {
         String selectedOrder = (String) orderByComboBox.getSelectedItem();
-
-        if (selectedOrder == null) return;
-
-        // Creates a mutable copy of all fetched listings
-        List<Accommodation> listToSort = new ArrayList<>(allFetchedListings);
-        Comparator<Accommodation> accommodationComparator = null;
-
-        switch (selectedOrder) {
-            case ORDER_BY_PRICE_ASC:
-                // Compare by price ascending, nulls last
-                System.out.println("Sorting by price ascending, nulls values last");
-                accommodationComparator = Comparator.comparing(Accommodation::getPrice,
-                        Comparator.nullsLast(Comparator.naturalOrder()));
-                break;
-
-            case ORDER_BY_PRICE_DESC:
-                // Compare by price descending, nulls last
-                System.out.println("Sorting by price descending, nulls values last");
-                accommodationComparator = Comparator.comparing(Accommodation::getPrice,
-                        Comparator.nullsLast(Comparator.reverseOrder()));
-                break;
-
-
-            case ORDER_BY_DEFAULT:
-                // Compare by date added newest, nulls lasts
-                System.out.println("Sorting by default: newest date added");
-                accommodationComparator = Comparator.comparing(Accommodation::getListingDate,
-                        Comparator.nullsLast(Comparator.reverseOrder()));
-                break;
-
-            case ORDER_BY_DATE_OLDEST:
-                accommodationComparator = Comparator.comparing(Accommodation::getListingDate,
-                        Comparator.nullsLast(Comparator.naturalOrder()));
-                break;
-
-        }
-        if (accommodationComparator != null) {
-            listToSort.sort(accommodationComparator);
+        if (selectedOrder == null) {
+            return;
         }
 
-        currentlyDisplayedListings = listToSort;
+
+        // Update the list that the UI is currently displaying
+        currentlyDisplayedListings = AccommodationSorter.sort(allFetchedListings, selectedOrder);
+
         refreshListingGrid(currentlyDisplayedListings);
     }
 
