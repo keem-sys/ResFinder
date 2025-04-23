@@ -7,11 +7,15 @@ import accommodationfinder.service.UserService;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.*;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 
-public class MainApplicationPanel {
+public class MainApplicationPanel  {
 
     private JPanel mainPanel;
 
@@ -26,6 +30,16 @@ public class MainApplicationPanel {
     private JTextField searchField;
     private JComboBox<String> orderByComboBox;
     private JButton filterButton;
+    private JScrollPane scrollPane;
+
+    private List<Accommodation> allFetchedListings = new ArrayList<>();
+    private List<Accommodation> currentlyDisplayedListings = new ArrayList<>();
+
+    // Constants for Combo Box
+    private static final String ORDER_BY_DEFAULT = "Default(Newest)";
+    private static final String ORDER_BY_PRICE_ASC = "Price: Low to High";
+    private static final String ORDER_BY_PRICE_DESC = "Price: High to Low";
+    private static final String ORDER_BY_DATE_OLDEST = "Date Listed: Oldest";
 
     // Listing Area Components
     private JPanel listingGridPanel;
@@ -37,7 +51,8 @@ public class MainApplicationPanel {
 
 
 
-    public MainApplicationPanel(AccommodationService accommodationService, UserService userService, MainWindow mainWindow) {
+    public MainApplicationPanel(AccommodationService accommodationService, UserService userService,
+                                MainWindow mainWindow) {
         this.accommodationService = accommodationService;
         this.userService = userService;
         this.mainWindow = mainWindow;
@@ -69,11 +84,11 @@ public class MainApplicationPanel {
         listingGridPanel.setBorder(new EmptyBorder(15, 0, 0, 0));
 
         // Wrap in ScrollPane
-        JScrollPane scrollPane = new JScrollPane(listingGridPanel);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        this.scrollPane = new JScrollPane(listingGridPanel);
+        this.scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        this.scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-        centerPanel.add(scrollPane, BorderLayout.CENTER);
+        centerPanel.add(this.scrollPane, BorderLayout.CENTER);
 
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
@@ -85,30 +100,8 @@ public class MainApplicationPanel {
     // Method to Load and Display Listings
     private void loadAndDisplayListings() {
         listingGridPanel.removeAll();
-
-        try {
-            List<Accommodation> listings = accommodationService.getAllActiveListings();
-
-            if (listings.isEmpty()) {
-                listingGridPanel.setLayout(new FlowLayout());
-                listingGridPanel.add(new JLabel("Sorry for the inconvenience, No accommodation listings found."));
-            } else {
-                listingGridPanel.setLayout(new GridLayout(0, 2, 15, 15));
-                for (Accommodation acc : listings) {
-                    AccommodationCardPanel card = new AccommodationCardPanel(acc, mainWindow);
-                    listingGridPanel.add(card);
-                }
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Error loading accommodation listings: " + e.getMessage());
-            e.printStackTrace();
-            listingGridPanel.setLayout(new FlowLayout());
-            listingGridPanel.add(new JLabel("Error loading listings. Please try again later."));
-            JOptionPane.showMessageDialog(mainPanel, "Error loading listings.", "Database Error",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-
+        listingGridPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+        listingGridPanel.add(new JLabel("Loading listings... Please wait."));
         listingGridPanel.revalidate();
         listingGridPanel.repaint();
 
@@ -223,11 +216,19 @@ public class MainApplicationPanel {
         searchPanel.add(searchField);
 
         // Order By
-        String[] orderByOptions = {"Default", "Price: Low to High", "Price: High to Low", "Date Listed: Newest"};
+        String[] orderByOptions = {
+                ORDER_BY_DEFAULT,
+                ORDER_BY_PRICE_ASC,
+                ORDER_BY_PRICE_DESC,
+                ORDER_BY_DATE_OLDEST,
+        };
+
         orderByComboBox = new JComboBox<>(orderByOptions);
+        orderByComboBox.addActionListener(e -> applySortingAndRefreshUI());
         JPanel orderByPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        orderByPanel.add(new JLabel("Order by:"));
+        orderByPanel.add(new JLabel("Sort by:"));
         orderByPanel.add(orderByComboBox);
+
 
         // Filter
         filterButton = new JButton("Filter:");
@@ -264,15 +265,80 @@ public class MainApplicationPanel {
             }
         }
 
-        SwingUtilities.invokeLater(() -> scrollPane.getViewport().setViewPosition(new Point(0, 0)));
+        SwingUtilities.invokeLater(() -> {
+                    if (scrollPane != null && scrollPane.getViewport() != null) {
+                        scrollPane.getViewport().setViewPosition(new Point(0, 0));
+                    } else {
+                        System.err.println("Warning: scrollPane or its viewport was null during refreshListingGrid " +
+                                "scroll reset.");
+                    }
+                }
+        );
 
 
         listingGridPanel.revalidate();
         listingGridPanel.repaint();
     }
-    
 
+    // Displays an error message in the listing panel
+    private void displayLoadingError(String message) {
+        listingGridPanel.removeAll();
+        listingGridPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+        JLabel errorLabel = new JLabel(message);
+        errorLabel.setForeground(Color.RED);
+        listingGridPanel.add(errorLabel);
+        listingGridPanel.revalidate();
+        listingGridPanel.repaint();
+    }
+
+    /**
+     * Applies sorting based on the combo box selection and refreshes the UI.
+     * This is called by the ActionListener on the orderByComboBox.
+     */
     private void applySortingAndRefreshUI() {
+        String selectedOrder = (String) orderByComboBox.getSelectedItem();
+
+        if (selectedOrder == null) return;
+
+        // Creates a mutable copy of all fetched listings
+        List<Accommodation> listToSort = new ArrayList<>(allFetchedListings);
+        Comparator<Accommodation> accommodationComparator = null;
+
+        switch (selectedOrder) {
+            case ORDER_BY_PRICE_ASC:
+                // Compare by price ascending, nulls last
+                System.out.println("Sorting by price ascending, nulls values last");
+                accommodationComparator = Comparator.comparing(Accommodation::getPrice,
+                        Comparator.nullsLast(Comparator.naturalOrder()));
+                break;
+
+            case ORDER_BY_PRICE_DESC:
+                // Compare by price descending, nulls last
+                System.out.println("Sorting by price descending, nulls values last");
+                accommodationComparator = Comparator.comparing(Accommodation::getPrice,
+                        Comparator.nullsLast(Comparator.reverseOrder()));
+                break;
+
+
+            case ORDER_BY_DEFAULT:
+                // Compare by date added newest, nulls lasts
+                System.out.println("Sorting by default: newest date added");
+                accommodationComparator = Comparator.comparing(Accommodation::getListingDate,
+                        Comparator.nullsLast(Comparator.reverseOrder()));
+                break;
+
+            case ORDER_BY_DATE_OLDEST:
+                accommodationComparator = Comparator.comparing(Accommodation::getListingDate,
+                        Comparator.nullsLast(Comparator.naturalOrder()));
+                break;
+
+        }
+        if (accommodationComparator != null) {
+            listToSort.sort(accommodationComparator);
+        }
+
+        currentlyDisplayedListings = listToSort;
+        refreshListingGrid(currentlyDisplayedListings);
     }
 
     // Method to return the main panel for MainWindow to display
