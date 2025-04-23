@@ -244,6 +244,37 @@ public class MainApplicationPanel {
         return searchFilterPanel;
     }
 
+    /**
+     * Clears and repopulates the listing grid panel with the provided list of accommodations.
+     * This method should be called on the Event Dispatch Thread (EDT).
+     * @param listings The list of accommodations to display.
+     */
+    private void refreshListingGrid(List<Accommodation> listings) {
+        listingGridPanel.removeAll(); // Clear previous listings
+
+        if (listings == null || listings.isEmpty()) {
+            listingGridPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+            listingGridPanel.add(new JLabel("No accommodation listings found matching your criteria."));
+        } else {
+
+            listingGridPanel.setLayout(new GridLayout(0, 2, 15, 15));
+            for (Accommodation acc : listings) {
+                AccommodationCardPanel card = new AccommodationCardPanel(acc, mainWindow);
+                listingGridPanel.add(card);
+            }
+        }
+
+        SwingUtilities.invokeLater(() -> scrollPane.getViewport().setViewPosition(new Point(0, 0)));
+
+
+        listingGridPanel.revalidate();
+        listingGridPanel.repaint();
+    }
+    
+
+    private void applySortingAndRefreshUI() {
+    }
+
     // Method to return the main panel for MainWindow to display
     public JPanel getMainPanel() {
         return mainPanel;
