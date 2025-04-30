@@ -24,7 +24,7 @@ public class AccommodationSorter {
             return new ArrayList<>(); // Return empty list if input is null
         }
 
-        // Create a mutable copy to sort, preserving the original list
+        // Create a mutable copy to sort
         List<Accommodation> listToSort = new ArrayList<>(originalList);
         Comparator<Accommodation> comparator = null;
 

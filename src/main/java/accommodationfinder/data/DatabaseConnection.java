@@ -172,40 +172,104 @@ public class DatabaseConnection {
         // Create Sample Accommodation Objects (using the obtained user IDs)
         Accommodation acc1 = new Accommodation(
                 "Cozy Studio Near CPUT Dist. Six", "A small, clean studio perfect for one student.",
-                Accommodation.AccommodationType.STUDIO, "12 Chapel St", "Cape Town", "8001",
-                -33.927, 18.425, new BigDecimal("5500.00"), Accommodation.PriceFrequency.PER_MONTH,
-                1, 1, 1, true, true, true, "12-month lease",
+                Accommodation.AccommodationType.STUDIO, "12 Chapel St", "Cape Town City Centre", "8001",
+                -33.927, 18.425, new BigDecimal("7500.00"), Accommodation.PriceFrequency.PER_MONTH,
+                1, 1, 2, true, true, true,
+                "12-month lease",
                 LocalDateTime.now().plusDays(10), null, true, sampleUser1);
         acc1.getImageUrls().add("https://properliving.co.za/static/b26f993800130e079b54ff6cbfbeac41/add31/HomePageHeroImage.jpg");
-
+        acc1.getImageUrls().add("https://properliving.co.za/static/9197a1844e04e3ed1d437ac0dd121854/47498/selectorDesktopPlusCommunal.jpg");
+        acc1.getImageUrls().add("https://properliving.co.za/static/dba2fea957e55fa3b267d260a8ae7a76/c78d4/selectorDesktopStudioPlus3D.png");
 
         Accommodation acc2 = new Accommodation(
-                "Shared House Room - Bellville Campus", "Room available in a shared student house, walking distance.",
-                Accommodation.AccommodationType.SHARED_ROOM, "5 Protea Rd", "Bellville", "7530",
-                -33.888, 18.630, new BigDecimal("3800.00"), Accommodation.PriceFrequency.PER_MONTH,
-                4, 2, 4, false, true, true, "Semester lease",
-                LocalDateTime.now().plusDays(5), null, false, sampleUser2); // Pass the User object
-        acc2.getImageUrls().add("https://106adderley.co.za/wp-content/uploads/2022/06/DSC09316.jpg");
+                "Premium Studio ", "Studio Availanle",
+                Accommodation.AccommodationType.STUDIO, "3 Willie Van Schoor Ave", "Bellville Park",
+                "7530", -33.888, 18.630, new BigDecimal("3800.00"),
+                Accommodation.PriceFrequency.PER_MONTH, 1, 1, 2,
+                true, true, true, "Academic Year",
+                LocalDateTime.now().plusDays(9), null, false, sampleUser1);
+        acc2.getImageUrls().add("https://properliving.co.za/static/0bb443567899622fa8bce700f9f463f7/47498/selectorDesktopPenthouse1.jpg");
+        acc2.getImageUrls().add("https://properliving.co.za/static/9550718c413081cfa0417f88b7d6db04/47498/selectorDesktopPenthouse2.jpg");
+        acc2.getImageUrls().add("https://properliving.co.za/static/61bb73d615d28e3a466c861b4ae9b71d/47498/selectorDesktopPenthouse3.jpg");
+        acc2.getImageUrls().add("https://properliving.co.za/static/eff924a8617a4ee2228fbd51f53313d1/47498/selectorDesktopPenthouse4.jpg");
+        acc2.getImageUrls().add("https://properliving.co.za/static/d3e499607698c480fa3898eb99884668/47498/selectorDesktopPenthouse5.jpg");
+
+
 
         Accommodation acc3 = new Accommodation(
-                "Modern 2-Bed Apt - Mowbray Area", "Recently renovated apartment, close to transport.",
-                Accommodation.AccommodationType.APARTMENT, "77 Main Rd", "Mowbray", "7700",
-                -33.947, 18.477, new BigDecimal("9500.00"), Accommodation.PriceFrequency.PER_MONTH,
-                2, 1, 2, true, false, true, "Annual lease",
-                LocalDateTime.now().plusMonths(1), null, true, sampleUser1);
-
-        acc3.getImageUrls().add("https://youthopportunitieshub.com/wp-content/uploads/2025/01/student24-accomodation-2025-01-14T123023.533.png");
-
+                "Shared House Room", "Room available in a shared student house, walking distance.",
+                Accommodation.AccommodationType.SHARED_ROOM, "106 Adderley Street", "Cape Town City Centre",
+                "7530", -33.888, 18.630, new BigDecimal("3800.00"),
+                Accommodation.PriceFrequency.PER_MONTH, 1, 2, 2,
+                true, true, true, "Monthly lease",
+                LocalDateTime.now().plusDays(5), null, false, sampleUser1);
+        acc3.getImageUrls().add("https://106adderley.co.za/wp-content/uploads/2022/05/IMG_20210729_122034-scaled.jpg");
+        acc3.getImageUrls().add("https://106adderley.co.za/wp-content/uploads/2020/02/Bronze-Room-106-Adderley-2.png");
+        acc3.getImageUrls().add("https://106adderley.co.za/wp-content/uploads/2020/02/Bronze-Room-106-Adderley-3.png");
 
 
         Accommodation acc4 = new Accommodation(
+                "Single Room", "Recently renovated room to rent",
+                Accommodation.AccommodationType.APARTMENT, "77 Main Rd", "Mowbray", "7700",
+                -33.947, 18.477, new BigDecimal("5500.00"), Accommodation.PriceFrequency.PER_MONTH,
+                2, 2, 2, true, true, true,
+                "Academic Year", LocalDateTime.now().plusMonths(6), null, true, sampleUser1);
+
+        acc4.getImageUrls().add("https://afs-pbsa-images-prod.s3.eu-west-2.amazonaws.com/lphs_36402_additional126202224523PM.jpg");
+        acc4.getImageUrls().add("https://afs-pbsa-images-prod.s3.eu-west-2.amazonaws.com/lphs_36403_additional126202224523PM.jpg");
+        acc4.getImageUrls().add("https://afs-pbsa-images-prod.s3.eu-west-2.amazonaws.com/lphs_36407_additional126202224524PM.jpg");
+
+
+
+
+        Accommodation acc5 = new Accommodation(
                 "Independent Dorm Room", "Single dorm room available",
-                Accommodation.AccommodationType.DORM, "Residence Block C", "Cape Town Centre", "7535",
-                -33.885, 18.635, new BigDecimal("3200.00"), Accommodation.PriceFrequency.PER_SEMESTER,
-                1, 0, 1, true, true, false, "Academic Year",
+                Accommodation.AccommodationType.DORM, "69 Kloof Rd", "Cape Town City Centre", "8005",
+                -33.885, 18.635, new BigDecimal("3200.00"), Accommodation.PriceFrequency.PER_MONTH,
+                1, 1, 2, true, true, false, "Academic Year",
                 LocalDateTime.now().plusWeeks(2), LocalDateTime.now().plusMonths(6),
                 true, sampleUser2);
-        acc4.getImageUrls().add("https://campuskey.co.za/wp-content/uploads/2024/07/Independent-Silver-Bedroom-1-scaled.jpg");
+        acc5.getImageUrls().add("https://afs-pbsa-images-prod.s3.eu-west-2.amazonaws.com/iq-images-jan-2025/The%20Brickworks/1.jpg");
+        acc5.getImageUrls().add("https://afs-pbsa-images-prod.s3.eu-west-2.amazonaws.com/iq-images-jan-2025/The%20Brickworks/5.jpg");
+
+
+        Accommodation acc6 = new Accommodation(
+                "Two Bed Room Accommodation", "Spacious two bedroom apartments...",
+                Accommodation.AccommodationType.APARTMENT, "22 Riebeek St", "Cape Town City Centre",
+                "8000", -33.9197614, 18.3459784, new BigDecimal("3200.00"),
+                Accommodation.PriceFrequency.PER_SEMESTER, 1, 0, 1,
+                true, true, false, "Academic Year",
+                LocalDateTime.now().plusWeeks(2), LocalDateTime.now().plusMonths(6),
+                true, sampleUser2);
+        acc6.getImageUrls().add("https://properliving.co.za/static/5e3af07283e55386943e39a31ea9d30d/7e6d5/one.webp");
+        acc6.getImageUrls().add("https://properliving.co.za/static/89e132dabd48707fb2f77ccda5e80c3c/7e6d5/two.webp");
+        acc6.getImageUrls().add("https://properliving.co.za/static/9ebb0a9d451e77d9c5638b55dec914a7/7e6d5/three.webp");
+        acc6.getImageUrls().add("https://properliving.co.za/static/b6ee8a514b612aef5f3986a1a58e0bc7/7e6d5/four.webp");
+
+        Accommodation acc7 = new Accommodation(
+                "Three Bed Room Accommodation", "Spacious three bed dorm room available",
+                Accommodation.AccommodationType.APARTMENT, "City Center, 1 St Georges Mall", "Cape Town Centre",
+                "8001", -33.9191531, 18.3459784, new BigDecimal("3500.00"),
+                Accommodation.PriceFrequency.PER_SEMESTER, 1, 0, 1,
+                true, true, false, "Academic Year",
+                LocalDateTime.now().plusWeeks(2), LocalDateTime.now().plusMonths(6),
+                true, sampleUser2);
+        acc7.getImageUrls().add("https://properliving.co.za/static/1489698255aa16ee6726fbcd85463d0c/47498/selectorDesktopThreeBedroom.jpg");
+        acc7.getImageUrls().add("https://properliving.co.za/static/57f1e1c6755ee1039b591a49e6619969/cb254/selectorDesktopThreeBedroom2.jpg");
+        acc7.getImageUrls().add("https://properliving.co.za/static/3f5a82188ff1b98afb6bf16c7e308a65/c78d4/selectorDesktopThreeBedroom3D.png");
+
+
+        Accommodation acc8 = new Accommodation(
+                "Room to Share Accommodation", "Spacious  bed dorm room available",
+                Accommodation.AccommodationType.SHARED_ROOM, "Liesbeek Avenue, Off Liesbeek Pkwy", "Mowbray",
+                "7925", -33.942043, 18.4418392, new BigDecimal("3200.00"),
+                Accommodation.PriceFrequency.PER_MONTH, 1, 1, 2,
+                true, true, false, "Academic Year",
+                LocalDateTime.now().plusWeeks(2), LocalDateTime.now().plusMonths(6),
+                false, sampleUser1);
+        acc8.getImageUrls().add("https://static.student.com/storm-frontend-wp/uploads/2016/01/Student.com-Room-Types-Shared-Room.jpg");
+        acc8.getImageUrls().add("https://static.student.com/storm-frontend-wp/uploads/2016/01/Student.com-Room-Types-Bathroom-Types.jpg");
+
 
         // DAO to insert accommodations
         try {
@@ -213,6 +277,10 @@ public class DatabaseConnection {
             accommodationDao.createAccommodation(acc2);
             accommodationDao.createAccommodation(acc3);
             accommodationDao.createAccommodation(acc4);
+            accommodationDao.createAccommodation(acc5);
+            accommodationDao.createAccommodation(acc6);
+            accommodationDao.createAccommodation(acc7);
+            accommodationDao.createAccommodation(acc8);
             System.out.println("Sample accommodation data inserted successfully.");
         } catch (SQLException e) {
             System.err.println("Error inserting sample accommodation data: " + e.getMessage());

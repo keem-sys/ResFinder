@@ -10,6 +10,7 @@ import java.awt.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 public class MainApplicationPanel {
@@ -106,7 +107,7 @@ public class MainApplicationPanel {
                     // Refresh the UI with the initially sorted list
                     refreshListingGrid(currentlyDisplayedListings);
 
-                } catch (InterruptedException | ExecutionException e) {
+                } catch (InterruptedException | ExecutionException | CancellationException e) {
                     Throwable cause = e.getCause();
                     String errorMsg = "Error loading accommodation listings: " + (cause != null ? cause.getMessage()
                             : e.getMessage());
