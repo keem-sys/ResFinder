@@ -183,7 +183,6 @@ public class LoginPanel extends JPanel {
         });
 
         // Request initial focus
-        SwingUtilities.invokeLater(() -> usernameOrEmailField.requestFocusInWindow());
     }
 
 
@@ -294,6 +293,19 @@ public class LoginPanel extends JPanel {
         button.setForeground(fgColor);
         button.setFocusPainted(false);
         // TODO: Add hover effect listener
+    }
+
+    /**
+     * Requests that the initial focus be set on the username/email field
+     * for this panel. Should be called after the panel is visible or
+     * added to the main window.
+     */
+    public void requestInitialFocus() {
+        SwingUtilities.invokeLater(() -> {
+            if (usernameOrEmailField != null) {
+                usernameOrEmailField.requestFocusInWindow();
+            }
+        });
     }
 
     // Method needed by MainWindow to switch panels

@@ -225,7 +225,6 @@ public class RegistrationPanel extends JPanel {
         });
 
         // Request initial focus
-        SwingUtilities.invokeLater(() -> fullNameField.requestFocusInWindow());
     }
 
 
@@ -333,6 +332,20 @@ public class RegistrationPanel extends JPanel {
             setErrorMessage("Registration failed. An unexpected error occurred.");
         }
     }
+
+    /**
+     * Requests that the initial focus be set on the full name field
+     * for this panel. Should be called after the panel is visible or
+     * added to the main window.
+     */
+    public void requestInitialFocus() {
+        SwingUtilities.invokeLater(() -> {
+            if (fullNameField != null) {
+                fullNameField.requestFocusInWindow();
+            }
+        });
+    }
+
 
     /**
      * Clears all input fields and the error message label.

@@ -375,6 +375,9 @@ public class MainApplicationPanel {
         listingGridPanel.repaint();
     }
 
+    public JTextField getSearchField() {
+        return searchField;
+    }
 
 
     // Method to return the main panel for MainWindow to display
