@@ -4,9 +4,8 @@ import accommodationfinder.service.UserService;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Arrays; // Import Arrays for clearing password
+import java.util.Arrays;
+
 
 public class LoginPanel extends JPanel {
 
@@ -38,7 +37,7 @@ public class LoginPanel extends JPanel {
         topPanel.setOpaque(false);
         backButton = new JButton("<- Back to Main View");
 
-        styleButton(backButton, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 15);
+        styleButton(backButton, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 13);
         topPanel.add(backButton);
         add(topPanel, BorderLayout.NORTH);
 
@@ -222,7 +221,7 @@ public class LoginPanel extends JPanel {
                 mainWindow.saveJwtToPreferences(jwtToken);
                 System.out.println("JWT token marked for saving.");
             } else {
-                mainWindow.clearJwtFromPreferences();
+                mainWindow.saveJwtToPreferences(null);
                 System.out.println("JWT token marked for clearing.");
             }
 
