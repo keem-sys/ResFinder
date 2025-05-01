@@ -170,6 +170,11 @@ public class MainWindow extends JFrame {
         }
     }
 
+    public void clearJwtFromPreferences() {
+        Preferences prefs = Preferences.userNodeForPackage(MainWindow.class);
+        prefs.remove(currentJwtToken);
+        System.out.println("JWT token cleared from preferences.");
+    }
     public void showMainApplicationView() {
 
         // Ensure the main panel itself exists
