@@ -324,7 +324,7 @@ public class DatabaseConnection {
                 "Cape Town City Centre",
                 "8001",
                 -33.921, 18.420,
-                new BigDecimal("4050.00"),
+                new BigDecimal("4000.00"),
                 Accommodation.PriceFrequency.PER_SEMESTER,
                 3,
                 2,

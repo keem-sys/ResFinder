@@ -7,6 +7,7 @@ import accommodationfinder.service.UserService;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,13 +28,14 @@ public class MainApplicationPanel {
     // Search/Filter Components
     private JTextField searchField;
     private JComboBox<String> orderByComboBox;
-    private JButton filterButton;
+    private JButton filterButton; // Still a placeholder
     private JScrollPane scrollPane;
 
+    // Data Lists
     private List<Accommodation> allFetchedListings = new ArrayList<>();
     private List<Accommodation> currentlyDisplayedListings = new ArrayList<>();
 
-
+    // Constants for Combo Box
     public static final String ORDER_BY_DEFAULT = "Default(Newest)";
     public static final String ORDER_BY_PRICE_ASC = "Price: Low to High";
     public static final String ORDER_BY_PRICE_DESC = "Price: High to Low";
@@ -56,7 +58,7 @@ public class MainApplicationPanel {
         mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // UI Setup remains the same
+        // UI Setup
         JPanel topBarPanel = createTopBar();
         mainPanel.add(topBarPanel, BorderLayout.NORTH);
         JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
@@ -77,13 +79,14 @@ public class MainApplicationPanel {
         centerPanel.add(this.scrollPane, BorderLayout.CENTER);
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
-
-        loadAndDisplayListings(); // Load data
-        showLoggedOutState(); // Set initial auth state
+        loadInitialListings(); // Load data asynchronously
+        showLoggedOutState();  // Set initial auth state
     }
 
-    // Method to Load and Display Listings
-    private void loadAndDisplayListings() {
+    // Data Loading
+
+    private void loadInitialListings() {
+        // Display loading message
         listingGridPanel.removeAll();
         listingGridPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         listingGridPanel.add(new JLabel("Loading listings... Please wait."));
@@ -93,36 +96,36 @@ public class MainApplicationPanel {
         SwingWorker<List<Accommodation>, Void> worker = new SwingWorker<>() {
             @Override
             protected List<Accommodation> doInBackground() throws SQLException {
+                // Fetch listings from the service
                 return accommodationService.getAllActiveListings();
             }
 
             @Override
             protected void done() {
                 try {
-                    allFetchedListings = get(); // Fetch all
+                    allFetchedListings = get(); // Retrieve the fetched list
 
-                    // Uses sorter for the initial default sort
-                    currentlyDisplayedListings = AccommodationSorter.sort(allFetchedListings, ORDER_BY_DEFAULT);
-
-                    // Refresh the UI with the initially sorted list
-                    refreshListingGrid(currentlyDisplayedListings);
+                    // Call the central update method to apply default sort/search
+                    // and display the initial results
+                    updateDisplayedListings();
 
                 } catch (InterruptedException | ExecutionException | CancellationException e) {
+                    // Handle errors during fetching or processing
                     Throwable cause = e.getCause();
-                    String errorMsg = "Error loading accommodation listings: " + (cause != null ? cause.getMessage()
-                            : e.getMessage());
+                    String errorMsg = "Error loading accommodation listings: " + (cause != null ? cause.getMessage() :
+                            e.getMessage());
                     System.err.println(errorMsg);
-                    e.printStackTrace();
+                    e.printStackTrace(); // Log the full stack trace
                     displayLoadingError("Error loading listings. Please try again later.");
-                    // Show specific dialog based on cause
+                    // Provide specific feedback to the user
                     if (cause instanceof SQLException) {
                         JOptionPane.showMessageDialog(mainPanel, "Database error loading listings.",
                                 "Database Error", JOptionPane.ERROR_MESSAGE);
                     } else {
-                        JOptionPane.showMessageDialog(mainPanel, "An unexpected error occurred while " +
-                                "loading listings.", "Loading Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(mainPanel, "An unexpected error occurred while loading " +
+                                "listings.", "Loading Error", JOptionPane.ERROR_MESSAGE);
                     }
-                } catch (Exception e) {
+                } catch (Exception e) { // Catch any other unexpected exceptions
                     System.err.println("Unexpected error during listing load completion: " + e.getMessage());
                     e.printStackTrace();
                     displayLoadingError("An unexpected error occurred.");
@@ -131,12 +134,119 @@ public class MainApplicationPanel {
                 }
             }
         };
-        worker.execute();
+        worker.execute(); // Start the background worker
     }
+
+
+    // Central Update Logic
+    /**
+     * Central method to apply filtering (future), searching, and sorting,
+     * then update the displayed listings grid.
+     */
+    private void updateDisplayedListings() {
+        // Get Current State from UI Controls
+        String searchText = searchField.getText();
+        String sortCriterion = (String) orderByComboBox.getSelectedItem();
+        // Object filterCriteria = getCurrentFilterCriteria(); // Placeholder for future filters
+
+        // Apply Filter -> Search -> Sort
+        List<Accommodation> currentList = new ArrayList<>(allFetchedListings);
+
+        // Apply Filtering
+        // currentList = applyFilters(currentList, filterCriteria);
+
+        // Apply Keyword Search
+        currentList = performSearch(currentList, searchText);
+
+        // Apply Sorting
+        // Ensure sortCriterion is not null, default if necessary
+        if (sortCriterion == null) {
+            sortCriterion = ORDER_BY_DEFAULT;
+        }
+        currentList = AccommodationSorter.sort(currentList, sortCriterion);
+
+        // Update Internal State and Refresh UI
+        currentlyDisplayedListings = currentList;
+        refreshListingGrid(currentlyDisplayedListings);
+    }
+
+    // Search Implementation
+
+    /**
+     * Filters the input list based on the provided search keywords.
+     *
+     * @param inputList   The list of accommodations to search within.
+     * @param rawKeywords The raw text entered by the user in the search field.
+     * @return A new list containing only accommodations matching the keywords.
+     */
+    private List<Accommodation> performSearch(List<Accommodation> inputList, String rawKeywords) {
+        String processedKeywords = rawKeywords.trim().toLowerCase();
+
+        // If search is empty, return the original list
+        if (processedKeywords.isEmpty()) {
+            return new ArrayList<>(inputList); // Return a copy
+        }
+
+        // Split search query into individual keywords, handles multiple spaces
+        String[] keywords = processedKeywords.split("\\s+");
+
+        List<Accommodation> results = new ArrayList<>();
+        for (Accommodation acc : inputList) {
+            boolean allKeywordsMatch = true; // Assume match until proven otherwise
+            for (String keyword : keywords) {
+                if (!accommodationContainsKeyword(acc, keyword)) {
+                    allKeywordsMatch = false; // If any keyword doesn't match, reject this accommodation
+                    break;
+                }
+            }
+            if (allKeywordsMatch) {
+                results.add(acc);
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Checks if accommodation contains a specific keyword in its searchable fields.
+     * Performs case-insensitive checking and handles null values.
+     *
+     * @param acc     The Accommodation object to check.
+     * @param keyword The single keyword (in lowercase) to search for.
+     * @return true if the keyword is found in any relevant field, false otherwise.
+     */
+    private boolean accommodationContainsKeyword(Accommodation acc, String keyword) {
+        if (keyword == null || keyword.isEmpty()) {
+            return true; // An empty keyword "matches" everything
+        }
+        if (acc == null) {
+            return false;
+        }
+
+        // Check Title
+        if (acc.getTitle() != null && acc.getTitle().toLowerCase().contains(keyword)) {
+            return true;
+        }
+        // Check Description (null-safe and case-insensitive)
+        if (acc.getDescription() != null && acc.getDescription().toLowerCase().contains(keyword)) {
+            return true;
+        }
+        // Check Address (null-safe and case-insensitive)
+        if (acc.getAddress() != null && acc.getAddress().toLowerCase().contains(keyword)) {
+            return true;
+        }
+        // Check City (null-safe and case-insensitive)
+        if (acc.getCity() != null && acc.getCity().toLowerCase().contains(keyword)) {
+            return true;
+        }
+
+
+        return false; // Keyword not found in any specified field
+    }
+
+
 
     // Helper method to create the Top Bar
     private JPanel createTopBar() {
-        // ... (same as before)
         JPanel topBarPanel = new JPanel(new BorderLayout());
         JLabel appTitleLabel = new JLabel("ResFinder");
         appTitleLabel.setFont(new Font("Arial", Font.BOLD, 36));
@@ -150,7 +260,7 @@ public class MainApplicationPanel {
 
     // Method to update UI for Logged In state
     public void showLoggedInState(String username) {
-        // ... (same as before)
+        // ... (implementation is fine)
         authAreaPanel.removeAll();
         welcomeLabel = new JLabel("Welcome, " + username);
         welcomeLabel.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -176,14 +286,20 @@ public class MainApplicationPanel {
         authAreaPanel.repaint();
     }
 
-
     // Helper method to create the Search/Filter Bar
     private JPanel createSearchFilterBar() {
         JPanel searchFilterPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
-        searchField = new JTextField(20);
+
+        // Search Area
+        searchField = new JTextField(25);
+        searchField.setToolTipText("Enter keywords and press Enter to search");
+        // Action Listener for Search Field
+        searchField.addActionListener(e -> updateDisplayedListings()); // Trigger update on Enter press
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        searchPanel.add(new JLabel("Search area:"));
+        searchPanel.add(new JLabel("Search:"));
         searchPanel.add(searchField);
+
+        // Order By ComboBox
         String[] orderByOptions = {
                 ORDER_BY_DEFAULT,
                 ORDER_BY_PRICE_ASC,
@@ -192,42 +308,58 @@ public class MainApplicationPanel {
         };
 
         orderByComboBox = new JComboBox<>(orderByOptions);
-        orderByComboBox.addActionListener(e -> applySortingAndRefreshUI());
+        for(ActionListener al : orderByComboBox.getActionListeners()) {
+            orderByComboBox.removeActionListener(al);
+        }
+
+        // Add the listener that calls the central update method
+        orderByComboBox.addActionListener(e -> updateDisplayedListings());
         JPanel orderByPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         orderByPanel.add(new JLabel("Sort by:"));
         orderByPanel.add(orderByComboBox);
-        filterButton = new JButton("Filter:");
+
+        // Filter Button
+        filterButton = new JButton("Filters");
+        filterButton.setToolTipText("Apply filters (Not implemented yet)");
+        // TODO: Implement Filter action
+        filterButton.addActionListener(e -> JOptionPane.showMessageDialog(mainPanel,
+                "Filter functionality is not yet implemented.", "Info", JOptionPane.INFORMATION_MESSAGE));
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         filterPanel.add(filterButton);
+
+        // Add components to the main search/filter panel
         searchFilterPanel.add(searchPanel);
         searchFilterPanel.add(orderByPanel);
         searchFilterPanel.add(filterPanel);
-        filterButton.addActionListener(e -> System.out.println("Filter button clicked"));
+
         return searchFilterPanel;
     }
 
-    // refreshListingGrid
     private void refreshListingGrid(List<Accommodation> listings) {
         listingGridPanel.removeAll();
+
         if (listings == null || listings.isEmpty()) {
+            // Display a message if no listings match criteria
             listingGridPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
             listingGridPanel.add(new JLabel("No accommodation listings found matching your criteria."));
         } else {
+            // Set grid layout and populate with cards
             listingGridPanel.setLayout(new GridLayout(0, 2, 15, 15));
             for (Accommodation acc : listings) {
                 AccommodationCardPanel card = new AccommodationCardPanel(acc, mainWindow);
                 listingGridPanel.add(card);
             }
         }
+
+        // Reset scroll pane to top AFTER components are  added/removed
         SwingUtilities.invokeLater(() -> {
-                    if (scrollPane != null && scrollPane.getViewport() != null) {
-                        scrollPane.getViewport().setViewPosition(new Point(0, 0));
-                    } else {
-                        System.err.println("Warning: scrollPane or its viewport was null during " +
-                                "refreshListingGrid scroll reset.");
-                    }
-                }
-        );
+            if (scrollPane != null && scrollPane.getViewport() != null) {
+                scrollPane.getViewport().setViewPosition(new Point(0, 0));
+            }
+            else { System.err.println("Warning: scrollPane/viewport null during scroll reset."); }
+        });
+
+        // Tell the layout manager to recalculate and repaint
         listingGridPanel.revalidate();
         listingGridPanel.repaint();
     }
@@ -243,22 +375,7 @@ public class MainApplicationPanel {
         listingGridPanel.repaint();
     }
 
-    /**
-     * Applies sorting using AccommodationSorter based on the combo box selection
-     * and refreshes the UI.
-     */
-    private void applySortingAndRefreshUI() {
-        String selectedOrder = (String) orderByComboBox.getSelectedItem();
-        if (selectedOrder == null) {
-            return;
-        }
 
-
-        // Update the list that the UI is currently displaying
-        currentlyDisplayedListings = AccommodationSorter.sort(allFetchedListings, selectedOrder);
-
-        refreshListingGrid(currentlyDisplayedListings);
-    }
 
     // Method to return the main panel for MainWindow to display
     public JPanel getMainPanel() {
