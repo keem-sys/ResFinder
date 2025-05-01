@@ -54,6 +54,8 @@ public class AccommodationDetailPanel extends JPanel {
     // Constants
     private static final Color BACKGROUND_COLOR = new Color(253, 251, 245);
     private static final Color PLACEHOLDER_COLOR = new Color(230, 230, 230);
+    private static final Color BUTTON_BACKGROUND_COLOR = new Color(230, 230, 230);
+    private static final Color TEXT_COLOR = new Color(50, 50, 50);
     private static final int IMG_WIDTH = 550;
     private static final int IMG_HEIGHT = 400;
 
@@ -78,11 +80,12 @@ public class AccommodationDetailPanel extends JPanel {
         topPanel.setOpaque(false);
 
         JButton backButton = new JButton("<- Back to Main View");
+        styleButton(backButton, BUTTON_BACKGROUND_COLOR, TEXT_COLOR, 13);
         backButton.addActionListener(e -> mainWindow.showMainApplicationView());
         topPanel.add(backButton, BorderLayout.WEST);
 
         titleLabel = new JLabel("Loading...", SwingConstants.LEFT);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         titleLabel.setBorder(new EmptyBorder(0, 10, 10, 0));
         topPanel.add(titleLabel, BorderLayout.CENTER);
 
@@ -115,7 +118,7 @@ public class AccommodationDetailPanel extends JPanel {
         prevImageButton = new JButton("< Prev");
         nextImageButton = new JButton("Next >");
         imageCountLabel = new JLabel("Image 0 of 0");
-        imageCountLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        imageCountLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
 
 
         prevImageButton.addActionListener(e -> showImageAtIndex(currentImageIndex - 1));
@@ -133,7 +136,7 @@ public class AccommodationDetailPanel extends JPanel {
         detailsTextArea.setEditable(false);
         detailsTextArea.setLineWrap(true);
         detailsTextArea.setWrapStyleWord(true);
-        detailsTextArea.setFont(new Font("Arial", Font.PLAIN, 14));
+        detailsTextArea.setFont(new Font("SansSerif", Font.PLAIN, 14));
         detailsTextArea.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createTitledBorder("Details"),
                 new EmptyBorder(5, 5, 5, 5)
@@ -174,7 +177,7 @@ public class AccommodationDetailPanel extends JPanel {
 
         // Lister Info
         listerInfoLabel = new JLabel("Listed by: Loading...");
-        listerInfoLabel.setFont(new Font("Arial", Font.ITALIC, 12));
+        listerInfoLabel.setFont(new Font("SansSerif", Font.ITALIC, 12));
         gbc.gridwidth = 3;
         contactPanel.add(listerInfoLabel, gbc);
         gbc.gridwidth = 1;
@@ -216,6 +219,7 @@ public class AccommodationDetailPanel extends JPanel {
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         sendMessageButton = new JButton("Send Message");
+        styleButton(sendMessageButton, BUTTON_BACKGROUND_COLOR, TEXT_COLOR, 12);
         sendMessageButton.addActionListener(e -> handleSendMessage());
         contactPanel.add(sendMessageButton, gbc);
 
@@ -560,6 +564,17 @@ public class AccommodationDetailPanel extends JPanel {
             case PER_NIGHT -> "/ night";
             case OTHER -> "";
         };
+    }
+
+    /**
+     * Helper to style JButtons consistently.
+     */
+    private void styleButton(JButton button, Color bgColor, Color fgColor, int fontSize) {
+        button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
+        button.setBackground(bgColor);
+        button.setForeground(fgColor);
+        button.setFocusPainted(false);
+        // TODO: Add hover effect listener
     }
 
     // Method to return this panel for MainWindow

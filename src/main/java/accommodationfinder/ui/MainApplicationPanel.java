@@ -49,6 +49,11 @@ public class MainApplicationPanel {
     private final AccommodationService accommodationService;
     private final MainWindow mainWindow;
 
+    private static final Color BACKGROUND_COLOR = new Color(253, 251, 245);
+    private static final Color TEXT_COLOR = new Color(50, 50, 50);
+    private static final Color BUTTON_BACKGROUND_COLOR = new Color(230, 230, 230);
+
+
     public MainApplicationPanel(AccommodationService accommodationService, UserService userService,
                                 MainWindow mainWindow) {
         this.accommodationService = accommodationService;
@@ -57,26 +62,38 @@ public class MainApplicationPanel {
 
         mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        mainPanel.setBackground(BACKGROUND_COLOR);
+
 
         // UI Setup
         JPanel topBarPanel = createTopBar();
         mainPanel.add(topBarPanel, BorderLayout.NORTH);
+
         JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
+        centerPanel.setOpaque(false);
         JLabel mainTitleLabel = new JLabel("Find Student Accommodation to Rent", SwingConstants.CENTER);
-        mainTitleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        mainTitleLabel.setBorder(new EmptyBorder(10, 0, 10, 0));
+        mainTitleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
+        mainTitleLabel.setBorder(new EmptyBorder(15, 0, 15, 0));
+
         JPanel searchFilterPanel = createSearchFilterBar();
         JPanel titleAndSearchPanel = new JPanel();
         titleAndSearchPanel.setLayout(new BoxLayout(titleAndSearchPanel, BoxLayout.Y_AXIS));
+        titleAndSearchPanel.setOpaque(false);
         titleAndSearchPanel.add(mainTitleLabel);
         titleAndSearchPanel.add(searchFilterPanel);
+
         centerPanel.add(titleAndSearchPanel, BorderLayout.NORTH);
+
         listingGridPanel = new JPanel(new GridLayout(0, 2, 15, 15));
-        listingGridPanel.setBorder(new EmptyBorder(15, 0, 0, 0));
+        listingGridPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
+        listingGridPanel.setOpaque(false);
+
         this.scrollPane = new JScrollPane(listingGridPanel);
         this.scrollPane.setBorder(BorderFactory.createEmptyBorder());
+
         this.scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         centerPanel.add(this.scrollPane, BorderLayout.CENTER);
+
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
         loadInitialListings(); // Load data asynchronously
@@ -89,7 +106,9 @@ public class MainApplicationPanel {
         // Display loading message
         listingGridPanel.removeAll();
         listingGridPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-        listingGridPanel.add(new JLabel("Loading listings... Please wait."));
+        JLabel loadingLabel = new JLabel("Loading listings... Please wait.");
+        loadingLabel.setForeground(TEXT_COLOR);
+        listingGridPanel.add(loadingLabel);
         listingGridPanel.revalidate();
         listingGridPanel.repaint();
 
@@ -248,10 +267,13 @@ public class MainApplicationPanel {
     // Helper method to create the Top Bar
     private JPanel createTopBar() {
         JPanel topBarPanel = new JPanel(new BorderLayout());
+        topBarPanel.setOpaque(false);
         JLabel appTitleLabel = new JLabel("ResFinder");
-        appTitleLabel.setFont(new Font("Arial", Font.BOLD, 36));
-        appTitleLabel.setBorder(new EmptyBorder(0, 10, 0, 0));
-        authAreaPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        appTitleLabel.setFont(new Font("SansSerif", Font.BOLD, 36));
+        appTitleLabel.setBorder(new EmptyBorder(0, 20, 0, 0));
+        appTitleLabel.setForeground(TEXT_COLOR);
+
+        authAreaPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
         authAreaPanel.setOpaque(false);
         topBarPanel.add(appTitleLabel, BorderLayout.WEST);
         topBarPanel.add(authAreaPanel, BorderLayout.EAST);
@@ -260,10 +282,9 @@ public class MainApplicationPanel {
 
     // Method to update UI for Logged In state
     public void showLoggedInState(String username) {
-        // ... (implementation is fine)
         authAreaPanel.removeAll();
         welcomeLabel = new JLabel("Welcome, " + username);
-        welcomeLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        welcomeLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         logoutButton = new JButton("Logout");
         logoutButton.addActionListener(e -> mainWindow.handleLogout());
         authAreaPanel.add(welcomeLabel);
@@ -277,9 +298,17 @@ public class MainApplicationPanel {
     public void showLoggedOutState() {
         authAreaPanel.removeAll();
         signUpButton = new JButton("Sign Up");
+        styleButton(signUpButton, BACKGROUND_COLOR, TEXT_COLOR, 14);
+        signUpButton.setPreferredSize(new Dimension(90, 35));
+
         loginButton = new JButton("Login");
+        styleButton(loginButton, BACKGROUND_COLOR, TEXT_COLOR, 14);
+        loginButton.setPreferredSize(new Dimension(90, 35));
+
+
         signUpButton.addActionListener(e -> mainWindow.switchToRegistrationPanel());
         loginButton.addActionListener(e -> mainWindow.switchToLoginPanel());
+
         authAreaPanel.add(signUpButton);
         authAreaPanel.add(loginButton);
         authAreaPanel.revalidate();
@@ -289,42 +318,62 @@ public class MainApplicationPanel {
     // Helper method to create the Search/Filter Bar
     private JPanel createSearchFilterBar() {
         JPanel searchFilterPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
+        searchFilterPanel.setOpaque(false);
 
         // Search Area
-        searchField = new JTextField(25);
-        searchField.setToolTipText("Enter keywords and press Enter to search");
-        // Action Listener for Search Field
-        searchField.addActionListener(e -> updateDisplayedListings()); // Trigger update on Enter press
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        searchPanel.add(new JLabel("Search:"));
+        searchPanel.setOpaque(false);
+        JLabel searchLabel = new JLabel("Search:");
+        searchLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        searchPanel.add(searchLabel);
+        searchField = new JTextField(30);
+        searchField.setToolTipText("Enter keywords and press Enter to search");
+        searchField.addActionListener(e -> updateDisplayedListings());
         searchPanel.add(searchField);
 
+
         // Order By ComboBox
+        JPanel orderByPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        orderByPanel.setOpaque(false);
+        JLabel sortLabel = new JLabel("Sort by:");
+        sortLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        orderByPanel.add(sortLabel);
+
         String[] orderByOptions = {
                 ORDER_BY_DEFAULT,
                 ORDER_BY_PRICE_ASC,
                 ORDER_BY_PRICE_DESC,
-                ORDER_BY_DATE_OLDEST,
-        };
+                ORDER_BY_DATE_OLDEST };
+        orderByComboBox = new JComboBox<>(orderByOptions);
+        orderByComboBox.setFont(new Font("SansSerif", Font.PLAIN, 12));
+
+        for(ActionListener al : orderByComboBox.getActionListeners()) { orderByComboBox.removeActionListener(al); } // Clear existing listeners
+        orderByComboBox.addActionListener(e -> updateDisplayedListings());
+        orderByPanel.add(orderByComboBox);
+
+        for(ActionListener al : orderByComboBox.getActionListeners()) {
+            orderByComboBox.removeActionListener(al);
+        }
+
+        orderByComboBox.addActionListener(e -> updateDisplayedListings());
+        orderByPanel.add(orderByComboBox);
 
         orderByComboBox = new JComboBox<>(orderByOptions);
         for(ActionListener al : orderByComboBox.getActionListeners()) {
             orderByComboBox.removeActionListener(al);
         }
 
-        // Add the listener that calls the central update method
-        orderByComboBox.addActionListener(e -> updateDisplayedListings());
-        JPanel orderByPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        orderByPanel.add(new JLabel("Sort by:"));
-        orderByPanel.add(orderByComboBox);
 
         // Filter Button
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        filterPanel.setOpaque(false);
         filterButton = new JButton("Filters");
+        styleButton(filterButton, BUTTON_BACKGROUND_COLOR, TEXT_COLOR, 13);
+
+        // TODO: implement filter functionality
         filterButton.setToolTipText("Apply filters (Not implemented yet)");
-        // TODO: Implement Filter action
         filterButton.addActionListener(e -> JOptionPane.showMessageDialog(mainPanel,
                 "Filter functionality is not yet implemented.", "Info", JOptionPane.INFORMATION_MESSAGE));
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         filterPanel.add(filterButton);
 
         // Add components to the main search/filter panel
@@ -375,10 +424,20 @@ public class MainApplicationPanel {
         listingGridPanel.repaint();
     }
 
+    /**
+     * Helper to style JButtons consistently.
+     */
+    private void styleButton(JButton button, Color bgColor, Color fgColor, int fontSize) {
+        button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
+        button.setBackground(bgColor);
+        button.setForeground(fgColor);
+        button.setFocusPainted(false);
+    }
+
+
     public JTextField getSearchField() {
         return searchField;
     }
-
 
     // Method to return the main panel for MainWindow to display
     public JPanel getMainPanel() {

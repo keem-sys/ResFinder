@@ -9,6 +9,7 @@ import accommodationfinder.data.DatabaseConnection;
 import accommodationfinder.data.UserDao;
 
 import javax.swing.*;
+import java.awt.*;
 import java.sql.SQLException;
 import java.util.prefs.Preferences;
 
@@ -27,11 +28,12 @@ public class MainWindow extends JFrame {
     private String currentJwtToken = null;
     private User currentUser = null;
 
+
     public MainWindow() {
         setTitle("Student Accommodation Finder");
         setSize(1280, 720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // Center the window
+        setLocationRelativeTo(null);
 
         try {
             // Create DatabaseConnection instance
