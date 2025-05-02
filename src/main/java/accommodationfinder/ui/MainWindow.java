@@ -9,6 +9,7 @@ import accommodationfinder.data.DatabaseConnection;
 import accommodationfinder.data.UserDao;
 
 import javax.swing.*;
+import java.awt.*;
 import java.sql.SQLException;
 import java.util.prefs.Preferences;
 
@@ -27,11 +28,12 @@ public class MainWindow extends JFrame {
     private String currentJwtToken = null;
     private User currentUser = null;
 
+
     public MainWindow() {
         setTitle("Student Accommodation Finder");
         setSize(1280, 720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // Center the window
+        setLocationRelativeTo(null);
 
         try {
             // Create DatabaseConnection instance
@@ -70,6 +72,15 @@ public class MainWindow extends JFrame {
                 }
             }
 
+            // Initial Focus Panel
+            SwingUtilities.invokeLater(() -> {
+                if (mainApplicationPanel != null && mainApplicationPanel.getSearchField() != null) {
+                    System.out.println("Requesting initial focus for search field.");
+                    mainApplicationPanel.getSearchField().requestFocusInWindow();
+                } else {
+                    System.err.println("Could not set initial focus: main panel or search field is null.");
+                }
+            });
 
         } catch (SQLException e) {
             System.err.println("FATAL ERROR during application startup: " + e.getMessage());
@@ -151,6 +162,7 @@ public class MainWindow extends JFrame {
         setContentPane(registrationPanel.getRegistrationPanel());
         revalidate();
         repaint();
+        registrationPanel.requestInitialFocus();
         System.out.println("Switched to registration panel");
     }
 
@@ -158,6 +170,7 @@ public class MainWindow extends JFrame {
         setContentPane(loginPanel.getLoginPanel());
         revalidate();
         repaint();
+        loginPanel.requestInitialFocus();
         System.out.println("Switched to login panel");
     }
 

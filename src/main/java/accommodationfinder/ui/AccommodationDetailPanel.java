@@ -3,12 +3,16 @@ package accommodationfinder.ui;
 import accommodationfinder.listing.Accommodation;
 import accommodationfinder.service.AccommodationService;
 
+import javax.imageio.IIOException;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.NumberFormat;
@@ -50,6 +54,8 @@ public class AccommodationDetailPanel extends JPanel {
     // Constants
     private static final Color BACKGROUND_COLOR = new Color(253, 251, 245);
     private static final Color PLACEHOLDER_COLOR = new Color(230, 230, 230);
+    private static final Color BUTTON_BACKGROUND_COLOR = new Color(230, 230, 230);
+    private static final Color TEXT_COLOR = new Color(50, 50, 50);
     private static final int IMG_WIDTH = 550;
     private static final int IMG_HEIGHT = 400;
 
@@ -74,11 +80,12 @@ public class AccommodationDetailPanel extends JPanel {
         topPanel.setOpaque(false);
 
         JButton backButton = new JButton("<- Back to Main View");
+        styleButton(backButton, BUTTON_BACKGROUND_COLOR, TEXT_COLOR, 13);
         backButton.addActionListener(e -> mainWindow.showMainApplicationView());
         topPanel.add(backButton, BorderLayout.WEST);
 
         titleLabel = new JLabel("Loading...", SwingConstants.LEFT);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         titleLabel.setBorder(new EmptyBorder(0, 10, 10, 0));
         topPanel.add(titleLabel, BorderLayout.CENTER);
 
@@ -111,7 +118,7 @@ public class AccommodationDetailPanel extends JPanel {
         prevImageButton = new JButton("< Prev");
         nextImageButton = new JButton("Next >");
         imageCountLabel = new JLabel("Image 0 of 0");
-        imageCountLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        imageCountLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
 
 
         prevImageButton.addActionListener(e -> showImageAtIndex(currentImageIndex - 1));
@@ -129,7 +136,7 @@ public class AccommodationDetailPanel extends JPanel {
         detailsTextArea.setEditable(false);
         detailsTextArea.setLineWrap(true);
         detailsTextArea.setWrapStyleWord(true);
-        detailsTextArea.setFont(new Font("Arial", Font.PLAIN, 14));
+        detailsTextArea.setFont(new Font("SansSerif", Font.PLAIN, 14));
         detailsTextArea.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createTitledBorder("Details"),
                 new EmptyBorder(5, 5, 5, 5)
@@ -170,7 +177,7 @@ public class AccommodationDetailPanel extends JPanel {
 
         // Lister Info
         listerInfoLabel = new JLabel("Listed by: Loading...");
-        listerInfoLabel.setFont(new Font("Arial", Font.ITALIC, 12));
+        listerInfoLabel.setFont(new Font("SansSerif", Font.ITALIC, 12));
         gbc.gridwidth = 3;
         contactPanel.add(listerInfoLabel, gbc);
         gbc.gridwidth = 1;
@@ -212,6 +219,7 @@ public class AccommodationDetailPanel extends JPanel {
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         sendMessageButton = new JButton("Send Message");
+        styleButton(sendMessageButton, BUTTON_BACKGROUND_COLOR, TEXT_COLOR, 12);
         sendMessageButton.addActionListener(e -> handleSendMessage());
         contactPanel.add(sendMessageButton, gbc);
 
@@ -442,19 +450,27 @@ public class AccommodationDetailPanel extends JPanel {
         }
 
         SwingWorker<ImageIcon, Void> imageLoader = new SwingWorker<>() {
+
             @Override
             protected ImageIcon doInBackground() throws Exception {
+                Image scaledImage = null;
+
                 try {
                     URL imageUrl = new URL(imageUrlString.trim());
-                    ImageIcon originalIcon = new ImageIcon(imageUrl);
+                    BufferedImage originalImage = null;
+                    try (InputStream is = imageUrl.openStream()) {
+                        originalImage = ImageIO.read(is);
+                    } // Stream is automatically e
 
-                    if (originalIcon.getImageLoadStatus() != MediaTracker.COMPLETE) {
-                        System.err.println("Failed to load image: " + imageUrlString + " (Status: " +
-                                originalIcon.getImageLoadStatus() + ")");
+                    // Check if ImageIO successfully read the image including WebP via plugin
+                    if (originalImage == null) {
+                        System.err.println("Failed to load image using ImageIO (unsupported format or error): " +
+                                imageUrlString);
+                        // TODO: Fallback attempt using TwelveMonkeysImageIO
                         return null;
                     }
 
-                    Image originalImage = originalIcon.getImage();
+                    // Proceed with scaling logic if image was loaded
                     int originalWidth = originalImage.getWidth(null);
                     int originalHeight = originalImage.getHeight(null);
 
@@ -468,8 +484,13 @@ public class AccommodationDetailPanel extends JPanel {
                     int scaledWidth = (int) (originalWidth * scale);
                     int scaledHeight = (int) (originalHeight * scale);
 
+                    // Ensure minimum dimensions after scaling if needed
+                    scaledWidth = Math.max(1, scaledWidth);
+                    scaledHeight = Math.max(1, scaledHeight);
+
+
                     // Create a BufferedImage for higher quality scaling
-                    BufferedImage scaledBI = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB); // Use ARGB for transparency
+                    BufferedImage scaledBI = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB);
                     Graphics2D g2d = scaledBI.createGraphics();
 
                     // Apply rendering hints for better quality
@@ -477,22 +498,29 @@ public class AccommodationDetailPanel extends JPanel {
                     g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+                    // Draw the original image (loaded by ImageIO) onto the scaled BufferedImage
                     g2d.drawImage(originalImage, 0, 0, scaledWidth, scaledHeight, null);
                     g2d.dispose();
 
-                    return new ImageIcon(scaledBI);
+                    return new ImageIcon(scaledBI); // Return the scaled BufferedImage wrapped in an ImageIcon
 
                 } catch (MalformedURLException e) {
                     System.err.println("Invalid image URL: " + imageUrlString + " - " + e.getMessage());
                     return null;
-                } catch (Exception e) {
-                    // Catch broader exceptions during image processing
-                    // TODO: Add Custom Exceptions
-                    System.err.println("Error loading/scaling image: " + imageUrlString + " - " + e.getMessage());
+                } catch (IIOException e) { // Catch specific ImageIO errors
+                    System.err.println("ImageIO error loading/reading image: " + imageUrlString + " - " + e.getMessage());
                     e.printStackTrace();
+                    return null;
+                } catch (IOException e) { // Catch general IO errors (network, stream issues)
+                    System.err.println("IO error loading image stream: " + imageUrlString + " - " + e.getMessage());
+                    return null;
+                } catch (Exception e) {
+                    System.err.println("General error loading/scaling image: " + imageUrlString + " - " + e.getMessage());
+                    e.printStackTrace(); // Print stack trace for unexpected errors
                     return null;
                 }
             }
+
 
             @Override
             protected void done() {
@@ -536,6 +564,17 @@ public class AccommodationDetailPanel extends JPanel {
             case PER_NIGHT -> "/ night";
             case OTHER -> "";
         };
+    }
+
+    /**
+     * Helper to style JButtons consistently.
+     */
+    private void styleButton(JButton button, Color bgColor, Color fgColor, int fontSize) {
+        button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
+        button.setBackground(bgColor);
+        button.setForeground(fgColor);
+        button.setFocusPainted(false);
+        // TODO: Add hover effect listener
     }
 
     // Method to return this panel for MainWindow

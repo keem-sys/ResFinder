@@ -109,43 +109,36 @@ public class UserService {
 
     public String loginUser(String usernameOrEmail, String plainTextPassword) throws Exception {
         User user = null;
-
-        // find user by username
         try {
+            // Try finding by username first
             user = userDao.getUserByUsername(usernameOrEmail);
-        } catch (SQLException e) {
-            System.out.println("Unable to get user username");
-            e.printStackTrace();
-        }
 
-        //  If not found by username, try to find by email
-        if (user == null) {
-            try {
+            // If not found by username, try by email
+            if (user == null) {
                 user = userDao.getUserByEmail(usernameOrEmail);
-            } catch (SQLException e) {
-                System.out.println("Unable to get user email");
-                e.printStackTrace();
             }
+
+        } catch (SQLException e) {
+            // Log the database error and throw a generic login failure exception
+            System.err.println("Database error during login lookup for: " + usernameOrEmail + " - " + e.getMessage());
+            throw new Exception("Login failed due to a database error. Please try again later.");
         }
 
-
-
-
-        // User not found by either username or email
         if (user == null) {
-            throw new Exception("Invalid username or email."); // TODO: Custom AuthenticationException
+            throw new Exception("Invalid username or email.");
         }
 
-        // Password Verification (using Argon2-jvm)
+        // Password Verification
         if (!verifyPassword(plainTextPassword, user.getPasswordHash())) {
-            throw new Exception("Invalid password."); // TODO: Custom AuthenticationException
+            throw new Exception("Invalid password.");
         }
 
+        // Generate Token
         return generateJwtToken(user);
     }
 
 
-  
+
     private String generateJwtToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("username", user.getUsername());
