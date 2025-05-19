@@ -18,10 +18,34 @@ public class RegistrationPanel extends JPanel {
     private JLabel fullNameLbl, usernameLbl, emailLbl, passwordLbl, confirmPasswordLbl, errorMsgLbl, titleLabel;
     private JTextField fullNameField, usernameField, emailField;
     private JPasswordField passwordField, confirmPasswordField;
-    private JButton registerButton, cancelButton;
+    public JButton registerButton, cancelButton;
 
     private final UserService userService;
     private final MainWindow mainWindow;
+
+    public JTextField getFullNameField() {
+        return fullNameField;
+    }
+
+    public JTextField getUsernameField() {
+        return usernameField;
+    }
+
+    public JTextField getEmailField() {
+        return emailField;
+    }
+
+    public JPasswordField getPasswordField() {
+        return passwordField;
+    }
+
+    public JPasswordField getConfirmPasswordField() {
+        return confirmPasswordField;
+    }
+
+    public JLabel getErrorMsgLbl() {
+        return errorMsgLbl;
+    }
 
     public RegistrationPanel(UserService userService, MainWindow mainWindow) {
         this.userService = userService;
