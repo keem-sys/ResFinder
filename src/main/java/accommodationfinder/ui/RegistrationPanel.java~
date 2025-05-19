@@ -14,8 +14,11 @@ public class RegistrationPanel extends JPanel {
 
     private JTextField fullNameField, usernameField, emailField;
     private JPasswordField passwordField, confirmPasswordField;
-
+<<<<<<< HEAD
     public JButton registerButton, cancelButton;
+
+    private final UserService userService;
+    private final MainWindow mainWindow;
 
     public JTextField getFullNameField() {
         return fullNameField;
@@ -40,7 +43,7 @@ public class RegistrationPanel extends JPanel {
     public JLabel getErrorMsgLbl() {
         return errorMsgLbl;
     }
-
+=======
     private JButton createAccountButton, backButton, loginButton;
     private JCheckBox termsCheckBox;
     private JLabel errorMsgLbl, titleLabel, loginPromptLabel;
@@ -52,7 +55,7 @@ public class RegistrationPanel extends JPanel {
     private static final Color FIELD_BACKGROUND_COLOR = new Color(230, 230, 230); // Light gray for fields/buttons
     private static final Color TEXT_COLOR = new Color(50, 50, 50); // Dark gray for text
     private static final Color ERROR_COLOR = Color.RED;
-
+>>>>>>> 4f08ebeff47f2a1548f8a3c885bedbe1c5175475
 
     public RegistrationPanel(UserService userService, MainWindow mainWindow) {
         this.userService = userService;

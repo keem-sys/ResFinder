@@ -1,7 +1,7 @@
 package accommodationfinder.ui;
 
 import accommodationfinder.auth.User;
-import accommodationfinder.auth.UserService;
+import accommodationfinder.service.UserService;
 import accommodationfinder.ui.MainWindow;
 import accommodationfinder.ui.RegistrationPanel;
 import org.junit.jupiter.api.BeforeEach;

@@ -45,11 +45,38 @@ public class UserDao {
         }
     }
 
+    // Method to get User ById
+
+    /**
+     * Retrieves a user by their unique ID.
+     *
+     * @param userId The ID of the user to retrieve.
+     * @return The User object if found, or null otherwise.
+     * @throws SQLException If a database access error occurs.
+     */
+    public User getUserById(Long userId) throws SQLException {
+        String sql = "SELECT * FROM USERS WHERE id = ?";
+        try (Connection connection = dbConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+            preparedStatement.setLong(1, userId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return mapResultSetToUser(resultSet); // Reuse existing helper
+                } else {
+                    return null; // User not found
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting user by ID: " + e.getMessage());
+            throw e;
+        }
+    }
 
 
     // Method to get User by Username
     public User getUserByUsername(String username) throws SQLException {
-        String sql = "SELECT * FROM USERS WHERE username = ?";
+        String sql = "SELECT * FROM USERS WHERE LOWER(username) = LOWER(?)";
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
@@ -69,7 +96,7 @@ public class UserDao {
 
     // Method to get User by Email
     public User getUserByEmail(String email) throws SQLException {
-        String sql = "SELECT * FROM USERS WHERE email = ?";
+        String sql = "SELECT * FROM USERS WHERE LOWER(email) = LOWER(?)";
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 

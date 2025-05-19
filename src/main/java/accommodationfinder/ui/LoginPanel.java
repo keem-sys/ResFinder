@@ -1,139 +1,315 @@
 package accommodationfinder.ui;
 
-import accommodationfinder.auth.UserService;
-import com.jgoodies.forms.builder.FormBuilder;
-import com.jgoodies.forms.layout.FormLayout;
-
+import accommodationfinder.service.UserService;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.prefs.Preferences;
+import java.util.Arrays;
+
 
 public class LoginPanel extends JPanel {
 
-    private JLabel usernameOrEmailLabel, passwordLabel, errorMessageLabel, titleLabel;
+    private JLabel usernameOrEmailLabel, passwordLabel, errorMessageLabel, titleLabel, registerPromptLabel;
     private JTextField usernameOrEmailField;
     private JPasswordField passwordField;
-    private JButton loginButton, registrationButton;
+    private JButton loginButton, backButton, registrationButton; // Changed cancelButton to backButton
     private JCheckBox rememberMeChkBox;
     private final UserService userService;
     private final MainWindow mainWindow;
+
+    // Define Colors based on Wireframe
+    private static final Color BACKGROUND_COLOR = new Color(253, 251, 245); // Beige background
+    private static final Color FIELD_BACKGROUND_COLOR = new Color(230, 230, 230); // Light gray for fields/buttons
+    private static final Color TEXT_COLOR = new Color(50, 50, 50); // Dark gray for text
+    private static final Color ERROR_COLOR = Color.RED;
 
     public LoginPanel(UserService userService, MainWindow mainWindow) {
         this.userService = userService;
         this.mainWindow = mainWindow;
 
+        // Main Panel Setup
+        setLayout(new BorderLayout(10, 10));
+        setBackground(BACKGROUND_COLOR);
+        setBorder(new EmptyBorder(15, 25, 15, 25));
 
-        FormLayout layout = new FormLayout(
-                "right:pref, 4dlu, 150dlu", // Columns
-                "p, 3dlu, p, 3dlu, p, 7dlu, p, 7dlu, p, 7dlu, p, 7dlu, p" // Rows
-        );
-        FormBuilder builder = FormBuilder.create().layout(layout).padding(new EmptyBorder(12, 12, 12, 12));
+        // Top Bar (Back Button)
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topPanel.setOpaque(false);
+        backButton = new JButton("<- Back to Main View");
 
-        // Title Label
-        titleLabel = new JLabel("Login!", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        builder.add(titleLabel).xyw(1, 1, 3); // Row 1, spans 3 columns
+        styleButton(backButton, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 13);
+        topPanel.add(backButton);
+        add(topPanel, BorderLayout.NORTH);
 
+        // Center Form Area
+        JPanel centerWrapper = new JPanel(new GridBagLayout());
+        centerWrapper.setOpaque(false);
+
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setOpaque(false); // Transparent background
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.anchor = GridBagConstraints.CENTER;
+
+        // Title
+        titleLabel = new JLabel("Welcome back!");
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 26));
+        titleLabel.setForeground(TEXT_COLOR);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(20, 8, 30, 8); // More space above and below title
+        formPanel.add(titleLabel, gbc);
+        gbc.gridwidth = 1; // Reset gridwidth
+        gbc.insets = new Insets(8, 8, 8, 8); // Reset insets
+
+        // Username/Email Row
         usernameOrEmailLabel = new JLabel("Username or Email:");
-        builder.add(usernameOrEmailLabel).xy(1, 3); // Row 3
-        usernameOrEmailField = new JTextField(20);
-        builder.add(usernameOrEmailField).xy(3, 3);
+        styleLabel(usernameOrEmailLabel);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.EAST;
+        formPanel.add(usernameOrEmailLabel, gbc);
 
+        usernameOrEmailField = new JTextField(25);
+        styleTextField(usernameOrEmailField);
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        formPanel.add(usernameOrEmailField, gbc);
+
+        // Password Row
         passwordLabel = new JLabel("Password:");
-        builder.add(passwordLabel).xy(1, 5); // Row 5
-        passwordField = new JPasswordField(20);
-        builder.add(passwordField).xy(3, 5);
+        styleLabel(passwordLabel);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.EAST;
+        formPanel.add(passwordLabel, gbc);
 
-        rememberMeChkBox = new JCheckBox("Remember me");
-        builder.add(rememberMeChkBox).xyw(3, 7, 1);
+        passwordField = new JPasswordField(25);
+        styleTextField(passwordField);
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        formPanel.add(passwordField, gbc);
 
-        errorMessageLabel = new JLabel("");
-        errorMessageLabel.setForeground(Color.RED);
-        builder.add(errorMessageLabel).xyw(1, 9, 3);
+        // Remember Me Checkbox
+        rememberMeChkBox = new JCheckBox("Remember Me");
+        rememberMeChkBox.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        rememberMeChkBox.setForeground(TEXT_COLOR);
+        rememberMeChkBox.setOpaque(false);
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(0, 8, 15, 8);
+        formPanel.add(rememberMeChkBox, gbc);
+        gbc.insets = new Insets(8, 8, 8, 8);
 
-        loginButton = new JButton("Login");
-        builder.add(loginButton).xyw(1, 11, 3);
+        // Error Message Label
+        errorMessageLabel = new JLabel(" ");
+        errorMessageLabel.setForeground(ERROR_COLOR);
+        errorMessageLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        errorMessageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 8, 8, 8);
+        formPanel.add(errorMessageLabel, gbc);
+        gbc.gridwidth = 1; // Reset
+        gbc.insets = new Insets(8, 8, 8, 8); // Reset
 
-        JPanel registerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JLabel registerLabel = new JLabel("Are you a new user? ");
+
+        // Log In Button (Centered)
+        loginButton = new JButton("Log In");
+        styleButton(loginButton, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 15);
+        loginButton.setPreferredSize(new Dimension(200, 40));
+        gbc.gridx = 1;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.insets = new Insets(15, 8, 30, 8);
+        formPanel.add(loginButton, gbc);
+        gbc.gridwidth = 1; // Reset
+        gbc.insets = new Insets(8, 8, 8, 8); // Reset
+
+        // Sign Up Prompt
+        JPanel registerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0)); // Centered flow layout
+        registerPanel.setOpaque(false);
+        registerPromptLabel = new JLabel("Don't have an account?");
+        styleLabel(registerPromptLabel);
         registrationButton = new JButton("Sign Up!");
-        registerPanel.add(registerLabel);
+        styleButton(registrationButton, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 13); // Style sign up button
+        registerPanel.add(registerPromptLabel);
         registerPanel.add(registrationButton);
-        builder.add(registerPanel).xyw(1, 13, 3);
-
-        loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("Login button clicked");
-                String usernameOrEmail = usernameOrEmailField.getText();
-                char[] passwordChars = passwordField.getPassword();
-                String password = new String(passwordChars);
-                boolean rememberMe = rememberMeChkBox.isSelected();
-
-                System.out.println("Username or Email: " + usernameOrEmail);
-                System.out.println("Password: " + password);
-                System.out.println("Remember me: " + rememberMe);
-
-                // Input validation
-                if (usernameOrEmail.isEmpty() || password.isEmpty()) {
-                    setErrorMessage("Username/Email and Password are required");
-                    return;
-                }
-
-                // Login Logic - Backend Integration
-                // 3. Handle failed login (display error message)
-
-                try {
-                    // loginUser method called
-                    String jwtToken = userService.loginUser(usernameOrEmail, password);
-
-                    // Store JWT based on "Remember Me" checkbox state
-                    if (rememberMeChkBox.isSelected()) { // If "Remember Me" is checked
-                        mainWindow.saveJwtToPreferences(jwtToken); // Save JWT via MainWindow's method
-                        System.out.println("JWT token saved due to 'Remember Me' being checked.");
-                    } else {
-                        mainWindow.saveJwtToPreferences(null); // Clear JWT if "Remember Me" is not checked
-                        System.out.println("JWT token cleared as 'Remember Me' is not checked.");
-                    }
-
-                    mainWindow.showMainApplicationView(); // Switch to main app view
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        formPanel.add(registerPanel, gbc);
 
 
-                    System.out.println("Login Successful! JWT Token: " + jwtToken);
-                    setErrorMessage("Login Successful!");
+        // Add formPanel to the centering wrapper
+        centerWrapper.add(formPanel, new GridBagConstraints()); // Add formPanel to the center
+        // Add the centering wrapper to the main panel's center
+        add(centerWrapper, BorderLayout.CENTER);
 
-                } catch (Exception authenticationException) {
-                    System.err.println("Login failed: " + authenticationException.getMessage());
-                    authenticationException.printStackTrace();
-                    setErrorMessage("Login failed: " + authenticationException.getMessage());                 }
-                finally {
-                    passwordField.setText("");
-                }
 
-            }
+        // Login Button Action
+        loginButton.addActionListener(e -> performLogin());
+
+        // Password Field Action
+        passwordField.addActionListener(e -> performLogin());
+
+        // Back Button Action
+        backButton.addActionListener(e -> {
+            System.out.println("Back button clicked - Switching to Main View");
+            clearInputs(); // Clear fields when going back
+            mainWindow.showMainApplicationView();
         });
 
-        registrationButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("Register button clicked on Login Panel - Switch to Registration Panel");
-                // Redirect to LoginPanel
-                SwingUtilities.invokeLater(mainWindow::switchToRegistrationPanel);
-            }
+        // Registration Button Action
+        registrationButton.addActionListener(e -> {
+            System.out.println("Sign Up button clicked on Login Panel - Switching to Registration Panel");
+            clearInputs(); // Clear fields before switching
+            SwingUtilities.invokeLater(mainWindow::switchToRegistrationPanel);
         });
 
-        add(builder.build());
+        // Request initial focus
     }
 
 
+    /**
+     * Attempts the login process using the UserService.
+     * Handles UI updates for success and failure.
+     */
+    private void performLogin() {
+        System.out.println("Login action triggered");
+        String usernameOrEmail = usernameOrEmailField.getText().trim();
+        char[] passwordChars = passwordField.getPassword();
+        String password = new String(passwordChars);
+        boolean rememberMe = rememberMeChkBox.isSelected();
+
+        System.out.println("Attempting login for: " + usernameOrEmail);
+        System.out.println("Remember me: " + rememberMe);
+
+        // Basic validation
+        if (usernameOrEmail.isEmpty() || password.isEmpty()) {
+            setErrorMessage("Username/Email and Password are required");
+            Arrays.fill(passwordChars, ' '); // Clear password array even on validation failure
+            return;
+        } else {
+            setErrorMessage(" "); // Clear previous error message
+        }
+
+        try {
+            // Call UserService to attempt login
+            String jwtToken = userService.loginUser(usernameOrEmail, password);
+            // Login Successful
+            System.out.println("Login attempt successful via UserService. Token received.");
+
+            // Handle 'Remember Me'
+            if (rememberMe) {
+                mainWindow.saveJwtToPreferences(jwtToken);
+                System.out.println("JWT token marked for saving.");
+            } else {
+                mainWindow.saveJwtToPreferences(null);
+                System.out.println("JWT token marked for clearing.");
+            }
+
+            // Notify MainWindow of successful login
+            mainWindow.handleLoginSuccess(jwtToken, true);
+
+            // Clear input fields on success
+            clearInputs();
+
+        } catch (Exception authenticationException) {
+            // Login Failed
+            System.err.println("Login failed: " + authenticationException.getMessage());
+            // Provide user-friendly error message
+            setErrorMessage("Login failed: Invalid username/email or password.");
+            passwordField.setText("");
+            passwordField.requestFocusInWindow();
+
+        } finally {
+            // Clear password array
+            Arrays.fill(passwordChars, ' ');
+        }
+    }
+
+    /**
+     * Clears all input fields and the error message.
+     */
+    private void clearInputs() {
+        usernameOrEmailField.setText("");
+        passwordField.setText("");
+        rememberMeChkBox.setSelected(false);
+        setErrorMessage(" ");
+    }
+
+    /**
+     * Sets the text of the error message label.
+     * @param message The message to display, or " " to clear.
+     */
+    public void setErrorMessage(String message) {
+        errorMessageLabel.setText(message == null ? " " : message);
+    }
+
+    /**
+     * Helper to style JLabels consistently.
+     */
+    private void styleLabel(JLabel label) {
+        label.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        label.setForeground(TEXT_COLOR);
+    }
+
+    /**
+     * Helper to style JTextField and JPasswordField consistently.
+     */
+    private void styleTextField(JTextField field) {
+        field.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        field.setBackground(FIELD_BACKGROUND_COLOR);
+        field.setForeground(TEXT_COLOR);
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(FIELD_BACKGROUND_COLOR.darker(), 1),
+                new EmptyBorder(5, 8, 5, 8) // Internal padding
+        ));
+        field.setCaretColor(TEXT_COLOR);
+    }
+
+    /**
+     * Helper to style JButtons consistently.
+     */
+    private void styleButton(JButton button, Color bgColor, Color fgColor, int fontSize) {
+        button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
+        button.setBackground(bgColor);
+        button.setForeground(fgColor);
+        button.setFocusPainted(false);
+        // TODO: Add hover effect listener
+    }
+
+    /**
+     * Requests that the initial focus be set on the username/email field
+     * for this panel. Should be called after the panel is visible or
+     * added to the main window.
+     */
+    public void requestInitialFocus() {
+        SwingUtilities.invokeLater(() -> {
+            if (usernameOrEmailField != null) {
+                usernameOrEmailField.requestFocusInWindow();
+            }
+        });
+    }
+
+    // Method needed by MainWindow to switch panels
     public JPanel getLoginPanel() {
         return this;
-    }
-
-    public void setErrorMessage(String message) {
-        errorMessageLabel.setText(message);
     }
 }
