@@ -124,8 +124,7 @@ public class MainApplicationPanel {
                 try {
                     allFetchedListings = get(); // Retrieve the fetched list
 
-                    // Call the central update method to apply default sort/search
-                    // and display the initial results
+                    // Call the central update method to apply default sort search and display the initial results
                     updateDisplayedListings();
 
                 } catch (InterruptedException | ExecutionException | CancellationException e) {
@@ -134,9 +133,10 @@ public class MainApplicationPanel {
                     String errorMsg = "Error loading accommodation listings: " + (cause != null ? cause.getMessage() :
                             e.getMessage());
                     System.err.println(errorMsg);
-                    e.printStackTrace(); // Log the full stack trace
+                    e.printStackTrace();
                     displayLoadingError("Error loading listings. Please try again later.");
-                    // Provide specific feedback to the user
+
+                    // Provide feedback to the user
                     if (cause instanceof SQLException) {
                         JOptionPane.showMessageDialog(mainPanel, "Database error loading listings.",
                                 "Database Error", JOptionPane.ERROR_MESSAGE);
@@ -144,7 +144,8 @@ public class MainApplicationPanel {
                         JOptionPane.showMessageDialog(mainPanel, "An unexpected error occurred while loading " +
                                 "listings.", "Loading Error", JOptionPane.ERROR_MESSAGE);
                     }
-                } catch (Exception e) { // Catch any other unexpected exceptions
+
+                } catch (Exception e) {
                     System.err.println("Unexpected error during listing load completion: " + e.getMessage());
                     e.printStackTrace();
                     displayLoadingError("An unexpected error occurred.");

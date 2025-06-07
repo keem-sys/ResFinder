@@ -162,12 +162,11 @@ public class AccommodationCardPanel extends JPanel {
     }
 
     private void handleCardClick() {
-        // TODO: trigger navigation to the detailed view
         System.out.println("Card clicked - Navigate to details for Listing ID: " + accommodation.getId());
         mainWindow.switchToDetailedView(accommodation.getId());
     }
 
-    // --- Helper Methods specific to this card ---
+    // Helper Methods
 
     private void loadImageAsync(JLabel imageLabel, int targetWidth, int targetHeight) {
         // Reset label state
@@ -193,7 +192,8 @@ public class AccommodationCardPanel extends JPanel {
 
                         // Check if ImageIO successfully read the image
                         if (originalImage == null) {
-                            System.err.println("Failed to load image using ImageIO (unsupported format or error): " + imageUrlString);
+                            System.err.println("Failed to load image using ImageIO (unsupported format or error): " +
+                                    imageUrlString);
                             // TODO: Fallback attempt using TwelveMonkeysImageIO
                             return null;
                         }

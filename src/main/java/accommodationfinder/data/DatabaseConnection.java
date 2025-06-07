@@ -217,9 +217,9 @@ public class DatabaseConnection {
                 Accommodation.PriceFrequency.PER_MONTH, 1, 2, 2,
                 true, true, true, "Monthly lease",
                 LocalDateTime.now().plusDays(5), null, false, sampleUser1);
-        acc3.getImageUrls().add("https://106adderley.co.za/wp-content/uploads/2022/05/IMG_20210729_122034-scaled.jpg");
-        acc3.getImageUrls().add("https://106adderley.co.za/wp-content/uploads/2020/02/Bronze-Room-106-Adderley-2.png");
-        acc3.getImageUrls().add("https://106adderley.co.za/wp-content/uploads/2020/02/Bronze-Room-106-Adderley-3.png");
+        acc3.getImageUrls().add("https://i.imgur.com/jY9Kaus.jpeg");
+        acc3.getImageUrls().add("https://i.imgur.com/1Tv2bS5.png");
+        acc3.getImageUrls().add("https://i.imgur.com/gXZPGqD.png");
         acc3.setListingDate(LocalDateTime.now().minusDays(2));
 
 
@@ -234,9 +234,9 @@ public class DatabaseConnection {
                 "Academic Year", LocalDateTime.now().plusMonths(6), null, true, sampleUser1);
 
         acc4.setListingDate(LocalDateTime.now().minusDays(1));
-        acc4.getImageUrls().add("https://afs-pbsa-images-prod.s3.eu-west-2.amazonaws.com/lphs_36402_additional126202224523PM.jpg");
-        acc4.getImageUrls().add("https://afs-pbsa-images-prod.s3.eu-west-2.amazonaws.com/lphs_36403_additional126202224523PM.jpg");
-        acc4.getImageUrls().add("https://afs-pbsa-images-prod.s3.eu-west-2.amazonaws.com/lphs_36407_additional126202224524PM.jpg");
+        acc4.getImageUrls().add("https://i.imgur.com/ulvUDmQ.jpeg");
+        acc4.getImageUrls().add("https://i.imgur.com/K1Zr5Qn.jpeg");
+        acc4.getImageUrls().add("https://i.imgur.com/HPFpug3.jpeg");
 
 
 
@@ -272,8 +272,8 @@ public class DatabaseConnection {
                 true, // NSFAS Accredited
                 sampleUser2 // Listed By
         );
-        acc5.getImageUrls().add("https://afs-pbsa-images-prod.s3.eu-west-2.amazonaws.com/iq-images-jan-2025/The%20Brickworks/1.jpg");
-        acc5.getImageUrls().add("https://afs-pbsa-images-prod.s3.eu-west-2.amazonaws.com/iq-images-jan-2025/The%20Brickworks/5.jpg");
+        acc5.getImageUrls().add("https://i.imgur.com/jDF3zhT.jpeg");
+        acc5.getImageUrls().add("https://i.imgur.com/ffocXxy.jpeg");
         acc5.setListingDate(LocalDateTime.now().minusDays(3));
 
         Accommodation acc6 = new Accommodation(
@@ -373,8 +373,8 @@ public class DatabaseConnection {
                 false,
                 sampleUser2
         );
-        acc8.getImageUrls().add("https://static.student.com/storm-frontend-wp/uploads/2016/01/Student.com-Room-Types-Shared-Room.jpg");
-        acc8.getImageUrls().add("https://static.student.com/storm-frontend-wp/uploads/2016/01/Student.com-Room-Types-Bathroom-Types.jpg");
+        acc8.getImageUrls().add("https://i.imgur.com/ZTbRsfP.jpeg");
+        acc8.getImageUrls().add("https://i.imgur.com/Xaw1jWG.jpeg");
         acc8.setListingDate(LocalDateTime.now());
 
         // DAO to insert accommodations
