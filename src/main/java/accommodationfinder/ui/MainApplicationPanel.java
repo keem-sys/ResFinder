@@ -345,24 +345,14 @@ public class MainApplicationPanel {
                 ORDER_BY_PRICE_ASC,
                 ORDER_BY_PRICE_DESC,
                 ORDER_BY_DATE_OLDEST };
+
         orderByComboBox = new JComboBox<>(orderByOptions);
         orderByComboBox.setFont(new Font("SansSerif", Font.PLAIN, 12));
 
-        for(ActionListener al : orderByComboBox.getActionListeners()) { orderByComboBox.removeActionListener(al); } // Clear existing listeners
         orderByComboBox.addActionListener(e -> updateDisplayedListings());
         orderByPanel.add(orderByComboBox);
 
-        for(ActionListener al : orderByComboBox.getActionListeners()) {
-            orderByComboBox.removeActionListener(al);
-        }
 
-        orderByComboBox.addActionListener(e -> updateDisplayedListings());
-        orderByPanel.add(orderByComboBox);
-
-        orderByComboBox = new JComboBox<>(orderByOptions);
-        for(ActionListener al : orderByComboBox.getActionListeners()) {
-            orderByComboBox.removeActionListener(al);
-        }
 
 
         // Filter Button
