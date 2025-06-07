@@ -172,7 +172,7 @@ public class DatabaseConnection {
 
         // Create Sample Accommodation Objects (using the obtained user IDs)
         Accommodation acc1 = new Accommodation(
-                "Cozy Studio Near CPUT Dist. Six", "Simplify your student budget! This cozy, " +
+                "Single Bed Room", "Simplify your student budget! This cozy, " +
                 "NSFAS-accredited studio near CPUT District Six offers all-inclusive living for R7500/month. " +
                 "Enjoy included uncapped Wi-Fi, utilities, and secure parking. The modern space features a study desk, " +
                 "comfy lounge area, and a balcony for fresh air. Perfect base for focused studying in the City Centre. ",
@@ -182,15 +182,15 @@ public class DatabaseConnection {
                 1, 1, 2, true, true, true,
                 "12-month lease",
                 LocalDateTime.now().plusDays(10), null, true, sampleUser1);
-        acc1.getImageUrls().add("https://properliving.co.za/static/b26f993800130e079b54ff6cbfbeac41/add31/HomePageHeroImage.jpg");
-        acc1.getImageUrls().add("https://properliving.co.za/static/9197a1844e04e3ed1d437ac0dd121854/47498/selectorDesktopPlusCommunal.jpg");
-        acc1.getImageUrls().add("https://properliving.co.za/static/dba2fea957e55fa3b267d260a8ae7a76/c78d4/selectorDesktopStudioPlus3D.png");
+        acc1.getImageUrls().add("https://i.imgur.com/Iigin4J.jpeg");
+        acc1.getImageUrls().add("https://i.imgur.com/SiU026v.jpeg");
+        acc1.getImageUrls().add("https://i.imgur.com/PHqNuZk.jpeg");
         acc1.setListingDate(LocalDateTime.now().minusDays(4));
 
 
         Accommodation acc2 = new Accommodation(
-                "Premium Studio in Bellville Park ", "Incredible value! Secure this premium, " +
-                "modern studio in Bellville Park for just R3800/month. Price includes essential uncapped Wi-Fi, " +
+                "Premium 1 Bed room in Bellville Park ", "Incredible value! Secure this premium, " +
+                "modern room in Bellville Park for just R3800/month. Price includes essential uncapped Wi-Fi, " +
                 "utilities, AND secure parking. Perfectly suited for the academic year lease term. " +
                 "Don't miss this all-inclusive deal!",
                 Accommodation.AccommodationType.STUDIO, "3 Willie Van Schoor Ave", "Bellville Park",
@@ -198,11 +198,10 @@ public class DatabaseConnection {
                 Accommodation.PriceFrequency.PER_MONTH, 1, 1, 2,
                 true, true, true, "Academic Year",
                 LocalDateTime.now().plusDays(9), null, false, sampleUser1);
-        acc2.getImageUrls().add("https://properliving.co.za/static/0bb443567899622fa8bce700f9f463f7/47498/selectorDesktopPenthouse1.jpg");
-        acc2.getImageUrls().add("https://properliving.co.za/static/9550718c413081cfa0417f88b7d6db04/47498/selectorDesktopPenthouse2.jpg");
-        acc2.getImageUrls().add("https://properliving.co.za/static/61bb73d615d28e3a466c861b4ae9b71d/47498/selectorDesktopPenthouse3.jpg");
-        acc2.getImageUrls().add("https://properliving.co.za/static/eff924a8617a4ee2228fbd51f53313d1/47498/selectorDesktopPenthouse4.jpg");
-        acc2.getImageUrls().add("https://properliving.co.za/static/d3e499607698c480fa3898eb99884668/47498/selectorDesktopPenthouse5.jpg");
+        acc2.getImageUrls().add("https://i.imgur.com/jqRSh0n.jpeg");
+        acc2.getImageUrls().add("https://i.imgur.com/LwOzY0D.jpeg");
+        acc2.getImageUrls().add("https://i.imgur.com/WpikjX9.jpeg");
+        acc2.getImageUrls().add("https://i.imgur.com/l1WWeGd.jpeg");
         acc2.setListingDate(LocalDateTime.now().minusDays(3));
 
 
@@ -306,10 +305,9 @@ public class DatabaseConnection {
                 false,
                 sampleUser2
         );
-        acc6.getImageUrls().add("https://properliving.co.za/static/5e3af07283e55386943e39a31ea9d30d/7e6d5/one.webp");
-        acc6.getImageUrls().add("https://properliving.co.za/static/89e132dabd48707fb2f77ccda5e80c3c/7e6d5/two.webp");
-        acc6.getImageUrls().add("https://properliving.co.za/static/9ebb0a9d451e77d9c5638b55dec914a7/7e6d5/three.webp");
-        acc6.getImageUrls().add("https://properliving.co.za/static/b6ee8a514b612aef5f3986a1a58e0bc7/7e6d5/four.webp");
+        acc6.getImageUrls().add("https://i.imgur.com/PJov4Rs.jpeg");
+        acc6.getImageUrls().add("https://i.imgur.com/N9EnkS4.jpeg");
+        acc6.getImageUrls().add("https://i.imgur.com/rmX0pTz.png");
         acc6.setListingDate(LocalDateTime.now().minusDays(10));
 
         Accommodation acc7 = new Accommodation(
@@ -338,9 +336,9 @@ public class DatabaseConnection {
                 true,
                 sampleUser2 // Listed By
         );
-        acc7.getImageUrls().add("https://properliving.co.za/static/1489698255aa16ee6726fbcd85463d0c/47498/selectorDesktopThreeBedroom.jpg");
-        acc7.getImageUrls().add("https://properliving.co.za/static/57f1e1c6755ee1039b591a49e6619969/cb254/selectorDesktopThreeBedroom2.jpg");
-        acc7.getImageUrls().add("https://properliving.co.za/static/3f5a82188ff1b98afb6bf16c7e308a65/c78d4/selectorDesktopThreeBedroom3D.png");
+        acc7.getImageUrls().add("https://i.imgur.com/7vtO9OA.jpeg");
+        acc7.getImageUrls().add("https://i.imgur.com/RwjCNKB.jpeg");
+        acc7.getImageUrls().add("https://i.imgur.com/DkAYU7b.jpeg");
         acc7.setListingDate(LocalDateTime.now().minusDays(10));
 
         Accommodation acc8 = new Accommodation(
