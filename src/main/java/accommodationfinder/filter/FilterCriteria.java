@@ -101,8 +101,6 @@ public class FilterCriteria {
         utilitiesIncluded = null;
         nsfasAccredited = null;
     }
-
-
 }
 
 
