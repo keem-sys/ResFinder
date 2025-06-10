@@ -74,6 +74,87 @@ public class FilterDialog extends JDialog {
         mainFilterPanel.add(typeCheckboxesPanel);
         mainFilterPanel.add(Box.createVerticalStrut(15));
 
+        // Price Range Section
+        JPanel pricePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        pricePanel.setOpaque(false);
+        pricePanel.setBorder(createTitledSectionBorder("Price Range (ZAR)"));
+        pricePanel.add(new JLabel("Min:"));
+        minPriceField = new JTextField(8);
+        minPriceField.setFont(FIELD_FONT);
+        pricePanel.add(minPriceField);
+        pricePanel.add(Box.createHorizontalStrut(10));
+        pricePanel.add(new JLabel("Max:"));
+        maxPriceField = new JTextField(8);
+        maxPriceField.setFont(FIELD_FONT);
+        pricePanel.add(maxPriceField);
+        mainFilterPanel.add(pricePanel);
+        mainFilterPanel.add(Box.createVerticalStrut(15));
+
+        // Rooms Section
+        JPanel roomsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        roomsPanel.setOpaque(false);
+        roomsPanel.setBorder(createTitledSectionBorder("Rooms"));
+        roomsPanel.add(new JLabel("Bedrooms (min): "));
+        bedroomsSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 8, 1));
+        bedroomsSpinner.setFont(FIELD_FONT);
+        roomsPanel.add(bedroomsSpinner);
+        roomsPanel.add(Box.createHorizontalStrut(10));
+
+        roomsPanel.add(new JLabel("Bathrooms (min): "));
+        bathroomsSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 5, 1));
+        bathroomsSpinner.setFont(FIELD_FONT);
+        roomsPanel.add(bathroomsSpinner);
+        mainFilterPanel.add(roomsPanel);
+        mainFilterPanel.add(Box.createVerticalStrut(15));
+
+        // City Section
+        JPanel cityPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        cityPanel.setOpaque(false);
+        cityPanel.setBorder(createTitledSectionBorder("Location"));
+        cityPanel.add(new JLabel("City:"));
+        Set<String> distinctCities = allListings.stream()
+                .map(Accommodation::getCity)
+                .filter(city -> city != null && !city.trim().isEmpty())
+                .collect(Collectors.toSet());
+        DefaultComboBoxModel<String> cityModel = new DefaultComboBoxModel<>();
+        cityModel.addElement("All cities");
+        distinctCities.stream().sorted().forEach(cityModel::addElement);
+        cityComboBox = new JComboBox<>(cityModel);
+        cityComboBox.setFont(FIELD_FONT);
+        cityPanel.add(cityComboBox);
+        mainFilterPanel.add(cityPanel);
+        mainFilterPanel.add(Box.createVerticalStrut(15));
+
+        // Features Section
+        JPanel featuresPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+        featuresPanel.setOpaque(false);
+        featuresPanel.setBorder(createTitledSectionBorder("Features"));
+        utilitiesIncludedCheckBox = new JCheckBox("Utilities Included");
+        utilitiesIncludedCheckBox.setFont(FIELD_FONT);
+        utilitiesIncludedCheckBox.setOpaque(false);
+        featuresPanel.add(utilitiesIncludedCheckBox);
+        nsfasAccreditedCheckBox = new JCheckBox("NSFAS Accredited");
+        nsfasAccreditedCheckBox.setFont(FIELD_FONT);
+        nsfasAccreditedCheckBox.setOpaque(false);
+        featuresPanel.add(nsfasAccreditedCheckBox);
+        mainFilterPanel.add(featuresPanel);
+        mainFilterPanel.add(Box.createVerticalStrut(20));
+
+
+        // Button Panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        buttonPanel.setOpaque(false);
+        applyButton = new JButton("Apply Filters");
+        clearButton = new JButton("Clear Filters");
+        cancelButton = new JButton("Cancel");
+
+        buttonPanel.add(clearButton);
+        buttonPanel.add(cancelButton);
+        buttonPanel.add(applyButton);
+
+        getContentPane().add(mainFilterPanel, BorderLayout.CENTER);
+        getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+
     }
 
 
