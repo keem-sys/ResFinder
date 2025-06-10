@@ -7,9 +7,13 @@ import accommodationfinder.listing.Accommodation;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class FilterDialog extends JDialog {
     private final FilterCriteria currentFilterCriteria;
@@ -158,8 +162,63 @@ public class FilterDialog extends JDialog {
     }
 
 
-    private Border createTitledSectionBorder(String accommodationType) {
-        return null;
+    private TitledBorder createTitledSectionBorder(String title) {
+        TitledBorder titledBorder  = BorderFactory.createTitledBorder(BorderFactory.createLineBorder
+                (SECTION_BORDER_COLOR), title);
+        titledBorder.setTitleFont(LABEL_FONT.deriveFont(Font.BOLD));
+        return titledBorder;
     }
+
+    private static String capitalize(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        String[] words = str.split("\\s");
+        StringBuilder capitalizedString = new StringBuilder();
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                capitalizedString.append(Character.toUpperCase(word.charAt(0)))
+                        .append(word.substring(1).toLowerCase()).append(" ");
+            }
+        }
+        return capitalizedString.toString().trim();
+    }
+
+    private String formatTypeEnum(String enumName) {
+        String s = enumName.replace('_', ' ').toLowerCase();
+        return  FilterDialog.capitalize(s);
+    }
+
+    private void populateFieldsFromCriteria(FilterCriteria filterCriteria) {
+        if (filterCriteria == null) return;
+        if (filterCriteria.getSelectedTypes() != null) {
+            for (JCheckBox checkBox: typeCheckBoxes) {
+                Accommodation.AccommodationType type = Accommodation.AccommodationType.valueOf(checkBox.getText()
+                        .toUpperCase().replace(' ', '_'));
+                checkBox.setSelected(filterCriteria.getSelectedTypes().contains(type));
+            }
+        }
+
+        minPriceField.setText(filterCriteria.getMinPrice() != null ? filterCriteria.getMinPrice().toPlainString() : "");
+        maxPriceField.setText(filterCriteria.getMaxPrice() != null ? filterCriteria.getMaxPrice().toPlainString() : "");
+        bedroomsSpinner.setValue(filterCriteria.getBedrooms() != null ? filterCriteria.getBedrooms() : 0);
+        bathroomsSpinner.setValue(filterCriteria.getBathrooms() != null ? filterCriteria.getBathrooms() : 0);
+
+        if (filterCriteria.getCity() != null && !filterCriteria.getCity().isEmpty()) {
+            cityComboBox.setSelectedItem(filterCriteria.getCity());
+        } else {
+            cityComboBox.setSelectedItem(0);
+        }
+
+        utilitiesIncludedCheckBox.setSelected(filterCriteria.getUtilitiesIncluded() != null &&
+                filterCriteria.getUtilitiesIncluded());
+        nsfasAccreditedCheckBox.setSelected(filterCriteria.getNsfasAccredited() != null &&
+                filterCriteria.getNsfasAccredited());
+    }
+
+
+}
+
+
 
 }
