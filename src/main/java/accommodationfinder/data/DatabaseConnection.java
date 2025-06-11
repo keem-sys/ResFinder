@@ -172,84 +172,107 @@ public class DatabaseConnection {
 
         // Create Sample Accommodation Objects (using the obtained user IDs)
         Accommodation acc1 = new Accommodation(
-                "Cozy Studio Near CPUT Dist. Six", "Simplify your student budget! This cozy, " +
-                "NSFAS-accredited studio near CPUT District Six offers all-inclusive living for R7500/month. " +
-                "Enjoy included uncapped Wi-Fi, utilities, and secure parking. The modern space features a study desk, " +
-                "comfy lounge area, and a balcony for fresh air. Perfect base for focused studying in the City Centre. ",
+                "Single Bed Room in Cape Town",  "This modern NSFAS-accredited studio apartment " +
+                "offers secure, fully furnished student accommodation just minutes from CPUT District Six. " +
+                "The unit includes a private bedroom with a comfortable single bed, built-in storage, ceiling fan, " +
+                "and blackout curtains. " +
+                "A dedicated study area features a built-in desk, shelving, and convenient power outlets, " +
+                "providing a quiet and organized workspace. " +
+                "The private bathroom is equipped with a modern shower, vanity, and toilet. " +
+                "The compact kitchenette includes a fridge, microwave, stove top, and ample cupboard space, " +
+                "making meal preparation easy. " +
+                "Unlimited Wi-Fi and utilities are included in the R7500 monthly rent, ensuring a " +
+                "hassle-free living experience. " + "The apartment also offers excellent natural light, " +
+                "balcony access, and a safe, convenient, and productive environment for focused student life.",
+
                 Accommodation.AccommodationType.STUDIO, "12 Chapel St", "Cape Town City Centre",
                 "8001", -33.927, 18.425, new BigDecimal("7500.00"),
                 Accommodation.PriceFrequency.PER_MONTH,
                 1, 1, 2, true, true, true,
                 "12-month lease",
                 LocalDateTime.now().plusDays(10), null, true, sampleUser1);
-        acc1.getImageUrls().add("https://properliving.co.za/static/b26f993800130e079b54ff6cbfbeac41/add31/HomePageHeroImage.jpg");
-        acc1.getImageUrls().add("https://properliving.co.za/static/9197a1844e04e3ed1d437ac0dd121854/47498/selectorDesktopPlusCommunal.jpg");
-        acc1.getImageUrls().add("https://properliving.co.za/static/dba2fea957e55fa3b267d260a8ae7a76/c78d4/selectorDesktopStudioPlus3D.png");
+        acc1.getImageUrls().add("https://i.imgur.com/Iigin4J.jpeg");
+        acc1.getImageUrls().add("https://i.imgur.com/SiU026v.jpeg");
+        acc1.getImageUrls().add("https://i.imgur.com/PHqNuZk.jpeg");
         acc1.setListingDate(LocalDateTime.now().minusDays(4));
 
 
         Accommodation acc2 = new Accommodation(
-                "Premium Studio in Bellville Park ", "Incredible value! Secure this premium, " +
-                "modern studio in Bellville Park for just R3800/month. Price includes essential uncapped Wi-Fi, " +
-                "utilities, AND secure parking. Perfectly suited for the academic year lease term. " +
-                "Don't miss this all-inclusive deal!",
+                "Premium 1 Bed room in Bellville Park ", "Experience incredible value in this modern, "
+                + "premium " + "studio in Belville Park! For just R3800/month, enjoy a comfortable student living " +
+                "with all-inclusive " + "living amenities. The bright space features a comfortable bed, " +
+                "dedicated study area " + "with a desk and shelving. Benefit from uncapped WI-FI, wall-mounted TV."+
+                "This fully equipped unit offers a kitchenette, a bathroom and secure parking. The space is ideal " +
+                "for focused students seeking an academic year lease. " +
+                "Don't miss this fully equipped student-friendly option in a prime location.",
                 Accommodation.AccommodationType.STUDIO, "3 Willie Van Schoor Ave", "Bellville Park",
                 "7530", -33.888, 18.630, new BigDecimal("6000.00"),
                 Accommodation.PriceFrequency.PER_MONTH, 1, 1, 2,
                 true, true, true, "Academic Year",
                 LocalDateTime.now().plusDays(9), null, false, sampleUser1);
-        acc2.getImageUrls().add("https://properliving.co.za/static/0bb443567899622fa8bce700f9f463f7/47498/selectorDesktopPenthouse1.jpg");
-        acc2.getImageUrls().add("https://properliving.co.za/static/9550718c413081cfa0417f88b7d6db04/47498/selectorDesktopPenthouse2.jpg");
-        acc2.getImageUrls().add("https://properliving.co.za/static/61bb73d615d28e3a466c861b4ae9b71d/47498/selectorDesktopPenthouse3.jpg");
-        acc2.getImageUrls().add("https://properliving.co.za/static/eff924a8617a4ee2228fbd51f53313d1/47498/selectorDesktopPenthouse4.jpg");
-        acc2.getImageUrls().add("https://properliving.co.za/static/d3e499607698c480fa3898eb99884668/47498/selectorDesktopPenthouse5.jpg");
+        acc2.getImageUrls().add("https://i.imgur.com/jqRSh0n.jpeg");
+        acc2.getImageUrls().add("https://i.imgur.com/LwOzY0D.jpeg");
+        acc2.getImageUrls().add("https://i.imgur.com/WpikjX9.jpeg");
+        acc2.getImageUrls().add("https://i.imgur.com/l1WWeGd.jpeg");
         acc2.setListingDate(LocalDateTime.now().minusDays(3));
 
 
-
         Accommodation acc3 = new Accommodation(
-                "Affordable Room To Share", "Budget-friendly room available in a shared student house " +
-                "at 106 Adderley Street, City Centre. Ideal location within walking distance to district 6 campus" +
-                "Rent of R3800/month includes Wi-Fi, utilities, and parking. Enjoy the flexibility of a monthly lease. " +
-                "You'll share the 2 bathrooms and common kitchen/living areas with housemates. Note: Not NSFAS accredited",
+                "Affordable 1-Bedroom Room Shared in Cape Town", "Discover a budget-friendly shared " +
+                "living in the heart of Cape Towns City Centre, " +
+                "at 106 Adderley Street, City Centre. This modern room offers twin beds, a bedside table and privacy " +
+                "blinds. the Ideal location means you're within walking distance to the District Six Campus" +
+                "Enjoy all this with a rent of just R3800/month covering Wi-Fi, utilities, parking, plus the " +
+                "flexibility of a monthly lease. " +
+                "You'll share the 2 bathrooms each fitted with two sinks and common kitchen/living areas with " +
+                "housemates. Note: Not NSFAS accredited",
+
                 Accommodation.AccommodationType.SHARED_ROOM, "106 Adderley Street", "Cape Town City Centre",
                 "7530", -33.888, 18.630, new BigDecimal("3600.00"),
                 Accommodation.PriceFrequency.PER_MONTH, 1, 2, 2,
                 true, true, true, "Monthly lease",
                 LocalDateTime.now().plusDays(5), null, false, sampleUser1);
-        acc3.getImageUrls().add("https://106adderley.co.za/wp-content/uploads/2022/05/IMG_20210729_122034-scaled.jpg");
-        acc3.getImageUrls().add("https://106adderley.co.za/wp-content/uploads/2020/02/Bronze-Room-106-Adderley-2.png");
-        acc3.getImageUrls().add("https://106adderley.co.za/wp-content/uploads/2020/02/Bronze-Room-106-Adderley-3.png");
+        acc3.getImageUrls().add("https://i.imgur.com/jY9Kaus.jpeg");
+        acc3.getImageUrls().add("https://i.imgur.com/1Tv2bS5.png");
+        acc3.getImageUrls().add("https://i.imgur.com/gXZPGqD.png");
         acc3.setListingDate(LocalDateTime.now().minusDays(2));
 
 
         Accommodation acc4 = new Accommodation(
-                "Renovated Room in Shared Mowbray Apartment", "Secure your spot for the next academic year! " +
-                "This recently renovated room is available in a modern 2-bedroom, 2-bathroom shared apartment at 77 Main Rd, " +
+                "2-Bedroom Apartment Shared in Mowbray", "Secure your spot for the next " +
+                "academic year! " +
+                "This recently renovated room is available in a modern 2-bedroom, 2-bathroom shared apartment at " +
+                "77 Main Rd, " +
                 "Mowbray. Ideal for students. You'll share the kitchen and living areas with one other housemate. " +
-                "The rent is all-inclusive.",
+                "This space features a comfortable bed with a large study desk and wardrobes creating the ideal " +
+                "study environment. "+
+                "The rent is all-inclusive offering a hassle-free living experience.",
                 Accommodation.AccommodationType.APARTMENT, "77 Main Rd", "Mowbray", "7700",
                 -33.947, 18.477, new BigDecimal("4500.00"), Accommodation.PriceFrequency.PER_MONTH,
                 2, 2, 2, true, true, true,
-                "Academic Year", LocalDateTime.now().plusMonths(6), null, true, sampleUser1);
+                "Academic Year", LocalDateTime.now().plusMonths(6), null, true,
+                sampleUser1);
 
         acc4.setListingDate(LocalDateTime.now().minusDays(1));
-        acc4.getImageUrls().add("https://afs-pbsa-images-prod.s3.eu-west-2.amazonaws.com/lphs_36402_additional126202224523PM.jpg");
-        acc4.getImageUrls().add("https://afs-pbsa-images-prod.s3.eu-west-2.amazonaws.com/lphs_36403_additional126202224523PM.jpg");
-        acc4.getImageUrls().add("https://afs-pbsa-images-prod.s3.eu-west-2.amazonaws.com/lphs_36407_additional126202224524PM.jpg");
+        acc4.getImageUrls().add("https://i.imgur.com/ulvUDmQ.jpeg");
+        acc4.getImageUrls().add("https://i.imgur.com/K1Zr5Qn.jpeg");
+        acc4.getImageUrls().add("https://i.imgur.com/HPFpug3.jpeg");
 
 
 
 
         Accommodation acc5 = new Accommodation(
-                "Affordable Dorm Room on Kloof Rd (Gardens)", // Added area to title
-                "Budget-friendly single dorm room available at 69 Kloof Rd, " +
-                        "located in the vibrant Gardens area, close to Cape Town City Centre amenities. " +
-                        "Ideal for students seeking focused accommodation. " +
-                        "Rent is R3200 per month, including water, electricity, and Wi-Fi. NSFAS accredited. " +
-                        "Enjoy your private room space while utilising shared communal facilities " +
-                        "(kitchens, lounges, shared bathrooms). " +
-                        "Please note parking is not available. **Important:** Available for a limited period from "
+                "1-Bedroom Dorm on Kloof Rd (Gardens)", // Added area to title
+                "Secure your space in this budget-friendly single dorm room available at 69 Kloof Rd, " +
+                        "located in the vibrant Gardens area, just minutes from Cape Town City Centre amenities. " +
+                        "This is Ideal for students seeking focused accommodation. " +
+                        "The room comes with a comfortable bed, a dedicated study area with ample storage " +
+                        "and shelving."+
+                        "At just R3200 per month,the rent is all-inclusive, covering water, electricity, and Wi-Fi. " +
+                        "NSFAS accredited. " +
+                        "While you enjoy your private room space and en-suite bathroom, you'll also have access to " +
+                        "shared communal facilities such as kitchens and lounges " +
+                        "Please note parking is not available. *Important:* Available for a limited period from "
                         + LocalDateTime.now().plusWeeks(2).format(DateTimeFormatter.ISO_LOCAL_DATE) + " until " +
                         LocalDateTime.now().plusMonths(6).format(DateTimeFormatter.ISO_LOCAL_DATE) +
                         ", suitable for the upcoming term/semester within an Academic Year lease structure.",
@@ -272,17 +295,19 @@ public class DatabaseConnection {
                 true, // NSFAS Accredited
                 sampleUser2 // Listed By
         );
-        acc5.getImageUrls().add("https://afs-pbsa-images-prod.s3.eu-west-2.amazonaws.com/iq-images-jan-2025/The%20Brickworks/1.jpg");
-        acc5.getImageUrls().add("https://afs-pbsa-images-prod.s3.eu-west-2.amazonaws.com/iq-images-jan-2025/The%20Brickworks/5.jpg");
+        acc5.getImageUrls().add("https://i.imgur.com/jDF3zhT.jpeg");
+        acc5.getImageUrls().add("https://i.imgur.com/ffocXxy.jpeg");
         acc5.setListingDate(LocalDateTime.now().minusDays(3));
 
         Accommodation acc6 = new Accommodation(
                 "Spacious 2-Bedroom Bellville Apartment for Students",
                 "Ideal for sharing! R3000 per student This spacious 2-bedroom, 1-bathroom " +
                         "apartment is located right on Riebeek Street in the heart of Bellville. " +
-                        "Perfect base for students needing easy access to transport and campuses. " +
-                        "The unit includes Wi-Fi and utilities.Please note, no parking is available with the unit. " +
-                        "**Lease Information:** Offered on an 'Academic Year' structure, " +
+                        "Perfect for students needing easy access to transport and campuses. " +
+                        "This offer provides spacious, private bedrooms. Each bright room features a comfortable bed, "
+                        + "and a dedicated study area."+
+                        "Your rent includes Wi-Fi and utilities. Please note, no parking is available with the unit. " +
+                        "*Lease Information:* Offered on an 'Academic Year' structure, " +
                         "but currently available for a specific term from " +
                         LocalDateTime.now().plusWeeks(2).format(DateTimeFormatter.ISO_LOCAL_DATE) +
                         " until " + LocalDateTime.now().plusMonths(6).format(DateTimeFormatter.ISO_LOCAL_DATE) +
@@ -306,18 +331,19 @@ public class DatabaseConnection {
                 false,
                 sampleUser2
         );
-        acc6.getImageUrls().add("https://properliving.co.za/static/5e3af07283e55386943e39a31ea9d30d/7e6d5/one.webp");
-        acc6.getImageUrls().add("https://properliving.co.za/static/89e132dabd48707fb2f77ccda5e80c3c/7e6d5/two.webp");
-        acc6.getImageUrls().add("https://properliving.co.za/static/9ebb0a9d451e77d9c5638b55dec914a7/7e6d5/three.webp");
-        acc6.getImageUrls().add("https://properliving.co.za/static/b6ee8a514b612aef5f3986a1a58e0bc7/7e6d5/four.webp");
+        acc6.getImageUrls().add("https://i.imgur.com/PJov4Rs.jpeg");
+        acc6.getImageUrls().add("https://i.imgur.com/N9EnkS4.jpeg");
+        acc6.getImageUrls().add("https://i.imgur.com/rmX0pTz.png");
         acc6.setListingDate(LocalDateTime.now().minusDays(10));
 
         Accommodation acc7 = new Accommodation(
-                "Spacious 3-Bedroom CBD Apartment on St Georges Mall",
-                "Share with friends! " +
+                "3-Bedroom CBD Apartment on St Georges Mall",
+                "Share with friends in this spacious 3-bedroom apartment! " +
                         "This large 3-bedroom, 2-bathrooms apartment is perfectly located on St Georges Mall " +
-                        "in the Cape Town CBD. Offers unparalleled access to transport, shops, and campuses. " +
-                        "Rent includes essential Wi-Fi and utilities. NSFAS accredited. ",
+                        "in the Cape Town CBD.The apartment features bright bedrooms some equipped with twin beds. " +
+                        "Enjoy unparalleled access to transport, shops, and campuses right on your doorstep. " +
+                        "The apartment includes 2 bathrooms and a compact, functional kitchenette." +
+                        "Rent includes essential Wi-Fi and utilities. NSFAS accredited.",
 
                 Accommodation.AccommodationType.APARTMENT,
                 "1 St Georges Mall",
@@ -338,19 +364,20 @@ public class DatabaseConnection {
                 true,
                 sampleUser2 // Listed By
         );
-        acc7.getImageUrls().add("https://properliving.co.za/static/1489698255aa16ee6726fbcd85463d0c/47498/selectorDesktopThreeBedroom.jpg");
-        acc7.getImageUrls().add("https://properliving.co.za/static/57f1e1c6755ee1039b591a49e6619969/cb254/selectorDesktopThreeBedroom2.jpg");
-        acc7.getImageUrls().add("https://properliving.co.za/static/3f5a82188ff1b98afb6bf16c7e308a65/c78d4/selectorDesktopThreeBedroom3D.png");
+        acc7.getImageUrls().add("https://i.imgur.com/7vtO9OA.jpeg");
+        acc7.getImageUrls().add("https://i.imgur.com/RwjCNKB.jpeg");
+        acc7.getImageUrls().add("https://i.imgur.com/DkAYU7b.jpeg");
         acc7.setListingDate(LocalDateTime.now().minusDays(10));
 
         Accommodation acc8 = new Accommodation(
                 "Shared Room in Mowbray House",
-                "Share a spacious room and save on costs! Located near Liesbeek Parkway in the convenient " +
-                        "Mowbray area, this room is designed for two occupants. " +
+                "Share a spacious, modern room and save on costs! Conveniently located near Liesbeek Parkway "
+                        + "in the Mowbray area, this room is designed for two occupants. " +
+                        "This features two comfortable single beds with individual reading lights included. " +
                         "The rent is R3200 per person, per month, including Wi-Fi and utilities." +
-                        "You'll share the room itself (equipped with 2 beds), " +
+                        "You'll share the room itself, " +
                         "plus communal bathrooms, kitchen, and living areas within the house/apartment. " +
-                        "No parking available. Not NSFAS accredited. **Important:** Available for a specific period from "
+                        "No parking available. Not NSFAS accredited. *Important:* Available for a specific period from "
                         + LocalDateTime.now().plusWeeks(2).format(DateTimeFormatter.ISO_LOCAL_DATE) +
                         " until " + LocalDateTime.now().plusMonths(6).format(DateTimeFormatter.ISO_LOCAL_DATE) +
                         ", under an 'Academic Year' lease structure.",
@@ -373,8 +400,8 @@ public class DatabaseConnection {
                 false,
                 sampleUser2
         );
-        acc8.getImageUrls().add("https://static.student.com/storm-frontend-wp/uploads/2016/01/Student.com-Room-Types-Shared-Room.jpg");
-        acc8.getImageUrls().add("https://static.student.com/storm-frontend-wp/uploads/2016/01/Student.com-Room-Types-Bathroom-Types.jpg");
+        acc8.getImageUrls().add("https://i.imgur.com/ZTbRsfP.jpeg");
+        acc8.getImageUrls().add("https://i.imgur.com/Xaw1jWG.jpeg");
         acc8.setListingDate(LocalDateTime.now());
 
         // DAO to insert accommodations

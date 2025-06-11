@@ -56,12 +56,12 @@ public class LoginPanel extends JPanel {
         titleLabel = new JLabel("Welcome back!");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 26));
         titleLabel.setForeground(TEXT_COLOR);
-        gbc.gridx = 0;
+        gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
-        gbc.insets = new Insets(20, 8, 30, 8); // More space above and below title
+        gbc.insets = new Insets(20, 8, 30, 8);
         formPanel.add(titleLabel, gbc);
-        gbc.gridwidth = 1; // Reset gridwidth
+        gbc.gridwidth = 1; // Reset
         gbc.insets = new Insets(8, 8, 8, 8); // Reset insets
 
         // Username/Email Row
@@ -157,7 +157,7 @@ public class LoginPanel extends JPanel {
 
 
         // Add formPanel to the centering wrapper
-        centerWrapper.add(formPanel, new GridBagConstraints()); // Add formPanel to the center
+        centerWrapper.add(formPanel, new GridBagConstraints());
         // Add the centering wrapper to the main panel's center
         add(centerWrapper, BorderLayout.CENTER);
 
@@ -171,18 +171,17 @@ public class LoginPanel extends JPanel {
         // Back Button Action
         backButton.addActionListener(e -> {
             System.out.println("Back button clicked - Switching to Main View");
-            clearInputs(); // Clear fields when going back
+            clearInputs();
             mainWindow.showMainApplicationView();
         });
 
         // Registration Button Action
         registrationButton.addActionListener(e -> {
             System.out.println("Sign Up button clicked on Login Panel - Switching to Registration Panel");
-            clearInputs(); // Clear fields before switching
+            clearInputs();
             SwingUtilities.invokeLater(mainWindow::switchToRegistrationPanel);
         });
 
-        // Request initial focus
     }
 
 
@@ -203,7 +202,7 @@ public class LoginPanel extends JPanel {
         // Basic validation
         if (usernameOrEmail.isEmpty() || password.isEmpty()) {
             setErrorMessage("Username/Email and Password are required");
-            Arrays.fill(passwordChars, ' '); // Clear password array even on validation failure
+            Arrays.fill(passwordChars, ' '); // Clear password array
             return;
         } else {
             setErrorMessage(" "); // Clear previous error message
@@ -233,7 +232,7 @@ public class LoginPanel extends JPanel {
         } catch (Exception authenticationException) {
             // Login Failed
             System.err.println("Login failed: " + authenticationException.getMessage());
-            // Provide user-friendly error message
+            // Provide error message
             setErrorMessage("Login failed: Invalid username/email or password.");
             passwordField.setText("");
             passwordField.requestFocusInWindow();
