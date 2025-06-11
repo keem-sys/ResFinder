@@ -1,5 +1,6 @@
 package accommodationfinder.ui;
 
+import accommodationfinder.filter.FilterCriteria;
 import accommodationfinder.listing.Accommodation;
 import accommodationfinder.service.AccommodationService;
 import accommodationfinder.service.UserService;
@@ -7,10 +8,10 @@ import accommodationfinder.service.UserService;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
@@ -28,7 +29,8 @@ public class MainApplicationPanel {
     // Search/Filter Components
     private JTextField searchField;
     private JComboBox<String> orderByComboBox;
-    private JButton filterButton; // Still a placeholder
+    private JButton filterButton;
+    private FilterCriteria currentFilterCriteria = new FilterCriteria();
     private JScrollPane scrollPane;
 
     // Data Lists
@@ -124,16 +126,14 @@ public class MainApplicationPanel {
                 try {
                     allFetchedListings = get(); // Retrieve the fetched list
 
-                    // Call the central update method to apply default sort search and display the initial results
+                    // Initial display no filters (default), default sort, no search
                     updateDisplayedListings();
 
                 } catch (InterruptedException | ExecutionException | CancellationException e) {
+
                     // Handle errors during fetching or processing
                     Throwable cause = e.getCause();
-                    String errorMsg = "Error loading accommodation listings: " + (cause != null ? cause.getMessage() :
-                            e.getMessage());
-                    System.err.println(errorMsg);
-                    e.printStackTrace();
+                    System.err.println("Error loading: " + (cause != null ? cause.getMessage() : e.getMessage()));
                     displayLoadingError("Error loading listings. Please try again later.");
 
                     // Provide feedback to the user
@@ -157,38 +157,74 @@ public class MainApplicationPanel {
         worker.execute(); // Start the background worker
     }
 
+    // Helper method to create the Search/Filter Bar
+    private JPanel createSearchFilterBar() {
+        JPanel searchFilterPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
+        searchFilterPanel.setOpaque(false);
 
-    // Central Update Logic
-    /**
-     * Central method to apply filtering (future), searching, and sorting,
-     * then update the displayed listings grid.
-     */
-    private void updateDisplayedListings() {
-        // Get Current State from UI Controls
-        String searchText = searchField.getText();
-        String sortCriterion = (String) orderByComboBox.getSelectedItem();
-        // Object filterCriteria = getCurrentFilterCriteria(); // Placeholder for future filters
+        // Search Area
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        searchPanel.setOpaque(false);
+        JLabel searchLabel = new JLabel("Search:");
+        searchLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        searchPanel.add(searchLabel);
+        searchField = new JTextField(30);
+        styleTextField(searchField);
+        searchField.setToolTipText("Enter keywords and press Enter to search");
+        searchField.addActionListener(e -> updateDisplayedListings());
+        searchPanel.add(searchField);
 
-        // Apply Filter -> Search -> Sort
-        List<Accommodation> currentList = new ArrayList<>(allFetchedListings);
 
-        // Apply Filtering
-        // currentList = applyFilters(currentList, filterCriteria);
+        // Order By ComboBox
+        JPanel orderByPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        orderByPanel.setOpaque(false);
+        JLabel sortLabel = new JLabel("Sort by:");
+        sortLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        orderByPanel.add(sortLabel);
 
-        // Apply Keyword Search
-        currentList = performSearch(currentList, searchText);
+        String[] orderByOptions = {
+                ORDER_BY_DEFAULT,
+                ORDER_BY_PRICE_ASC,
+                ORDER_BY_PRICE_DESC,
+                ORDER_BY_DATE_OLDEST };
 
-        // Apply Sorting
-        // Ensure sortCriterion is not null, default if necessary
-        if (sortCriterion == null) {
-            sortCriterion = ORDER_BY_DEFAULT;
-        }
-        currentList = AccommodationSorter.sort(currentList, sortCriterion);
+        orderByComboBox = new JComboBox<>(orderByOptions);
+        orderByComboBox.setFont(new Font("SansSerif", Font.PLAIN, 12));
 
-        // Update Internal State and Refresh UI
-        currentlyDisplayedListings = currentList;
-        refreshListingGrid(currentlyDisplayedListings);
+        orderByComboBox.addActionListener(e -> updateDisplayedListings());
+        orderByPanel.add(orderByComboBox);
+
+
+
+
+        // Filter Button
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        filterPanel.setOpaque(false);
+        filterButton = new JButton("Filters");
+        styleButton(filterButton, BUTTON_BACKGROUND_COLOR, TEXT_COLOR, 13);
+        filterButton.setToolTipText("Apply filters to listings");
+
+        filterButton.addActionListener(e -> {
+            FilterDialog filterDialog = new FilterDialog(mainWindow, currentFilterCriteria,
+                    new ArrayList<>(allFetchedListings));
+
+            filterDialog.setVisible(true);
+
+            if (filterDialog.wereFiltersApplied()) {
+                this.currentFilterCriteria = filterDialog.getAppliedCriteria();
+                updateDisplayedListings();
+            }
+        });
+        filterPanel.add(filterButton);
+
+        // Add components to the main search/filter panel
+        searchFilterPanel.add(searchPanel);
+        searchFilterPanel.add(orderByPanel);
+        searchFilterPanel.add(filterPanel);
+
+        return searchFilterPanel;
     }
+
 
     // Search Implementation
 
@@ -263,6 +299,111 @@ public class MainApplicationPanel {
         return false; // Keyword not found in any specified field
     }
 
+    // Central Update Logic
+    /**
+     * Central method to apply filtering (future), searching, and sorting,
+     * then update the displayed listings grid.
+     */
+    private void updateDisplayedListings() {
+        // Get Current State from UI Controls
+        String searchText = searchField.getText();
+        String sortCriterion = (String) orderByComboBox.getSelectedItem();
+
+        // Apply Filter -> Search -> Sort
+        List<Accommodation> currentList = new ArrayList<>(allFetchedListings);
+
+        // Apply Filtering
+        currentList = applyFilters(currentList, currentFilterCriteria);
+
+        // Apply Keyword Search
+        currentList = performSearch(currentList, searchText);
+
+        // Apply Sorting
+        // Ensure sortCriterion is not null, default if necessary
+        if (sortCriterion == null) {
+            sortCriterion = ORDER_BY_DEFAULT;
+        }
+        currentList = AccommodationSorter.sort(currentList, sortCriterion);
+
+        // Update Internal State and Refresh UI
+        currentlyDisplayedListings = currentList;
+        refreshListingGrid(currentlyDisplayedListings);
+    }
+
+    private List<Accommodation> applyFilters(List<Accommodation> inputList, FilterCriteria criteria) {
+        if (criteria == null || !criteria.hasActiveFilters()) {
+            return new ArrayList<>(inputList);
+        }
+
+        List<Accommodation> filteredList = new ArrayList<>();
+        for (Accommodation accommodation : inputList) {
+            boolean matchesAllCriteria = true;
+
+            // Type Filter
+            Set<Accommodation.AccommodationType> selectedTypes = criteria.getSelectedTypes();
+            if (selectedTypes != null && !selectedTypes.isEmpty()) {
+                if (accommodation.getType() == null || !selectedTypes.contains(accommodation.getType())) {
+                    matchesAllCriteria = false;
+                }
+            }
+
+            // Min Price Filter
+            if (matchesAllCriteria && criteria.getMinPrice() != null) {
+                if (accommodation.getPrice() == null ||
+                        accommodation.getPrice().compareTo(criteria.getMinPrice()) < 0) {
+                    matchesAllCriteria = false;
+                }
+            }
+
+            // Max price Filter
+            if (matchesAllCriteria && criteria.getMaxPrice() != null) {
+                if (accommodation.getPrice() == null ||
+                        accommodation.getPrice().compareTo(criteria.getMaxPrice()) > 0) {
+                    matchesAllCriteria = false;
+                }
+            }
+
+            // Bedrooms filter
+            if (matchesAllCriteria && criteria.getBedrooms() != null && criteria.getBedrooms() > 0) {
+                if (accommodation.getBedrooms() < criteria.getBedrooms()) {
+                    matchesAllCriteria = false;
+                }
+            }
+
+            // Bathrooms Filter
+            if (matchesAllCriteria && criteria.getBathrooms() != null && criteria.getBathrooms() > 0) {
+                if (accommodation.getBathrooms() < criteria.getBathrooms()) {
+                    matchesAllCriteria = false;
+                }
+            }
+
+            // City Filter
+            if (matchesAllCriteria && criteria.getCity() != null && !criteria.getCity().isEmpty() && !"All Cities".equals(criteria.getCity())) {
+                if (accommodation.getCity() == null || !accommodation.getCity().equalsIgnoreCase(criteria.getCity())) {
+                    matchesAllCriteria = false;
+                }
+            }
+
+            // Utilities Included Filter (true means must be true, false means must be false, null means don't care)
+            if (matchesAllCriteria && criteria.getUtilitiesIncluded() != null) {
+                if (accommodation.isUtilitiesIncluded() != criteria.getUtilitiesIncluded()) {
+                    matchesAllCriteria = false;
+                }
+            }
+
+            // NSFAS Accredited Filter
+            if (matchesAllCriteria && criteria.getNsfasAccredited() != null) {
+                if (accommodation.isNsfasAccredited() != criteria.getNsfasAccredited()) {
+                    matchesAllCriteria = false;
+                }
+            }
+
+            if (matchesAllCriteria) {
+                filteredList.add(accommodation);
+            }
+        }
+        return filteredList;
+    }
 
 
     // Helper method to create the Top Bar
@@ -316,64 +457,7 @@ public class MainApplicationPanel {
         authAreaPanel.repaint();
     }
 
-    // Helper method to create the Search/Filter Bar
-    private JPanel createSearchFilterBar() {
-        JPanel searchFilterPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
-        searchFilterPanel.setOpaque(false);
 
-        // Search Area
-        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        searchPanel.setOpaque(false);
-        JLabel searchLabel = new JLabel("Search:");
-        searchLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        searchPanel.add(searchLabel);
-        searchField = new JTextField(30);
-        searchField.setToolTipText("Enter keywords and press Enter to search");
-        searchField.addActionListener(e -> updateDisplayedListings());
-        searchPanel.add(searchField);
-
-
-        // Order By ComboBox
-        JPanel orderByPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        orderByPanel.setOpaque(false);
-        JLabel sortLabel = new JLabel("Sort by:");
-        sortLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        orderByPanel.add(sortLabel);
-
-        String[] orderByOptions = {
-                ORDER_BY_DEFAULT,
-                ORDER_BY_PRICE_ASC,
-                ORDER_BY_PRICE_DESC,
-                ORDER_BY_DATE_OLDEST };
-
-        orderByComboBox = new JComboBox<>(orderByOptions);
-        orderByComboBox.setFont(new Font("SansSerif", Font.PLAIN, 12));
-
-        orderByComboBox.addActionListener(e -> updateDisplayedListings());
-        orderByPanel.add(orderByComboBox);
-
-
-
-
-        // Filter Button
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        filterPanel.setOpaque(false);
-        filterButton = new JButton("Filters");
-        styleButton(filterButton, BUTTON_BACKGROUND_COLOR, TEXT_COLOR, 13);
-
-        // TODO: implement filter functionality
-        filterButton.setToolTipText("Apply filters (Not implemented yet)");
-        filterButton.addActionListener(e -> JOptionPane.showMessageDialog(mainPanel,
-                "Filter functionality is not yet implemented.", "Info", JOptionPane.INFORMATION_MESSAGE));
-        filterPanel.add(filterButton);
-
-        // Add components to the main search/filter panel
-        searchFilterPanel.add(searchPanel);
-        searchFilterPanel.add(orderByPanel);
-        searchFilterPanel.add(filterPanel);
-
-        return searchFilterPanel;
-    }
 
     private void refreshListingGrid(List<Accommodation> listings) {
         listingGridPanel.removeAll();
@@ -423,6 +507,14 @@ public class MainApplicationPanel {
         button.setBackground(bgColor);
         button.setForeground(fgColor);
         button.setFocusPainted(false);
+    }
+
+    private void styleTextField(JTextField field) {
+        field.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.GRAY),
+                new EmptyBorder(4, 6, 4, 6)
+        ));
     }
 
 
