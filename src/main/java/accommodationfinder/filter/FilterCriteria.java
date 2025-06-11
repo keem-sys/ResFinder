@@ -63,7 +63,11 @@ public class FilterCriteria {
     }
 
     public void setCity(String city) {
-        this.city = city;
+        if (city == null || city.trim().isEmpty() || "All Suburbs".equalsIgnoreCase(city.trim())) {
+            this.city = null;
+        } else {
+            this.city = city.trim();
+        }
     }
 
     public Boolean getUtilitiesIncluded() {
@@ -87,7 +91,7 @@ public class FilterCriteria {
                 minPrice != null || maxPrice != null ||
                 (bedrooms != null && bedrooms > 0) ||
                 (bathrooms != null && bathrooms > 0) ||
-                (city != null && !city.trim().isEmpty() && !"All Cities".equals(city)) ||
+                (city != null) ||
                 utilitiesIncluded != null || nsfasAccredited != null;
     }
 

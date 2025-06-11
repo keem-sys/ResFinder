@@ -37,6 +37,8 @@ public class FilterDialog extends JDialog {
     private static final Font LABEL_FONT = new Font("SansSerif", Font.PLAIN, 13);
     private static final Font FIELD_FONT = new Font("SansSerif", Font.PLAIN, 13);
 
+    public static final String ALL_CITIES_OPTION = "All Suburbs";
+
     public FilterDialog(Frame owner, FilterCriteria initialFilterCriteria, List<Accommodation> allListings) {
         super(owner, "Filter Accommodations", true);
         this.currentFilterCriteria = new FilterCriteria();
@@ -113,13 +115,13 @@ public class FilterDialog extends JDialog {
         JPanel cityPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         cityPanel.setOpaque(false);
         cityPanel.setBorder(createTitledSectionBorder("Location"));
-        cityPanel.add(new JLabel("City:"));
+        cityPanel.add(new JLabel("Suburbs:"));
         Set<String> distinctCities = allListings.stream()
                 .map(Accommodation::getCity)
                 .filter(city -> city != null && !city.trim().isEmpty())
                 .collect(Collectors.toSet());
         DefaultComboBoxModel<String> cityModel = new DefaultComboBoxModel<>();
-        cityModel.addElement("All cities");
+        cityModel.addElement(ALL_CITIES_OPTION);
         distinctCities.stream().sorted().forEach(cityModel::addElement);
         cityComboBox = new JComboBox<>(cityModel);
         cityComboBox.setFont(FIELD_FONT);
@@ -205,7 +207,7 @@ public class FilterDialog extends JDialog {
         if (filterCriteria.getCity() != null && !filterCriteria.getCity().isEmpty()) {
             cityComboBox.setSelectedItem(filterCriteria.getCity());
         } else {
-            cityComboBox.setSelectedItem(0);
+            cityComboBox.setSelectedItem(ALL_CITIES_OPTION);
         }
 
         utilitiesIncludedCheckBox.setSelected(filterCriteria.getUtilitiesIncluded() != null &&
@@ -257,7 +259,12 @@ public class FilterDialog extends JDialog {
 
         // Update City
         String selectedCity  = (String) cityComboBox.getSelectedItem();
-        currentFilterCriteria.setCity("All suburbs".equals(selectedCity) ? null : selectedCity);
+        if (FilterDialog.ALL_CITIES_OPTION.equals(selectedCity)) {
+            currentFilterCriteria.setCity(null);
+        } else {
+            currentFilterCriteria.setCity(selectedCity);
+        }
+
 
         // Update Booleans for Checkboxes
         currentFilterCriteria.setUtilitiesIncluded(utilitiesIncludedCheckBox.isSelected() ? true : null);
@@ -276,6 +283,7 @@ public class FilterDialog extends JDialog {
         clearButton.addActionListener(e -> {
             currentFilterCriteria.reset();
             populateFieldsFromCriteria(currentFilterCriteria);
+            filtersApplied = true;
         });
 
         cancelButton.addActionListener(e -> {

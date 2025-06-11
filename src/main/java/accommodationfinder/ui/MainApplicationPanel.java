@@ -378,7 +378,7 @@ public class MainApplicationPanel {
             }
 
             // City Filter
-            if (matchesAllCriteria && criteria.getCity() != null && !criteria.getCity().isEmpty() && !"All Cities".equals(criteria.getCity())) {
+            if (matchesAllCriteria && criteria.getCity() != null) {
                 if (accommodation.getCity() == null || !accommodation.getCity().equalsIgnoreCase(criteria.getCity())) {
                     matchesAllCriteria = false;
                 }
