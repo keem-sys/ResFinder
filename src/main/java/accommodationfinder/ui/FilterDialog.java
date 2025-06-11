@@ -5,21 +5,19 @@ import accommodationfinder.filter.FilterCriteria;
 import accommodationfinder.listing.Accommodation;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class FilterDialog extends JDialog {
     private final FilterCriteria currentFilterCriteria;
-    private boolean filtersApplied;
+    private boolean filtersApplied = false;
 
-    private JPanel typeCheckboxesPanel; // Panel to hold AccommodationType checkboxes
+    private JPanel typeCheckboxesPanel;
     private List<JCheckBox> typeCheckBoxes;
 
     private JTextField minPriceField;
@@ -49,7 +47,7 @@ public class FilterDialog extends JDialog {
         ((JPanel) getContentPane()).setBorder(new EmptyBorder(15, 15, 15, 15));
 
         initComponents(allListings);
-        populateFieldsFromCriteria(initialCriteria);
+        populateFieldsFromCriteria(initialFilterCriteria);
         addListeners();
 
         pack();
@@ -216,9 +214,82 @@ public class FilterDialog extends JDialog {
                 filterCriteria.getNsfasAccredited());
     }
 
+    private void updateCriteriaFromFields() {
+        Set<Accommodation.AccommodationType> selectedTypes = new HashSet<>();
+        for (JCheckBox checkBox : typeCheckBoxes) {
+            if (checkBox.isSelected()) {
+                // Convert checkbox text back to enum value
+                String enumName = checkBox.getText().toUpperCase().replace(' ', '_');
+                try {
+                    selectedTypes.add(Accommodation.AccommodationType.valueOf(enumName));
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Error parsing type enum from checkbox: " + enumName);
+                }
+            }
+        }
+        currentFilterCriteria.setSelectedTypes(selectedTypes.isEmpty() ? null : selectedTypes);
 
-}
+        // Update Price
+        try{
+            String minText = minPriceField.getText().trim();
+            currentFilterCriteria.setMinPrice(minText.isEmpty() ? null : new BigDecimal(minText));
+        } catch (NumberFormatException e) {
+            currentFilterCriteria.setMinPrice(null);
+            JOptionPane.showMessageDialog(this, "Invalid Min Price format.",
+                    "Input Error", JOptionPane.ERROR_MESSAGE);
 
+        }
 
+        try {
+            String maxText = maxPriceField.getText().trim();
+            currentFilterCriteria.setMaxPrice(maxText.isEmpty() ? null : new BigDecimal(maxText));
+        } catch (NumberFormatException e) {
+            currentFilterCriteria.setMaxPrice(null);
+            JOptionPane.showMessageDialog(this, "Invalid Max Price format.",
+                    "Input Error", JOptionPane.ERROR_MESSAGE);
+        }
 
+        // Update Spinners
+        int beds = (Integer) bedroomsSpinner.getValue();
+        currentFilterCriteria.setBedrooms(beds > 0 ? beds : null);
+        int baths = (Integer) bathroomsSpinner.getValue();
+        currentFilterCriteria.setBathrooms(baths > 0 ? baths : null);
+
+        // Update City
+        String selectedCity  = (String) cityComboBox.getSelectedItem();
+        currentFilterCriteria.setCity("All suburbs".equals(selectedCity) ? null : selectedCity);
+
+        // Update Booleans for Checkboxes
+        currentFilterCriteria.setUtilitiesIncluded(utilitiesIncludedCheckBox.isSelected() ? true : null);
+        currentFilterCriteria.setNsfasAccredited(nsfasAccreditedCheckBox.isSelected() ? true : null);
+
+    }
+
+    private void addListeners() {
+        applyButton.addActionListener(e -> {
+            updateCriteriaFromFields();
+            this.filtersApplied = true;
+            setVisible(false);
+            dispose();
+        });
+
+        clearButton.addActionListener(e -> {
+            currentFilterCriteria.reset();
+            populateFieldsFromCriteria(currentFilterCriteria);
+        });
+
+        cancelButton.addActionListener(e -> {
+            this.filtersApplied = false;
+            setVisible(false);
+            dispose();
+        });
+    }
+
+    public boolean wereFiltersApplied() {
+        return filtersApplied;
+    }
+
+    public FilterCriteria getAppliedCriteria() {
+        return currentFilterCriteria;
+    }
 }
