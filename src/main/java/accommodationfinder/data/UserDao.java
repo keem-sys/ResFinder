@@ -76,7 +76,7 @@ public class UserDao {
 
     // Method to get User by Username
     public User getUserByUsername(String username) throws SQLException {
-        String sql = "SELECT * FROM USERS WHERE username = ?";
+        String sql = "SELECT * FROM USERS WHERE LOWER(username) = LOWER(?)";
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
@@ -96,7 +96,7 @@ public class UserDao {
 
     // Method to get User by Email
     public User getUserByEmail(String email) throws SQLException {
-        String sql = "SELECT * FROM USERS WHERE email = ?";
+        String sql = "SELECT * FROM USERS WHERE LOWER(email) = LOWER(?)";
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
