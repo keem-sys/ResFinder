@@ -170,7 +170,7 @@ public class MainApplicationPanel {
         searchPanel.add(searchLabel);
         searchField = new JTextField(30);
         styleTextField(searchField);
-        searchField.setToolTipText("Enter keywords and press Enter to search");
+        searchField.setToolTipText("Enter words and press Enter to search");
         searchField.addActionListener(e -> updateDisplayedListings());
         searchPanel.add(searchField);
 

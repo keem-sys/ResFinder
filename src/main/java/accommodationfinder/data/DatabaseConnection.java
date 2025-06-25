@@ -218,7 +218,7 @@ public class DatabaseConnection {
 
 
         Accommodation acc3 = new Accommodation(
-                "Affordable 1-Bedroom Room Shared in Cape Town", "Discover a budget-friendly shared " +
+                "Affordable 1 Bedroom Room Shared in Cape Town", "Discover a budget-friendly shared " +
                 "living in the heart of Cape Towns City Centre, " +
                 "at 106 Adderley Street, City Centre. This modern room offers twin beds, a bedside table and privacy " +
                 "blinds. the Ideal location means you're within walking distance to the District Six Campus" +
@@ -239,7 +239,7 @@ public class DatabaseConnection {
 
 
         Accommodation acc4 = new Accommodation(
-                "2-Bedroom Apartment Shared in Mowbray", "Secure your spot for the next " +
+                "2 Bedroom Apartment Shared in Mowbray", "Secure your spot for the next " +
                 "academic year! " +
                 "This recently renovated room is available in a modern 2-bedroom, 2-bathroom shared apartment at " +
                 "77 Main Rd, " +
@@ -262,7 +262,7 @@ public class DatabaseConnection {
 
 
         Accommodation acc5 = new Accommodation(
-                "1-Bedroom Dorm on Kloof Rd (Gardens)", // Added area to title
+                "1 Bedroom Dorm on Kloof Rd (Gardens)", // Added area to title
                 "Secure your space in this budget-friendly single dorm room available at 69 Kloof Rd, " +
                         "located in the vibrant Gardens area, just minutes from Cape Town City Centre amenities. " +
                         "This is Ideal for students seeking focused accommodation. " +
@@ -283,24 +283,24 @@ public class DatabaseConnection {
                 -33.930, 18.409,
                 new BigDecimal("3200.00"),
                 Accommodation.PriceFrequency.PER_MONTH,
-                1, // 1 Bed
-                1, // 1 Bath
                 1,
-                true, // Internet Included
-                true, // Utilities Included
-                false, // Parking Available
-                "Academic Year", // Lease Term structure
-                LocalDateTime.now().plusWeeks(2), // Available From
-                LocalDateTime.now().plusMonths(6), // Available Until
-                true, // NSFAS Accredited
-                sampleUser2 // Listed By
+                1,
+                1,
+                true,
+                true,
+                false,
+                "Academic Year",
+                LocalDateTime.now().plusWeeks(2),
+                LocalDateTime.now().plusMonths(6),
+                true,
+                sampleUser2
         );
         acc5.getImageUrls().add("https://i.imgur.com/jDF3zhT.jpeg");
         acc5.getImageUrls().add("https://i.imgur.com/ffocXxy.jpeg");
         acc5.setListingDate(LocalDateTime.now().minusDays(3));
 
         Accommodation acc6 = new Accommodation(
-                "Spacious 2-Bedroom Bellville Apartment for Students",
+                "Spacious 2 Bedroom Bellville Apartment for Students",
                 "Ideal for sharing! R3000 per student This spacious 2-bedroom, 1-bathroom " +
                         "apartment is located right on Riebeek Street in the heart of Bellville. " +
                         "Perfect for students needing easy access to transport and campuses. " +
@@ -337,7 +337,7 @@ public class DatabaseConnection {
         acc6.setListingDate(LocalDateTime.now().minusDays(10));
 
         Accommodation acc7 = new Accommodation(
-                "3-Bedroom CBD Apartment on St Georges Mall",
+                "3 Bedroom CBD Apartment on St Georges Mall",
                 "Share with friends in this spacious 3-bedroom apartment! " +
                         "This large 3-bedroom, 2-bathrooms apartment is perfectly located on St Georges Mall " +
                         "in the Cape Town CBD.The apartment features bright bedrooms some equipped with twin beds. " +
@@ -404,6 +404,82 @@ public class DatabaseConnection {
         acc8.getImageUrls().add("https://i.imgur.com/Xaw1jWG.jpeg");
         acc8.setListingDate(LocalDateTime.now());
 
+        Accommodation acc9 = new Accommodation(
+                "Furnished Ensuite Room in Mowbray",
+                "Enjoy privacy and comfort in this stylishly furnished ensuite room, ideal for focused study " +
+                        "and relaxation. Located at 1 Raapenberg Road, Mowbray, this modern unit offers a peaceful " +
+                        "environment just minutes from key campuses and public transport. " +
+                        "This fully private room comes with a cozy double bed, a sleek study desk, and an " +
+                        "ensuite bathroom for your exclusive use. You'll also have access to a comfortable living " +
+                        "area and a compact kitchenette – perfect for independent student living. " +
+                        "The rent is R9000 per week, which includes Wi-Fi and water. Electricity is prepaid. " +
+                        "*Please note:* This unit is not NSFAS accredited and no parking is available on the " +
+                        "premises. " + "Lease period: From " +
+                        LocalDateTime.now().plusWeeks(4).format(DateTimeFormatter.ISO_LOCAL_DATE) +
+                        " until " + LocalDateTime.now().plusMonths(6).format(DateTimeFormatter.ISO_LOCAL_DATE) +
+                        ", under a Weekly Lease structure."
+                ,
+                Accommodation.AccommodationType.APARTMENT,
+                "1 Raapenberg Rd",
+                "Mowbray",
+                "7705",
+                -33.9467651, 18.4818226,
+                new BigDecimal("9000"),
+                Accommodation.PriceFrequency.PER_WEEK,
+                1,
+                1,
+                1,
+                false,
+                true,
+                false,
+                "Weekly Lease",
+                LocalDateTime.now().plusWeeks(4),
+                LocalDateTime.now().plusMonths(6),
+                false,
+                sampleUser1
+        );
+        acc9.getImageUrls().add("https://i.imgur.com/mZXKd4E.jpeg");
+        acc9.getImageUrls().add("https://i.imgur.com/VAAal9B.jpeg");
+        acc9.getImageUrls().add("https://i.imgur.com/IGqZQBS.png");
+
+        Accommodation acc10 = new Accommodation(
+                "Private Bedroom to Rent in Mowbray",
+                "Secure and spacious two-bedroom student unit in Mowbray – " +
+                        "ideal for friends or siblings sharing. Located at 12 Hornsey Road, this modern dorm-style " +
+                        "setup offers two private bedrooms with a shared bathroom and communal kitchen/living space. " +
+                        "Each bedroom is fully furnished with a comfortable bed, study desk, and storage. " +
+                        "The space is bright, secure, and designed for academic life and comfortable living. " +
+                        "Rent is R5000 per week per room, inclusive of Wi-Fi and water. Electricity is prepaid. " +
+                        "NSFAS accredited. Parking available on request. " +
+                        "Lease duration: From " +
+                        LocalDateTime.now().plusWeeks(4).format(DateTimeFormatter.ISO_LOCAL_DATE) +
+                        " until " + LocalDateTime.now().plusMonths(5).format(DateTimeFormatter.ISO_LOCAL_DATE) +
+                        " under a Weekly Lease agreement."
+                ,
+                Accommodation.AccommodationType.DORM,
+                "12 Hornsey Rd",
+                "Mowbray",
+                "7700",
+                -33.9493108, 18.4721028,
+                new BigDecimal("5000"),
+                Accommodation.PriceFrequency.PER_WEEK,
+                2,
+                1,
+                2,
+                false,
+                true,
+                true,
+                "Weekly Lease",
+                LocalDateTime.now().plusWeeks(4),
+                LocalDateTime.now().plusMonths(5),
+                false,
+                sampleUser2
+        );
+        acc10.getImageUrls().add("https://i.imgur.com/e7QIhNU.png");
+        acc10.getImageUrls().add("https://i.imgur.com/xda0eGe.png");
+        acc10.getImageUrls().add("https://i.imgur.com/vNq3aQC.png");
+        acc10.getImageUrls().add("https://i.imgur.com/vW6C0q2.png");
+
         // DAO to insert accommodations
         try {
             accommodationDao.createAccommodation(acc1);
@@ -414,6 +490,8 @@ public class DatabaseConnection {
             accommodationDao.createAccommodation(acc6);
             accommodationDao.createAccommodation(acc7);
             accommodationDao.createAccommodation(acc8);
+            accommodationDao.createAccommodation(acc9);
+            accommodationDao.createAccommodation(acc10);
             System.out.println("Sample accommodation data inserted successfully.");
         } catch (SQLException e) {
             System.err.println("Error inserting sample accommodation data: " + e.getMessage());
