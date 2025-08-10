@@ -10,7 +10,27 @@ import java.time.format.DateTimeFormatter;
 
 public class DatabaseConnection {
 
-    private static final String JDBC_URL = "jdbc:h2:./student_accommodation_db"; // File-based DB in project directory
+    private static final String PRODUCTION_JDBC_URL = "jdbc:h2:./student_accommodation_db"; // File-based DB in project directory
+    private final String jdbcUrl;
+
+    /**
+     * Default constructor for production use.
+     * It points to the file-based H2 database.
+     */
+    public DatabaseConnection() {
+        this(PRODUCTION_JDBC_URL);
+    }
+
+    /**
+     * Test-friendly constructor. Allows specifying the JDBC URL.
+     *
+     *
+     * @param jdbcUrl The JDBC connection string to use.
+     */
+    public DatabaseConnection(String jdbcUrl) {
+        this.jdbcUrl = jdbcUrl;
+    }
+
 
     /**
      * Gets a new connection to the database.
@@ -20,7 +40,7 @@ public class DatabaseConnection {
      * @throws SQLException if a database access error occurs.
      */
     public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(JDBC_URL);
+        return DriverManager.getConnection(this.jdbcUrl);
     }
 
     /**
@@ -31,8 +51,8 @@ public class DatabaseConnection {
      * @throws SQLException if a database access error occurs during initialization.
      */
     public void initializeDatabase() throws SQLException {
-        try (Connection connection = DriverManager.getConnection(JDBC_URL)) {
-            System.out.println("Initializing database schema and data...");
+        try (Connection connection = DriverManager.getConnection(this.jdbcUrl)) {
+            System.out.println("Initializing database schema and data for..." + this.jdbcUrl);
             createUsersTableIfNotExists(connection);
             createAccommodationsTableIfNotExists(connection);
             initializeSampleDataIfEmpty(connection);
