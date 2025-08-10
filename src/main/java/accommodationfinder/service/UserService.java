@@ -31,14 +31,18 @@ public class UserService {
     private static final long JWT_EXPIRATION_MS = 1000 * 60 * 60 * 24;
 
     public UserService(UserDao userDao) {
+        this(userDao, loadJwtSecretKeyFromConfig());
+    }
+
+    UserService(UserDao userDao, Key secretKey) {
         this.userDao = userDao;
-        this.jwtSecretKey = loadJwtSecretKeyFromConfig();
+        this.jwtSecretKey = secretKey;
     }
 
 
-    private Key loadJwtSecretKeyFromConfig() {
+    private static Key loadJwtSecretKeyFromConfig() {
         Properties properties = new Properties();
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream("application.properties")) {
+        try (InputStream input = UserService.class.getClassLoader().getResourceAsStream("application.properties")) {
             if (input == null) {
                 throw new IllegalStateException("Unable to find application.properties file!");
             }

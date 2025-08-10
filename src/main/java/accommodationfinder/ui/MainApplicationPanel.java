@@ -170,7 +170,7 @@ public class MainApplicationPanel {
         searchPanel.add(searchLabel);
         searchField = new JTextField(30);
         styleTextField(searchField);
-        searchField.setToolTipText("Enter keywords and press Enter to search");
+        searchField.setToolTipText("Enter words and press Enter to search");
         searchField.addActionListener(e -> updateDisplayedListings());
         searchPanel.add(searchField);
 
@@ -235,7 +235,7 @@ public class MainApplicationPanel {
      * @param rawKeywords The raw text entered by the user in the search field.
      * @return A new list containing only accommodations matching the keywords.
      */
-    private List<Accommodation> performSearch(List<Accommodation> inputList, String rawKeywords) {
+     List<Accommodation> performSearch(List<Accommodation> inputList, String rawKeywords) {
         String processedKeywords = rawKeywords.trim().toLowerCase();
 
         // If search is empty, return the original list

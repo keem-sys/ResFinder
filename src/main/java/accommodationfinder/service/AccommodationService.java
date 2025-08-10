@@ -43,7 +43,7 @@ public class AccommodationService {
         if (accommodation.getPrice() == null || accommodation.getPrice().signum() < 0) {
             throw new IllegalArgumentException("Price cannot be null or negative.");
         }
-        // TODO: Add more validation rules as needed (description length, city, etc.)
+        // TODO: Add more validation rules
 
 
         // Set Service-Managed Fields

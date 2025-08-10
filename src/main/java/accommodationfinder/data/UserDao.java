@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class UserDao {
-    // Call DatabaseConnection.java
     private final DatabaseConnection dbConnection;
 
 
@@ -21,7 +20,7 @@ public class UserDao {
                 "VALUES (?, ?, ?, ?, ?)";
 
         try (Connection connection = dbConnection.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) { // Important: Pass Statement.RETURN_GENERATED_KEYS
+             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             preparedStatement.setString(1, user.getFullName());
             preparedStatement.setString(2, user.getUsername());
@@ -40,7 +39,7 @@ public class UserDao {
                 throw new SQLException("Creating user in database failed, no ID was generated."); // Slightly clearer message
             }
         } catch (SQLException e) {
-            System.err.println("Error creating user in database: " + e.getMessage());
+            System.err.printf("Error creating user in database: %s%n", e.getMessage());
             throw e; // Re-throw the exception or handle it as needed
         }
     }
