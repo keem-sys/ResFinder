@@ -34,7 +34,7 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         // secret key for tests
-        String secretString = "89a84479f3ce1998304cea5342b530f8d0eae1588aef348a7dc8b399996c91d0";
+        String secretString = "89a84479f3ce1998304cea5342b530f8d0eae1588aef348a7dc8b399996c91d0t";
         testSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretString));
 
         userService = new UserService(mockUserDao, testSecretKey);
