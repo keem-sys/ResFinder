@@ -488,6 +488,23 @@ public class MainApplicationPanel {
         listingGridPanel.repaint();
     }
 
+    /**
+     * Resets all active filters and clears the search field, then refreshes the listings.
+     */
+    public void clearAllFiltersAndSearch() {
+        if (currentFilterCriteria != null) {
+            currentFilterCriteria.reset();
+        }
+
+        if (searchField != null) {
+            searchField.setText("");
+        }
+
+        updateDisplayedListings();
+        System.out.println("Filters and search have been cleared via menu.");
+    }
+
+
     // displayLoadingError
     private void displayLoadingError(String message) {
         listingGridPanel.removeAll();
