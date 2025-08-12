@@ -104,7 +104,7 @@ public class MainApplicationPanel {
 
     // Data Loading
 
-    private void loadInitialListings() {
+    protected void loadInitialListings() {
         // Display loading message
         listingGridPanel.removeAll();
         listingGridPanel.setLayout(new FlowLayout(FlowLayout.CENTER));

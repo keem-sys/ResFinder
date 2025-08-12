@@ -41,7 +41,7 @@ public class MenuBarManager {
         viewMenu.add(refreshMenuItem);
 
         JMenuItem clearFiltersMenuItem = new JMenuItem("Clear Filters");
-        clearFiltersMenuItem.addActionListener(e -> mainWindow.clearMainviewFilters());
+        clearFiltersMenuItem.addActionListener(e -> mainWindow.clearMainViewFilters());
         viewMenu.add(clearFiltersMenuItem);
 
         viewMenu.addSeparator();

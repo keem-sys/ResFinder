@@ -178,6 +178,41 @@ public class MainWindow extends JFrame {
         return prefs.get("jwtToken", null);
     }
 
+    // Stub Methods called by Menu
+
+    public void showUserProfileDialog() {
+        if (currentUser == null) {
+            JOptionPane.showMessageDialog(this, "You must be logged in to view your profile.",
+                    "Access Denied", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        // TODO: Create and show UserProfileDialog
+        JOptionPane.showMessageDialog(this,
+                "Feature 'My Profile' is not yet implemented.",
+                "Coming Soon",
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void showAboutDialog() {
+        JOptionPane.showMessageDialog(this,
+                "ResFinder version 1.0\nYour one-stop solution for student accommodation.",
+                "About ResFinder",
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void refreshMainViewListings() {
+        if (mainApplicationPanel != null) {
+            System.out.println("Menu: Refreshing listings...");
+            mainApplicationPanel.loadInitialListings();
+        }
+    }
+
+    public void clearMainViewFilters() {
+        if (mainApplicationPanel != null) {
+            System.out.println("Menu: Clearing filters and search...");
+            mainApplicationPanel.clearAllFiltersAndSearch();
+        }
+    }
 
     public void switchToRegistrationPanel() {
         setContentPane(registrationPanel.getRegistrationPanel());
