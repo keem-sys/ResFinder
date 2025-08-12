@@ -457,8 +457,6 @@ public class MainApplicationPanel {
         authAreaPanel.repaint();
     }
 
-
-
     private void refreshListingGrid(List<Accommodation> listings) {
         listingGridPanel.removeAll();
 
@@ -543,4 +541,5 @@ public class MainApplicationPanel {
     public JPanel getMainPanel() {
         return mainPanel;
     }
+
 }
