@@ -75,13 +75,13 @@ class FilterCriteriaTest {
     }
 
     @Test
-    @DisplayName("Should NOT have active filters if city is set to 'All Cities'")
+    @DisplayName("Should NOT have active filters if city is set to 'All Suburbs'")
     void shouldNotHaveActiveFiltersIfCityIsAllCities() {
         // Arrange: The setCity method should treat "All Cities" as null (no filter)
-        criteria.setCity("All Cities");
+        criteria.setCity("All suburbs");
 
         // Act & Assert
-        assertFalse(criteria.hasActiveFilters(), "hasActiveFilters() should be false if city is 'All Cities'.");
+        assertFalse(criteria.hasActiveFilters(), "hasActiveFilters() should be false if city is 'All Suburbs'.");
     }
 
     @Test

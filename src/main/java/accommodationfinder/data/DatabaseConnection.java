@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 
 public class DatabaseConnection {
 
-    private static final String PRODUCTION_JDBC_URL = "jdbc:h2:./student_accommodation_db"; // File-based DB in project directory
+    private static final String PRODUCTION_JDBC_URL = "jdbc:h2:./student_accommodation_db"; // File-based DB
     private final String jdbcUrl;
 
     /**
