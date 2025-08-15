@@ -57,6 +57,24 @@ public class UserService {
         }
     }
 
+    public void updateUserFullName(Long userId, String newFullName) throws SQLException {
+        if (newFullName == null || newFullName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Full Name cannot be empty.");
+        }
+        userDao.updateFullName(userId, newFullName.trim());
+        System.out.println("User full name updated for ID: " + userId);
+    }
+
+    public void changeUserPassword(Long userId, String newPlainTextPassword) throws SQLException {
+        if (newPlainTextPassword == null || newPlainTextPassword.length() < 8) {
+            throw new IllegalArgumentException("New password must be at least 8 characters long.");
+        }
+        // Hash new password
+        String newHashedPassword = hashPassword(newPlainTextPassword);
+        userDao.updatePassword(userId, newHashedPassword);
+        System.out.println("User password updated for ID: " + userId);
+    }
+
     public Long registerUser(User user) throws SQLException {
 
         if (user.getFullName() == null || user.getFullName().isEmpty() ||

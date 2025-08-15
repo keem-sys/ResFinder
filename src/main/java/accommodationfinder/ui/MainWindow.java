@@ -186,11 +186,10 @@ public class MainWindow extends JFrame {
                     "Access Denied", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        // TODO: Create and show UserProfileDialog
-        JOptionPane.showMessageDialog(this,
-                "Feature 'My Profile' is not yet implemented.",
-                "Coming Soon",
-                JOptionPane.INFORMATION_MESSAGE);
+
+        UserProfileDialog userProfileDialog = new UserProfileDialog(this, userService, currentUser);
+        userProfileDialog.setVisible(true);
+
     }
 
     public void showAboutDialog() {

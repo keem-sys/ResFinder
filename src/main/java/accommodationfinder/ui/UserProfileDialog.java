@@ -179,12 +179,12 @@ public class UserProfileDialog extends JDialog {
             // Update user profile
             if (nameChanged) {
                 currentUser.setFullName(newFullName);
-                // userService.updateUserProfile(currentUser.getId(), newFullName);
+                userService.updateUserFullName(currentUser.getId(), newFullName);
             }
 
             // Change password
             if (passwordChanged) {
-                //userService.changeUserPassword(currentUser.getId(), newPassword);
+                userService.changeUserPassword(currentUser.getId(), newPassword);
             }
 
             JOptionPane.showMessageDialog(this, "Profile updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
