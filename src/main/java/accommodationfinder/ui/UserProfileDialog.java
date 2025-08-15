@@ -66,6 +66,7 @@ public class UserProfileDialog extends JDialog {
         gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.EAST;
         gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.gridy++;
 
         // Full Name
         formPanel.add(new JLabel("Full Name:"), gbc);
@@ -172,10 +173,8 @@ public class UserProfileDialog extends JDialog {
             }
         }
 
-        // Updates via Service ---
+        // Updates
         try {
-            boolean success = true;
-
             // Update user profile
             if (nameChanged) {
                 currentUser.setFullName(newFullName);
@@ -187,7 +186,9 @@ public class UserProfileDialog extends JDialog {
                 userService.changeUserPassword(currentUser.getId(), newPassword);
             }
 
-            JOptionPane.showMessageDialog(this, "Profile updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+            JOptionPane.showMessageDialog(this, "Profile updated successfully!",
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
             dispose();
 
         } catch (SQLException e) {
