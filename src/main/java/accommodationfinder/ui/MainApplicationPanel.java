@@ -428,6 +428,7 @@ public class MainApplicationPanel {
         welcomeLabel = new JLabel("Welcome, " + username);
         welcomeLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         logoutButton = new JButton("Logout");
+        styleButton(logoutButton, BACKGROUND_COLOR, TEXT_COLOR, 13);
         logoutButton.addActionListener(e -> mainWindow.handleLogout());
         authAreaPanel.add(welcomeLabel);
         authAreaPanel.add(Box.createRigidArea(new Dimension(10, 0)));

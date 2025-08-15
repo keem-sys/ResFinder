@@ -75,7 +75,7 @@ public class UserProfileDialog extends JDialog {
         gbc.gridy++;
         formPanel.add(new JLabel("Email:"), gbc);
         gbc.gridy++;
-        gbc.insets = new Insets(20, 8, 8, 8); // Add space before password fields
+        gbc.insets = new Insets(20, 8, 8, 8);
         formPanel.add(new JLabel("New Password:"), gbc);
         gbc.gridy++;
         gbc.insets = new Insets(8, 8, 8, 8);
@@ -95,13 +95,13 @@ public class UserProfileDialog extends JDialog {
 
         gbc.gridy++;
         usernameField = new JTextField(25);
-        styleTextField(usernameField, false); // Not editable
+        styleTextField(usernameField, false);
         usernameField.setText(currentUser.getUsername());
         formPanel.add(usernameField, gbc);
 
         gbc.gridy++;
         emailField = new JTextField(25);
-        styleTextField(emailField, false); // Not editable
+        styleTextField(emailField, false);
         emailField.setText(currentUser.getEmail());
         formPanel.add(emailField, gbc);
 
@@ -122,9 +122,10 @@ public class UserProfileDialog extends JDialog {
         buttonPanel.setOpaque(false);
         saveChangesButton = new JButton("Save Changes");
         cancelButton = new JButton("Cancel");
-        // TODO: Style buttons
         buttonPanel.add(cancelButton);
+        styleButton(cancelButton, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 13);
         buttonPanel.add(saveChangesButton);
+        styleButton(saveChangesButton, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 13);
 
         getContentPane().add(formPanel, BorderLayout.CENTER);
         getContentPane().add(buttonPanel, BorderLayout.SOUTH);
@@ -215,5 +216,11 @@ public class UserProfileDialog extends JDialog {
         ));
     }
 
+    private void styleButton(JButton button, Color bgColor, Color fgColor, int fontSize) {
+        button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
+        button.setBackground(bgColor);
+        button.setForeground(fgColor);
+        button.setFocusPainted(false);
+    }
 
 }
