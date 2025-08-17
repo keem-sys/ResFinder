@@ -44,6 +44,29 @@ public class UserDao {
         }
     }
 
+
+    public void updateFullName(Long userId, String newFullName) throws SQLException {
+        String sql = "UPDATE users SET full_name = ? WHERE id = ?";
+
+        try (Connection connection = dbConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, newFullName);
+            preparedStatement.setLong(2, userId);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    public void updatePassword(Long userId, String newHashedPassword) throws SQLException {
+        String sql = "UPDATE users SET password_hash = ? WHERE id = ?";
+
+        try (Connection connection = dbConnection.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, newHashedPassword);
+            pstmt.setLong(2, userId);
+            pstmt.executeUpdate();
+        }
+    }
+
     // Method to get User ById
 
     /**

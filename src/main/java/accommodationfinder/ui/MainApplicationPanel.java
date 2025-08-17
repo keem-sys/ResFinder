@@ -104,7 +104,7 @@ public class MainApplicationPanel {
 
     // Data Loading
 
-    private void loadInitialListings() {
+    protected void loadInitialListings() {
         // Display loading message
         listingGridPanel.removeAll();
         listingGridPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
@@ -428,6 +428,7 @@ public class MainApplicationPanel {
         welcomeLabel = new JLabel("Welcome, " + username);
         welcomeLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         logoutButton = new JButton("Logout");
+        styleButton(logoutButton, BACKGROUND_COLOR, TEXT_COLOR, 13);
         logoutButton.addActionListener(e -> mainWindow.handleLogout());
         authAreaPanel.add(welcomeLabel);
         authAreaPanel.add(Box.createRigidArea(new Dimension(10, 0)));
@@ -457,8 +458,6 @@ public class MainApplicationPanel {
         authAreaPanel.repaint();
     }
 
-
-
     private void refreshListingGrid(List<Accommodation> listings) {
         listingGridPanel.removeAll();
 
@@ -487,6 +486,23 @@ public class MainApplicationPanel {
         listingGridPanel.revalidate();
         listingGridPanel.repaint();
     }
+
+    /**
+     * Resets all active filters and clears the search field, then refreshes the listings.
+     */
+    public void clearAllFiltersAndSearch() {
+        if (currentFilterCriteria != null) {
+            currentFilterCriteria.reset();
+        }
+
+        if (searchField != null) {
+            searchField.setText("");
+        }
+
+        updateDisplayedListings();
+        System.out.println("Filters and search have been cleared via menu.");
+    }
+
 
     // displayLoadingError
     private void displayLoadingError(String message) {
@@ -526,4 +542,5 @@ public class MainApplicationPanel {
     public JPanel getMainPanel() {
         return mainPanel;
     }
+
 }

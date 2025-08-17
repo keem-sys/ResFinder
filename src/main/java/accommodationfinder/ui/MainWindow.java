@@ -25,6 +25,8 @@ public class MainWindow extends JFrame {
     private AccommodationDao accommodationDao;
     private AccommodationService accommodationService;
 
+    private MenuBarManager menuBarManager;
+
     private String currentJwtToken = null;
     private User currentUser = null;
 
@@ -55,6 +57,12 @@ public class MainWindow extends JFrame {
             this.registrationPanel = new RegistrationPanel(userService, this);
             this.loginPanel = new LoginPanel(userService, this);
 
+            // Initialise MenuBar
+            this.menuBarManager = new MenuBarManager(this);
+            JMenuBar menuBar = menuBarManager.createMenuBar();
+            this.setJMenuBar(menuBar);
+
+
             // Set initial content pane
             setContentPane(mainApplicationPanel.getMainPanel());
 
@@ -71,6 +79,9 @@ public class MainWindow extends JFrame {
                     mainApplicationPanel.showLoggedOutState();
                 }
             }
+
+            // update menu state after user check
+            menuBarManager.updateMenuState(this.currentUser);
 
             // Initial Focus Panel
             SwingUtilities.invokeLater(() -> {
@@ -116,9 +127,14 @@ public class MainWindow extends JFrame {
             this.currentUser = user;
             System.out.println("Login successful for user: " + currentUser.getUsername() + " (ID: " + currentUser.getId() + ")");
 
-            // Update the UI in MainApplicationPanel
+            // Update UI in MainApplicationPanel
             if (mainApplicationPanel != null) {
                 mainApplicationPanel.showLoggedInState(currentUser.getUsername());
+            }
+
+            // Update menu state on successful login
+            if (menuBarManager != null) {
+                menuBarManager.updateMenuState(this.currentUser);
             }
 
             // Navigate to the main application view
@@ -149,6 +165,11 @@ public class MainWindow extends JFrame {
             mainApplicationPanel.showLoggedOutState();
         }
 
+        // Update menu state when logged out
+        if (menuBarManager != null) {
+            menuBarManager.updateMenuState(null);
+        }
+
         showMainApplicationView();
     }
 
@@ -157,6 +178,40 @@ public class MainWindow extends JFrame {
         return prefs.get("jwtToken", null);
     }
 
+    // Stub Methods called by Menu
+
+    public void showUserProfileDialog() {
+        if (currentUser == null) {
+            JOptionPane.showMessageDialog(this, "You must be logged in to view your profile.",
+                    "Access Denied", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        UserProfileDialog userProfileDialog = new UserProfileDialog(this, userService, currentUser);
+        userProfileDialog.setVisible(true);
+
+    }
+
+    public void showAboutDialog() {
+        JOptionPane.showMessageDialog(this,
+                "ResFinder version 1.0\nYour one-stop solution for student accommodation.",
+                "About ResFinder",
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void refreshMainViewListings() {
+        if (mainApplicationPanel != null) {
+            System.out.println("Menu: Refreshing listings...");
+            mainApplicationPanel.loadInitialListings();
+        }
+    }
+
+    public void clearMainViewFilters() {
+        if (mainApplicationPanel != null) {
+            System.out.println("Menu: Clearing filters and search...");
+            mainApplicationPanel.clearAllFiltersAndSearch();
+        }
+    }
 
     public void switchToRegistrationPanel() {
         setContentPane(registrationPanel.getRegistrationPanel());
