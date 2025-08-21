@@ -4,13 +4,10 @@ import accommodationfinder.auth.User;
 import accommodationfinder.data.UserDao;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-
-import javax.crypto.SecretKey;
 import java.security.Key;
 
 import java.io.IOException;
@@ -31,18 +28,14 @@ public class UserService {
     private static final long JWT_EXPIRATION_MS = 1000 * 60 * 60 * 24;
 
     public UserService(UserDao userDao) {
-        this(userDao, loadJwtSecretKeyFromConfig());
-    }
-
-    UserService(UserDao userDao, Key secretKey) {
         this.userDao = userDao;
-        this.jwtSecretKey = secretKey;
+        this.jwtSecretKey = loadJwtSecretKeyFromConfig();
     }
 
 
-    private static Key loadJwtSecretKeyFromConfig() {
+    private Key loadJwtSecretKeyFromConfig() {
         Properties properties = new Properties();
-        try (InputStream input = UserService.class.getClassLoader().getResourceAsStream("application.properties")) {
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream("application.properties")) {
             if (input == null) {
                 throw new IllegalStateException("Unable to find application.properties file!");
             }
@@ -55,24 +48,6 @@ public class UserService {
         } catch (IOException e) {
             throw new IllegalStateException("Error loading application.properties file!", e);
         }
-    }
-
-    public void updateUserFullName(Long userId, String newFullName) throws SQLException {
-        if (newFullName == null || newFullName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Full Name cannot be empty.");
-        }
-        userDao.updateFullName(userId, newFullName.trim());
-        System.out.println("User full name updated for ID: " + userId);
-    }
-
-    public void changeUserPassword(Long userId, String newPlainTextPassword) throws SQLException {
-        if (newPlainTextPassword == null || newPlainTextPassword.length() < 8) {
-            throw new IllegalArgumentException("New password must be at least 8 characters long.");
-        }
-        // Hash new password
-        String newHashedPassword = hashPassword(newPlainTextPassword);
-        userDao.updatePassword(userId, newHashedPassword);
-        System.out.println("User password updated for ID: " + userId);
     }
 
     public Long registerUser(User user) throws SQLException {
@@ -131,36 +106,41 @@ public class UserService {
 
     public String loginUser(String usernameOrEmail, String plainTextPassword) throws Exception {
         User user = null;
+
+        // find user by username
         try {
-            // Try finding by username first
             user = userDao.getUserByUsername(usernameOrEmail);
-
-            // If not found by username, try by email
-            if (user == null) {
-                user = userDao.getUserByEmail(usernameOrEmail);
-            }
-
         } catch (SQLException e) {
-            // Log the database error and throw a generic login failure exception
-            System.err.println("Database error during login lookup for: " + usernameOrEmail + " - " + e.getMessage());
-            throw new Exception("Login failed due to a database error. Please try again later.");
+            System.out.println("Unable to get user username");
+            e.printStackTrace();
         }
 
+        //  If not found by username, try to find by email
         if (user == null) {
-            throw new Exception("Invalid username or email.");
+            try {
+                user = userDao.getUserByEmail(usernameOrEmail);
+            } catch (SQLException e) {
+                System.out.println("Unable to get user email");
+                e.printStackTrace();
+            }
         }
 
-        // Password Verification
+
+        // User not found by either username or email
+        if (user == null) {
+            throw new Exception("Invalid username or email."); // TODO: Custom AuthenticationException
+        }
+
+        // Password Verification (using Argon2-jvm)
         if (!verifyPassword(plainTextPassword, user.getPasswordHash())) {
-            throw new Exception("Invalid password.");
+            throw new Exception("Invalid password."); // TODO: Custom AuthenticationException
         }
 
-        // Generate Token
         return generateJwtToken(user);
     }
 
 
-
+  
     private String generateJwtToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("username", user.getUsername());
@@ -190,67 +170,20 @@ public class UserService {
             return false;
         }
     }
-
-    /**
-     * Validates the JWT token and extracts user claims if valid.
-     *
-     * @param jwtToken The JWT token string.
-     * @return A map of claims (like userId, username) if the token is valid, null otherwise.
-     */
-    public Claims validateAndExtractClaims(String jwtToken) {
-        if (jwtToken == null || jwtToken.trim().isEmpty()) {
-            return null;
-        }
+    //extracts the username from a valid JWT
+    public String getUsernameFromJwt(String jwtToken) {
         try {
             return Jwts.parser()
-                    .verifyWith((SecretKey) jwtSecretKey)
+                    .setSigningKey(jwtSecretKey)
                     .build()
-                    .parseSignedClaims(jwtToken)
-                    .getPayload();
-        } catch (JwtException | IllegalArgumentException e) { // Catch potential errors
-            System.err.println("JWT validation/parsing failed: " + e.getMessage());
-            return null;
+                    .parseClaimsJws(jwtToken)
+                    .getBody()
+                    .get("username", String.class); // Extracts the "username" claim
+        } catch (Exception e) {
+            System.err.println("Failed to extract username from JWT: " + e.getMessage());
+            return "User"; // Fallback
         }
     }
-
-    /**
-     * Retrieves the User object based on the ID stored within a valid JWT token.
-     *
-     * @param jwtToken The JWT token string.
-     * @return The User object if the token is valid and the user exists, null otherwise.
-     */
-    public User getUserFromToken(String jwtToken) {
-        Claims claims = validateAndExtractClaims(jwtToken);
-        if (claims != null) {
-            try {
-                // Extract user ID from claims
-                Object userIdObj = claims.get("userId");
-                Long userId = null;
-                if (userIdObj instanceof Integer) {
-                    userId = ((Integer) userIdObj).longValue();
-                } else if (userIdObj instanceof Long) {
-                    userId = (Long) userIdObj;
-                }
-
-                if (userId != null) {
-                    // Fetch user from DAO using the ID
-                    return userDao.getUserById(userId);
-                } else {
-                    System.err.println("User ID not found or invalid type in JWT claims.");
-                    return null;
-                }
-            } catch (SQLException e) {
-                System.err.println("Database error fetching user from token ID: " + e.getMessage());
-                return null;
-            } catch (Exception e) {
-                System.err.println("Error processing claims from token: " + e.getMessage());
-                return null;
-            }
-        }
-        return null; // Token invalid or claims couldn't be extracted
-    }
-
-
 
     //  Password Verification Method (using Argon2-jvm)
     private boolean verifyPassword(String plainTextPassword, String hashedPassword) {

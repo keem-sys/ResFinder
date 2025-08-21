@@ -1,18 +1,12 @@
 package accommodationfinder.ui;
 
-import accommodationfinder.listing.Accommodation; // Import Accommodation class
-
-import javax.imageio.IIOException;
-import javax.imageio.ImageIO;
+import accommodationfinder.listing.Accommodation;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.NumberFormat;
@@ -45,19 +39,19 @@ public class AccommodationCardPanel extends JPanel {
         setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         setBackground(new Color(253, 251, 245)); // Match background
 
-        // --- Image Panel (Top) ---
+        // Image Panel (Top)
         JPanel imageContainerPanel = createImagePanel();
         add(imageContainerPanel, BorderLayout.NORTH);
 
-        // --- Details Panel (Center) ---
+        // Details Panel (Center)
         JPanel detailsPanel = createDetailsPanel();
         add(detailsPanel, BorderLayout.CENTER);
 
-        // --- Bottom Bar (South) ---
+        // Bottom Bar (South)
         JPanel bottomBarPanel = createBottomBar();
         add(bottomBarPanel, BorderLayout.SOUTH);
 
-        // --- Click Listener for the whole card ---
+        // Click Listener for the whole card
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         addMouseListener(new MouseAdapter() {
             @Override
@@ -97,7 +91,8 @@ public class AccommodationCardPanel extends JPanel {
         titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
         titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel priceLabel = new JLabel(currencyFormatter.format(accommodation.getPrice()) + " " + formatPriceFrequency(accommodation.getPriceFrequency()));
+        JLabel priceLabel = new JLabel(currencyFormatter.format(accommodation.getPrice()) + " " +
+                formatPriceFrequency(accommodation.getPriceFrequency()));
         priceLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         priceLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -162,11 +157,18 @@ public class AccommodationCardPanel extends JPanel {
     }
 
     private void handleCardClick() {
+        // TODO: trigger navigation to the detailed view
+        // mainWindow.switch
         System.out.println("Card clicked - Navigate to details for Listing ID: " + accommodation.getId());
-        mainWindow.switchToDetailedView(accommodation.getId());
+        // Placeholder action using mainWindow reference
+        JOptionPane.showMessageDialog(null, // Use mainWindow's frame
+                "Should show details for: " + accommodation.getTitle(),
+                "View More Clicked (Placeholder)",
+                JOptionPane.INFORMATION_MESSAGE);
+
     }
 
-    // Helper Methods
+    // Helper Methods specific to this card
 
     private void loadImageAsync(JLabel imageLabel, int targetWidth, int targetHeight) {
         // Reset label state
@@ -181,71 +183,25 @@ public class AccommodationCardPanel extends JPanel {
             SwingWorker<ImageIcon, Void> imageLoader = new SwingWorker<>() {
                 @Override
                 protected ImageIcon doInBackground() throws Exception {
-                    Image scaledImage = null;
-
                     try {
-                        URL imageUrl = new URL(imageUrlString.trim());
-                        BufferedImage originalImage = null;
-                        try (InputStream is = imageUrl.openStream()) {
-                            originalImage = ImageIO.read(is);
-                        }
+                        URL imageUrl = new URL(imageUrlString);
+                        ImageIcon originalIcon = new ImageIcon(imageUrl);
 
-                        // Check if ImageIO successfully read the image
-                        if (originalImage == null) {
-                            System.err.println("Failed to load image using ImageIO (unsupported format or error): " +
-                                    imageUrlString);
-                            // TODO: Fallback attempt using TwelveMonkeysImageIO
+                        if (originalIcon.getImageLoadStatus() != MediaTracker.COMPLETE) {
+                            System.err.println("Failed to load image: " + imageUrlString + " (Status: " + originalIcon.getImageLoadStatus()+")");
                             return null;
                         }
 
-                        // Proceed with scaling logic if image was loaded
-                        int originalWidth = originalImage.getWidth(null);
-                        int originalHeight = originalImage.getHeight(null);
-
-                        if (originalWidth <= 0 || originalHeight <= 0) {
-                            System.err.println("Invalid image dimensions for: " + imageUrlString);
-                            return null;
-                        }
-
-                        // Calculate scaled dimensions maintaining aspect ratio
-                        double scale = Math.min((double) targetWidth / originalWidth, (double) targetHeight / originalHeight);
-                        int scaledWidth = (int) (originalWidth * scale);
-                        int scaledHeight = (int) (originalHeight * scale);
-
-                        // Ensure minimum dimensions after scaling if needed
-                        scaledWidth = Math.max(1, scaledWidth);
-                        scaledHeight = Math.max(1, scaledHeight);
-
-
-                        // Create a BufferedImage for higher quality scaling
-                        BufferedImage scaledBI = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB);
-                        Graphics2D g2d = scaledBI.createGraphics();
-
-                        // Apply rendering hints for better quality
-                        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-                        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                        // Draw the original image (loaded by ImageIO) onto the scaled BufferedImage
-                        g2d.drawImage(originalImage, 0, 0, scaledWidth, scaledHeight, null);
-                        g2d.dispose();
-
-                        return new ImageIcon(scaledBI); // Return the scaled BufferedImage wrapped in an ImageIcon
+                        Image image = originalIcon.getImage();
+                        Image scaledImage = image.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+                        return new ImageIcon(scaledImage);
 
                     } catch (MalformedURLException e) {
                         System.err.println("Invalid image URL: " + imageUrlString + " - " + e.getMessage());
                         return null;
-                    } catch (IIOException e) { // Catch specific ImageIO errors
-                        System.err.println("ImageIO error loading/reading image: " + imageUrlString + " - " + e.getMessage());
-                        e.printStackTrace();
-                        return null;
-                    } catch (IOException e) { // Catch general IO errors (network, stream issues)
-                        System.err.println("IO error loading image stream: " + imageUrlString + " - " + e.getMessage());
-                        e.printStackTrace();
-                        return null;
                     } catch (Exception e) {
-                        System.err.println("General error loading/scaling image: " + imageUrlString + " - " + e.getMessage());
-                        e.printStackTrace();
+                        System.err.println("Error loading/scaling image: " + imageUrlString + " - " + e.getMessage());
+                        // e.printStackTrace();
                         return null;
                     }
                 }
