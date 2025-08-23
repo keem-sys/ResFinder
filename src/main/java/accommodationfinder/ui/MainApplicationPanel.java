@@ -98,8 +98,8 @@ public class MainApplicationPanel {
 
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
-        loadInitialListings(); // Load data asynchronously
-        showLoggedOutState();  // Set initial auth state
+        loadInitialListings();
+        showLoggedOutState();
     }
 
     // Data Loading
@@ -193,8 +193,6 @@ public class MainApplicationPanel {
 
         orderByComboBox.addActionListener(e -> updateDisplayedListings());
         orderByPanel.add(orderByComboBox);
-
-
 
 
         // Filter Button
@@ -474,7 +472,6 @@ public class MainApplicationPanel {
             }
         }
 
-        // Reset scroll pane to top AFTER components are  added/removed
         SwingUtilities.invokeLater(() -> {
             if (scrollPane != null && scrollPane.getViewport() != null) {
                 scrollPane.getViewport().setViewPosition(new Point(0, 0));
@@ -482,7 +479,6 @@ public class MainApplicationPanel {
             else { System.err.println("Warning: scrollPane/viewport null during scroll reset."); }
         });
 
-        // Tell the layout manager to recalculate and repaint
         listingGridPanel.revalidate();
         listingGridPanel.repaint();
     }
@@ -504,7 +500,6 @@ public class MainApplicationPanel {
     }
 
 
-    // displayLoadingError
     private void displayLoadingError(String message) {
         listingGridPanel.removeAll();
         listingGridPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
@@ -538,7 +533,6 @@ public class MainApplicationPanel {
         return searchField;
     }
 
-    // Method to return the main panel for MainWindow to display
     public JPanel getMainPanel() {
         return mainPanel;
     }

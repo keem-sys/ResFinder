@@ -67,6 +67,7 @@ public class MenuBarManager {
         accountMenu.add(logInMenuItem);
 
         signUpMenuItem = new JMenuItem("Sign Up");
+        styleMenuItem(signUpMenuItem);
         signUpMenuItem.addActionListener(e -> mainWindow.switchToRegistrationPanel());
         accountMenu.add(signUpMenuItem);
 
@@ -78,6 +79,13 @@ public class MenuBarManager {
         accountMenu.add(profileMenuItem);
 
         // Help Menu
+        JMenuItem contactMenuItem = new JMenuItem("Contact Us");
+        styleMenuItem(contactMenuItem);
+        contactMenuItem.addActionListener(e -> mainWindow.switchToContactPanel());
+        helpMenu.add(contactMenuItem);
+
+        helpMenu.addSeparator();
+
         JMenuItem aboutItem = new JMenuItem("About ResFinder");
         styleMenuItem(aboutItem);
         aboutItem.addActionListener(e -> mainWindow.showAboutDialog());

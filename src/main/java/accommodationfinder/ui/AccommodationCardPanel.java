@@ -45,19 +45,18 @@ public class AccommodationCardPanel extends JPanel {
         setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         setBackground(new Color(253, 251, 245)); // Match background
 
-        // --- Image Panel (Top) ---
+        // Image Panel (Top)
         JPanel imageContainerPanel = createImagePanel();
         add(imageContainerPanel, BorderLayout.NORTH);
 
-        // --- Details Panel (Center) ---
+        // Details Panel (Center)
         JPanel detailsPanel = createDetailsPanel();
         add(detailsPanel, BorderLayout.CENTER);
 
-        // --- Bottom Bar (South) ---
+        // Bottom Bar (South)
         JPanel bottomBarPanel = createBottomBar();
         add(bottomBarPanel, BorderLayout.SOUTH);
 
-        // --- Click Listener for the whole card ---
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         addMouseListener(new MouseAdapter() {
             @Override
@@ -226,7 +225,7 @@ public class AccommodationCardPanel extends JPanel {
                         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                        // Draw the original image (loaded by ImageIO) onto the scaled BufferedImage
+                        // Draw the original image onto BufferedImage
                         g2d.drawImage(originalImage, 0, 0, scaledWidth, scaledHeight, null);
                         g2d.dispose();
 

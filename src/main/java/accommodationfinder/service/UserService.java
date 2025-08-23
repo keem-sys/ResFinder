@@ -120,8 +120,7 @@ public class UserService {
         user.setRegistrationDate(LocalDateTime.now());
 
         try {
-            Long userId = userDao.createUser(user);
-            return userId;
+            return userDao.createUser(user);
         } catch (SQLException sqlException) {
             System.err.println("Error creating user in the database " + sqlException.getMessage());
             throw sqlException;
@@ -132,7 +131,7 @@ public class UserService {
     public String loginUser(String usernameOrEmail, String plainTextPassword) throws Exception {
         User user = null;
         try {
-            // Try finding by username first
+            // Try finding by username
             user = userDao.getUserByUsername(usernameOrEmail);
 
             // If not found by username, try by email
@@ -141,7 +140,7 @@ public class UserService {
             }
 
         } catch (SQLException e) {
-            // Log the database error and throw a generic login failure exception
+            // Log database error and throw exception
             System.err.println("Database error during login lookup for: " + usernameOrEmail + " - " + e.getMessage());
             throw new Exception("Login failed due to a database error. Please try again later.");
         }
@@ -191,6 +190,7 @@ public class UserService {
         }
     }
 
+
     /**
      * Validates the JWT token and extracts user claims if valid.
      *
@@ -207,7 +207,7 @@ public class UserService {
                     .build()
                     .parseSignedClaims(jwtToken)
                     .getPayload();
-        } catch (JwtException | IllegalArgumentException e) { // Catch potential errors
+        } catch (JwtException | IllegalArgumentException e) {
             System.err.println("JWT validation/parsing failed: " + e.getMessage());
             return null;
         }
@@ -247,12 +247,12 @@ public class UserService {
                 return null;
             }
         }
-        return null; // Token invalid or claims couldn't be extracted
+        return null;
     }
 
 
 
-    //  Password Verification Method (using Argon2-jvm)
+    //  Password Verification using Argon2-jvm
     private boolean verifyPassword(String plainTextPassword, String hashedPassword) {
         Argon2 argon2 = Argon2Factory.create();
         try {
@@ -260,7 +260,7 @@ public class UserService {
         } catch (Exception e) {
             // Password verification failed
             System.err.println("Password verification error: " + e.getMessage());
-            return false; // Verification failed
+            return false;
         }
     }
 

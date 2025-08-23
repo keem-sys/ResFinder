@@ -9,7 +9,6 @@ import accommodationfinder.data.DatabaseConnection;
 import accommodationfinder.data.UserDao;
 
 import javax.swing.*;
-import java.awt.*;
 import java.sql.SQLException;
 import java.util.prefs.Preferences;
 
@@ -21,6 +20,7 @@ public class MainWindow extends JFrame {
     private LoginPanel loginPanel;
     private MainApplicationPanel mainApplicationPanel;
     private AccommodationDetailPanel accommodationDetailPanel;
+    private ContactPanel contactPanel;
 
     private AccommodationDao accommodationDao;
     private AccommodationService accommodationService;
@@ -38,17 +38,12 @@ public class MainWindow extends JFrame {
         setLocationRelativeTo(null);
 
         try {
-            // Create DatabaseConnection instance
             databaseConnection = new DatabaseConnection();
-
-            // Perform Database Initialization
             databaseConnection.initializeDatabase();
 
-            // create DAOs
             userDao = new UserDao(databaseConnection);
             accommodationDao = new AccommodationDao(databaseConnection, userDao);
 
-            // Create Services
             userService = new UserService(userDao);
             accommodationService = new AccommodationService(accommodationDao, userDao);
 
@@ -56,6 +51,7 @@ public class MainWindow extends JFrame {
             this.mainApplicationPanel = new MainApplicationPanel(accommodationService, userService, this);
             this.registrationPanel = new RegistrationPanel(userService, this);
             this.loginPanel = new LoginPanel(userService, this);
+            this.contactPanel = new ContactPanel(this);
 
             // Initialise MenuBar
             this.menuBarManager = new MenuBarManager(this);
@@ -63,7 +59,6 @@ public class MainWindow extends JFrame {
             this.setJMenuBar(menuBar);
 
 
-            // Set initial content pane
             setContentPane(mainApplicationPanel.getMainPanel());
 
             // JWT Check
@@ -83,7 +78,6 @@ public class MainWindow extends JFrame {
             // update menu state after user check
             menuBarManager.updateMenuState(this.currentUser);
 
-            // Initial Focus Panel
             SwingUtilities.invokeLater(() -> {
                 if (mainApplicationPanel != null && mainApplicationPanel.getSearchField() != null) {
                     System.out.println("Requesting initial focus for search field.");
@@ -97,13 +91,13 @@ public class MainWindow extends JFrame {
             System.err.println("FATAL ERROR during application startup: " + e.getMessage());
             e.printStackTrace();
             JOptionPane.showMessageDialog(this,
-                    "Failed to initialize the application database.\nPlease check logs or contact support.\nError: " + e.getMessage(),
+                    "Failed to initialize the application database." +
+                            "\nPlease check logs or contact support.\nError: " + e.getMessage(),
                     "Initialization Error",
                     JOptionPane.ERROR_MESSAGE);
-            System.exit(1); // Exit if database setup fails critically
+            System.exit(1);
             return;
         } catch (Exception e) {
-            // Catch other potential startup errors
             System.err.println("FATAL ERROR during application startup: " + e.getMessage());
             e.printStackTrace();
             JOptionPane.showMessageDialog(this,
@@ -132,12 +126,10 @@ public class MainWindow extends JFrame {
                 mainApplicationPanel.showLoggedInState(currentUser.getUsername());
             }
 
-            // Update menu state on successful login
             if (menuBarManager != null) {
                 menuBarManager.updateMenuState(this.currentUser);
             }
 
-            // Navigate to the main application view
             showMainApplicationView();
 
             if (showSuccessMessage) {
@@ -158,7 +150,7 @@ public class MainWindow extends JFrame {
         System.out.println("Handling logout.");
         this.currentJwtToken = null;
         this.currentUser = null;
-        saveJwtToPreferences(null); // Clear persisted token
+        saveJwtToPreferences(null);
 
         // Update the UI in MainApplicationPanel
         if (mainApplicationPanel != null) {
@@ -178,7 +170,6 @@ public class MainWindow extends JFrame {
         return prefs.get("jwtToken", null);
     }
 
-    // Stub Methods called by Menu
 
     public void showUserProfileDialog() {
         if (currentUser == null) {
@@ -190,6 +181,13 @@ public class MainWindow extends JFrame {
         UserProfileDialog userProfileDialog = new UserProfileDialog(this, userService, currentUser);
         userProfileDialog.setVisible(true);
 
+    }
+
+    public void switchToContactPanel() {
+        setContentPane(contactPanel.getContactPanel());
+        revalidate();
+        repaint();
+        System.out.println("Switched to Contact Panel");
     }
 
     public void showAboutDialog() {
@@ -240,20 +238,16 @@ public class MainWindow extends JFrame {
 
     public void showMainApplicationView() {
 
-        // Ensure the main panel itself exists
         if (mainApplicationPanel == null) {
             System.err.println("Error: MainApplicationPanel is null when trying to show it.");
-            // TODO: Handle error exit or throw Exception
-            return;
+            throw new IllegalStateException("MainApplicationPanel cannot be null when showing the main app view");
         }
 
-        // Update the auth state just in case token expired between views
         if (currentUser != null) {
             mainApplicationPanel.showLoggedInState(currentUser.getUsername());
         } else {
             mainApplicationPanel.showLoggedOutState();
         }
-
 
         setContentPane(mainApplicationPanel.getMainPanel());
         revalidate();
@@ -274,7 +268,6 @@ public class MainWindow extends JFrame {
             Accommodation accommodation = accommodationService.getListingById(accommodationId);
 
             if (accommodation != null) {
-                // Create a NEW instance of the detail panel each time
                 accommodationDetailPanel = new AccommodationDetailPanel(accommodationService, this, accommodationId);
                 setContentPane(accommodationDetailPanel.getDetailPanel());
                 revalidate();
@@ -282,17 +275,14 @@ public class MainWindow extends JFrame {
                 System.out.println("Successfully switched to detailed view for: " + accommodation.getTitle());
             }
             else {
-                // Handle case where listing is not found
                 System.err.println("Accommodation with ID " + accommodationId + " not found.");
                 JOptionPane.showMessageDialog(this,
                         "Could not find details for the selected accommodation.",
                         "Listing Not Found",
                         JOptionPane.WARNING_MESSAGE);
-                // Switch back to main view
                 showMainApplicationView();
             }
 
-            // Update auth state in main panel BEFORE switching away
             if (mainApplicationPanel != null) {
                 if (currentUser != null) mainApplicationPanel.showLoggedInState(currentUser.getUsername());
                 else mainApplicationPanel.showLoggedOutState();
@@ -300,14 +290,12 @@ public class MainWindow extends JFrame {
 
 
         } catch (SQLException e) {
-            // Handle database errors during fetch
             System.err.println("Database error fetching accommodation details for ID " + accommodationId + ": " + e.getMessage());
             e.printStackTrace();
             JOptionPane.showMessageDialog(this,
                     "An error occurred while retrieving accommodation details.\nPlease try again later.",
                     "Database Error",
                     JOptionPane.ERROR_MESSAGE);
-            // Switch back to main view
             showMainApplicationView();
         }
     }
@@ -320,13 +308,8 @@ public class MainWindow extends JFrame {
         return currentJwtToken;
     }
 
-
-
-    // Getter for the main frame if needed by child components
     public JFrame getMainFrame() {
         return this;
     }
-
-
 
 }
