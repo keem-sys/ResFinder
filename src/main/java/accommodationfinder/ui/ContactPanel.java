@@ -7,14 +7,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Calendar;
 
-public class ContactGUI extends JFrame{
+public class ContactGui extends JFrame {
     private JLabel lblTitle, lblDescription, lblFirstName, lblLastName, lblEmail, lblMessage, lblCopyRight, lblSubTitle;
     private JTextField txtFirstName, txtLastName, txtEmail;
     private JTextArea txtMessage;
     private JPanel panelMain, panelWest, panelEast,panelSouth;
     private JButton btnSend;
 
-    public ContactGUI() {
+    public ContactGui() {
 
         lblFirstName = new JLabel("First Name");
         lblLastName = new JLabel("Last Name");
@@ -176,7 +176,7 @@ public class ContactGUI extends JFrame{
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         }
 
-//    public static void main(String[] args) {
-//        new ContactGUI().setGUI();
-//    }
+        public JFrame getContactGui() {
+            return this;
+        }
     }
