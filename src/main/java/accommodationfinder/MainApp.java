@@ -6,9 +6,6 @@ import javax.swing.*;
 public class MainApp {
 
     public static void main(String[] args) {
-
-
-        // Set Look and Feel using Nimbus L&F
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -21,7 +18,6 @@ public class MainApp {
         }
 
 
-        // Run the MainWindow class set in UI using EDT throws Error if application start failed
         SwingUtilities.invokeLater(() -> {
             try{
                 MainWindow mainWindow = new MainWindow();

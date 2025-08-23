@@ -40,14 +40,15 @@ CPUT students often encounter significant difficulties in finding appropriate ac
 - **Accommodation Listing Management:**
     - Display of accommodation listings.
     - Detailed view for individual accommodation listings.
-<br><br/>
   
 - **Sorting, Search & Filtering**:
     - Sorting listings by price and date added
     - Keyword search functionality.
     - Filtering by accommodation type, suburbs and accreditation type.
 
-      <br><br/>
+- **Contact Us Feature:**
+    - Basic "Contact Us" form for user inquiries.
+
 - **UI Structure:**
     - Login Panel.
     - Registration Panel.
@@ -55,15 +56,9 @@ CPUT students often encounter significant difficulties in finding appropriate ac
     - Detail view of Listing Panel
 
 **Planned Features (Future Terms):**
-
 - **Map Integration:**
     - Display accommodation listings on an interactive map.
     - Indicate campus locations.
-<br><br/>
-
-- **Contact Us Feature:**
-    - Basic "Contact Us" form for user inquiries.
-      <br><br/>
 
 - **System and User Documentation:**
     - Comprehensive system documentation.

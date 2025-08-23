@@ -17,7 +17,6 @@ public class LoginPanel extends JPanel {
     private final UserService userService;
     private final MainWindow mainWindow;
 
-    // Define Colors based on Wireframe
     private static final Color BACKGROUND_COLOR = new Color(253, 251, 245); // Beige background
     private static final Color FIELD_BACKGROUND_COLOR = new Color(230, 230, 230); // Light gray for fields/buttons
     private static final Color TEXT_COLOR = new Color(50, 50, 50); // Dark gray for text
@@ -32,7 +31,7 @@ public class LoginPanel extends JPanel {
         setBackground(BACKGROUND_COLOR);
         setBorder(new EmptyBorder(15, 25, 15, 25));
 
-        // Top Bar (Back Button)
+        // Top Bar
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topPanel.setOpaque(false);
         backButton = new JButton("<- Back to Main View");
@@ -126,7 +125,7 @@ public class LoginPanel extends JPanel {
         gbc.insets = new Insets(8, 8, 8, 8); // Reset
 
 
-        // Log In Button (Centered)
+        // Log In Button
         loginButton = new JButton("Log In");
         styleButton(loginButton, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 15);
         loginButton.setPreferredSize(new Dimension(200, 40));
@@ -155,27 +154,19 @@ public class LoginPanel extends JPanel {
         gbc.anchor = GridBagConstraints.CENTER;
         formPanel.add(registerPanel, gbc);
 
-
-        // Add formPanel to the centering wrapper
         centerWrapper.add(formPanel, new GridBagConstraints());
-        // Add the centering wrapper to the main panel's center
         add(centerWrapper, BorderLayout.CENTER);
 
 
-        // Login Button Action
         loginButton.addActionListener(e -> performLogin());
-
-        // Password Field Action
         passwordField.addActionListener(e -> performLogin());
 
-        // Back Button Action
         backButton.addActionListener(e -> {
             System.out.println("Back button clicked - Switching to Main View");
             clearInputs();
             mainWindow.showMainApplicationView();
         });
 
-        // Registration Button Action
         registrationButton.addActionListener(e -> {
             System.out.println("Sign Up button clicked on Login Panel - Switching to Registration Panel");
             clearInputs();
@@ -202,10 +193,10 @@ public class LoginPanel extends JPanel {
         // Basic validation
         if (usernameOrEmail.isEmpty() || password.isEmpty()) {
             setErrorMessage("Username/Email and Password are required");
-            Arrays.fill(passwordChars, ' '); // Clear password array
+            Arrays.fill(passwordChars, ' ');
             return;
         } else {
-            setErrorMessage(" "); // Clear previous error message
+            setErrorMessage(" ");
         }
 
         try {
@@ -223,10 +214,8 @@ public class LoginPanel extends JPanel {
                 System.out.println("JWT token marked for clearing.");
             }
 
-            // Notify MainWindow of successful login
             mainWindow.handleLoginSuccess(jwtToken, true);
 
-            // Clear input fields on success
             clearInputs();
 
         } catch (Exception authenticationException) {
@@ -291,7 +280,6 @@ public class LoginPanel extends JPanel {
         button.setBackground(bgColor);
         button.setForeground(fgColor);
         button.setFocusPainted(false);
-        // TODO: Add hover effect listener
     }
 
     /**

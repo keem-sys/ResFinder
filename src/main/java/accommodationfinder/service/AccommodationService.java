@@ -14,10 +14,9 @@ public class AccommodationService {
     private final AccommodationDao accommodationDao;
     private final UserDao userDao;
 
-    // Constructor for Dependency Injection
     public AccommodationService(AccommodationDao accommodationDao, UserDao userDao) {
         this.accommodationDao = accommodationDao;
-        this.userDao = userDao; // Store the injected UserDao
+        this.userDao = userDao;
     }
 
     /**
@@ -43,7 +42,7 @@ public class AccommodationService {
         if (accommodation.getPrice() == null || accommodation.getPrice().signum() < 0) {
             throw new IllegalArgumentException("Price cannot be null or negative.");
         }
-        // TODO: Add more validation rules as needed (description length, city, etc.)
+        // TODO: Add more validation rules
 
 
         // Set Service-Managed Fields
@@ -55,7 +54,6 @@ public class AccommodationService {
         }
 
 
-        // Delegate to DAO
         return accommodationDao.createAccommodation(accommodation);
     }
 
@@ -79,7 +77,7 @@ public class AccommodationService {
      */
     public List<Accommodation> getAllActiveListings() throws SQLException {
 
-        return accommodationDao.getAllAccommodations(); // TODO: Implement search
+        return accommodationDao.getAllAccommodations();
     }
 
     /**
@@ -106,7 +104,7 @@ public class AccommodationService {
         if (existingListing == null) {
             throw new IllegalArgumentException("Accommodation with ID " + accommodation.getId() + " not found.");
         }
-        // Only the user who listed it can update
+
         if (!existingListing.getListedBy().getId().equals(currentUser.getId())) {
             throw new SecurityException("You do not have permission to update this listing.");
         }
@@ -123,7 +121,6 @@ public class AccommodationService {
         accommodation.setListingDate(existingListing.getListingDate());
         accommodation.setLastUpdatedDate(LocalDateTime.now());
 
-        // Delegate to DAO
         return accommodationDao.updateAccommodation(accommodation);
     }
 
@@ -154,7 +151,6 @@ public class AccommodationService {
             throw new SecurityException("You do not have permission to delete this listing.");
         }
 
-        // Delegate to DAO
         return accommodationDao.deleteAccommodation(accommodationId);
     }
 

@@ -7,9 +7,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class UserDao {
-    // Call DatabaseConnection.java
     private final DatabaseConnection dbConnection;
-
 
     public UserDao(DatabaseConnection dbConnection) {
         this.dbConnection = dbConnection;
@@ -21,7 +19,7 @@ public class UserDao {
                 "VALUES (?, ?, ?, ?, ?)";
 
         try (Connection connection = dbConnection.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) { // Important: Pass Statement.RETURN_GENERATED_KEYS
+             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             preparedStatement.setString(1, user.getFullName());
             preparedStatement.setString(2, user.getUsername());
@@ -37,11 +35,34 @@ public class UserDao {
             if (generatedKeys.next()) {
                 return generatedKeys.getLong(1);
             } else {
-                throw new SQLException("Creating user in database failed, no ID was generated."); // Slightly clearer message
+                throw new SQLException("Creating user in database failed, no ID was generated.");
             }
         } catch (SQLException e) {
-            System.err.println("Error creating user in database: " + e.getMessage());
-            throw e; // Re-throw the exception or handle it as needed
+            System.err.printf("Error creating user in database: %s%n", e.getMessage());
+            throw e;
+        }
+    }
+
+
+    public void updateFullName(Long userId, String newFullName) throws SQLException {
+        String sql = "UPDATE users SET full_name = ? WHERE id = ?";
+
+        try (Connection connection = dbConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, newFullName);
+            preparedStatement.setLong(2, userId);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    public void updatePassword(Long userId, String newHashedPassword) throws SQLException {
+        String sql = "UPDATE users SET password_hash = ? WHERE id = ?";
+
+        try (Connection connection = dbConnection.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, newHashedPassword);
+            pstmt.setLong(2, userId);
+            pstmt.executeUpdate();
         }
     }
 
@@ -62,9 +83,9 @@ public class UserDao {
             preparedStatement.setLong(1, userId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return mapResultSetToUser(resultSet); // Reuse existing helper
+                    return mapResultSetToUser(resultSet);
                 } else {
-                    return null; // User not found
+                    return null;
                 }
             }
         } catch (SQLException e) {
@@ -83,7 +104,7 @@ public class UserDao {
             preparedStatement.setString(1, username);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return mapResultSetToUser(resultSet); // Helper method to create User object from ResultSet
+                    return mapResultSetToUser(resultSet);
                 } else {
                     return null; // User not found
                 }
@@ -103,7 +124,7 @@ public class UserDao {
             preparedStatement.setString(1, email);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return mapResultSetToUser(resultSet); // Helper method to create User object from ResultSet
+                    return mapResultSetToUser(resultSet);
                 } else {
                     return null; // User not found
                 }
@@ -127,7 +148,7 @@ public class UserDao {
                 if (resultSet.next()) {
                     return resultSet.getInt(1) > 0; // Returns true if count > 0 (username exists)
                 } else {
-                    return false; // Should not happen, but handle case where result set is empty
+                    return false;
                 }
             }
         } catch (SQLException e) {
@@ -145,9 +166,9 @@ public class UserDao {
             preparedStatement.setString(1, email);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    return resultSet.getInt(1) > 0; // Returns true if count > 0 (email exists)
+                    return resultSet.getInt(1) > 0;
                 } else {
-                    return false; // Should not happen, but handle case where result set is empty
+                    return false;
                 }
             }
         } catch (SQLException e) {
@@ -172,7 +193,4 @@ public class UserDao {
 
         return user;
     }
-
-
-
 }
