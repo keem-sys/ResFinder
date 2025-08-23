@@ -13,20 +13,12 @@ public class DatabaseConnection {
     private static final String PRODUCTION_JDBC_URL = "jdbc:h2:./student_accommodation_db"; // File-based DB
     private final String jdbcUrl;
 
-    /**
-     * Default constructor for production use.
-     * It points to the file-based H2 database.
-     */
+
     public DatabaseConnection() {
         this(PRODUCTION_JDBC_URL);
     }
 
-    /**
-     * Test-friendly constructor. Allows specifying the JDBC URL.
-     *
-     *
-     * @param jdbcUrl The JDBC connection string to use.
-     */
+
     public DatabaseConnection(String jdbcUrl) {
         this.jdbcUrl = jdbcUrl;
     }
@@ -131,8 +123,8 @@ public class DatabaseConnection {
 
     // Initialize Sample Data
     private void initializeSampleDataIfEmpty(Connection connection) {
-        // Check if accommodations table is empty
         String checkSql = "SELECT COUNT(*) FROM ACCOMMODATIONS";
+
         try (Statement checkStmt = connection.createStatement();
              ResultSet rs = checkStmt.executeQuery(checkSql)) {
             if (rs.next() && rs.getInt(1) == 0) {
@@ -155,14 +147,15 @@ public class DatabaseConnection {
         User sampleUser1 = null;
         User sampleUser2 = null;
 
-        // --- Check/Create Sample Users ---
+        // Create Sample Users
         try {
             sampleUser1 = userDao.getUserByUsername("landlord1");
             if (sampleUser1 == null) {
                 System.out.println("Creating sample user 'landlord1'");
                 // TODO: implement HashPassword.
                 String placeholderHash = "$argon2id$v=19$m=65536,t=2,p=1$placeholderSalt$placeholderHash";
-                sampleUser1 = new User(null, "Peter Xolani", "landlord1", "landlord1@gmail.com", placeholderHash);
+                sampleUser1 = new User(null, "Peter Xolani", "landlord1",
+                        "landlord1@gmail.com", placeholderHash);
                 sampleUser1.setId(userDao.createUser(sampleUser1));
             }
         } catch (SQLException e) {
@@ -174,9 +167,9 @@ public class DatabaseConnection {
             sampleUser2 = userDao.getUserByUsername("agent2");
             if (sampleUser2 == null) {
                 System.out.println("Creating sample user 'agent2'");
-                // TODO: proper password hasher
                 String placeholderHash = "$argon2id$v=19$m=65536,t=2,p=1$placeholderSalt2$placeholderHash2";
-                sampleUser2 = new User(null, "Makunyane Dean", "agent2", "agent2@gmail.com", placeholderHash);
+                sampleUser2 = new User(null, "Makunyane Dean", "agent2", "agent2@gmail.com",
+                        placeholderHash);
                 sampleUser2.setId(userDao.createUser(sampleUser2));
             }
         } catch (SQLException e) {
@@ -190,7 +183,7 @@ public class DatabaseConnection {
         }
 
 
-        // Create Sample Accommodation Objects (using the obtained user IDs)
+        // Create Sample Accommodation Objects
         Accommodation acc1 = new Accommodation(
                 "Single Bed Room in Cape Town",  "This modern NSFAS-accredited studio apartment " +
                 "offers secure, fully furnished student accommodation just minutes from CPUT District Six. " +

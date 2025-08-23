@@ -13,10 +13,8 @@ public class User {
     private LocalDateTime registrationDate;
 
 
-    // Default constructor
     public User() {}
 
-    // Overloaded Constructor
     public User(Long id, String fullName, String username, String email, String passwordHash) {
         this.id = id;
         this.fullName = fullName;

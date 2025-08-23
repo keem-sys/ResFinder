@@ -14,7 +14,6 @@ public class AccommodationDao {
     private final DatabaseConnection dbConnection;
     private final UserDao userDao;
 
-    // Define a delimiter for storing image URLs in the TEXT field
     private static final String IMAGE_URL_DELIMITER = ";";
 
     public AccommodationDao(DatabaseConnection dbConnection, UserDao userDao) {
@@ -72,7 +71,6 @@ public class AccommodationDao {
             ps.setTimestamp(19, accommodation.getAvailableUntil() != null ?
                     Timestamp.valueOf(accommodation.getAvailableUntil()) : null);
 
-            // Join image URLs into a delimited string
             String imageUrlsString = accommodation.getImageUrls() != null ?
                     String.join(IMAGE_URL_DELIMITER, accommodation.getImageUrls()) : null;
             ps.setString(20, imageUrlsString);
@@ -251,7 +249,7 @@ public class AccommodationDao {
     }
 
 
-    // --- Helper Method to Map ResultSet to Accommodation Object ---
+    // Helper Method to Map ResultSet to Accommodation Object
     private Accommodation mapResultSetToAccommodation(ResultSet rs) throws SQLException {
         Accommodation accommodation = new Accommodation();
 
@@ -259,13 +257,14 @@ public class AccommodationDao {
         accommodation.setTitle(rs.getString("title"));
         accommodation.setDescription(rs.getString("description"));
 
-        // Safely map Enums
+        // Map Enums
         try {
             accommodation.setType(Accommodation.AccommodationType.valueOf(rs.getString("type")));
             accommodation.setPriceFrequency(Accommodation.PriceFrequency.valueOf(rs.getString("price_frequency")));
             accommodation.setStatus(Accommodation.AccommodationStatus.valueOf(rs.getString("status")));
         } catch (IllegalArgumentException | NullPointerException e) {
-            System.err.println("Warning: Invalid enum value found in database for accommodation ID " + rs.getLong("id") + ". Error: " + e.getMessage());
+            System.err.println("Warning: Invalid enum value found in database for accommodation ID " +
+                    rs.getLong("id") + ". Error: " + e.getMessage());
 
         }
 
@@ -306,16 +305,15 @@ public class AccommodationDao {
         if (imageUrlsString != null && !imageUrlsString.isEmpty()) {
             accommodation.setImageUrls(Arrays.asList(imageUrlsString.split(IMAGE_URL_DELIMITER)));
         } else {
-            accommodation.setImageUrls(new ArrayList<>()); // Ensure list is not null
+            accommodation.setImageUrls(new ArrayList<>());
         }
 
         accommodation.setNsfasAccredited(rs.getBoolean("nsfas_accredited"));
 
-        // Fetch the associated User object
+        // Fetch associated User object
         long listedByUserId = rs.getLong("listed_by_user_id");
-        if (!rs.wasNull()) { // Check if the foreign key was actually present
-            // Use the injected UserDao to get the user
-            User listedBy = userDao.getUserById(listedByUserId); // *** Requires getUserById in UserDao ***
+        if (!rs.wasNull()) { // Check if foreign key was actually present
+            User listedBy = userDao.getUserById(listedByUserId);
             if (listedBy == null) {
                 System.err.println("Warning: Could not find user with ID " + listedByUserId + " referenced by accommodation ID " + accommodation.getId());
 
