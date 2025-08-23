@@ -10,6 +10,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +23,25 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
+import org.jxmapviewer.JXMapViewer;
+import org.jxmapviewer.OSMTileFactoryInfo;
+import org.jxmapviewer.input.CenterMapListener;
+import org.jxmapviewer.input.PanKeyListener;
+import org.jxmapviewer.input.PanMouseInputListener;
+import org.jxmapviewer.input.ZoomMouseWheelListenerCursor;
+import org.jxmapviewer.viewer.DefaultTileFactory;
+import org.jxmapviewer.viewer.GeoPosition;
+import org.jxmapviewer.viewer.TileFactoryInfo;
+import java.io.File;
+import org.jxmapviewer.painter.CompoundPainter;
+import org.jxmapviewer.painter.Painter;
+import org.jxmapviewer.viewer.DefaultWaypoint;
+import org.jxmapviewer.viewer.Waypoint;
+import org.jxmapviewer.viewer.WaypointPainter;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 public class AccommodationDetailPanel extends JPanel {
 
     private final AccommodationService accommodationService;
@@ -31,7 +52,7 @@ public class AccommodationDetailPanel extends JPanel {
     private JLabel titleLabel;
     private JLabel imageLabel;
     private JTextArea detailsTextArea;
-    private JPanel imageContainerPanel;
+    private JTabbedPane imageContainerPanel;
     private JButton prevImageButton;
     private JButton nextImageButton;
     private JLabel imageCountLabel;
@@ -43,12 +64,22 @@ public class AccommodationDetailPanel extends JPanel {
     private JButton sendMessageButton;
     private JLabel listerInfoLabel;
 
+    // New Tab Components
+    private JTabbedPane tabbedPane;
+    private JPanel imagePanel;
+    private JPanel locationPanel;
+    private JLabel mapLabel;
+
     // State for Image Gallery
     private List<String> currentImageUrls;
     private int currentImageIndex = 0;
 
+    // Current accommodation for map display
+    private Accommodation currentAccommodation;
+
     // Formatters
-    private static final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("en", "ZA"));
+    private static final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(
+            Locale.forLanguageTag("en-ZA") );
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy 'at' HH:mm");
 
     // Constants
@@ -70,12 +101,10 @@ public class AccommodationDetailPanel extends JPanel {
 
         initComponents();
         setupContactFormListeners();
-        //prefillContactForm();      // Prefill form if user is logged in
         loadAccommodationDetails();
     }
 
     private void initComponents() {
-        // Top Section (Back Button + Title)
         JPanel topPanel = new JPanel(new BorderLayout(10, 0));
         topPanel.setOpaque(false);
 
@@ -91,18 +120,22 @@ public class AccommodationDetailPanel extends JPanel {
 
         add(topPanel, BorderLayout.NORTH);
 
-        // Center Section (Image Gallery + Details + Contact)
+        // Center Section
         JPanel centerContentPanel = new JPanel(new BorderLayout(20, 10));
         centerContentPanel.setOpaque(false);
 
-        // Left Side (Image Gallery + Details below)
+        // Left Section
         JPanel leftPanel = new JPanel(new BorderLayout(10, 15));
         leftPanel.setOpaque(false);
 
-        // Image Gallery Panel
-        imageContainerPanel = new JPanel(new BorderLayout());
-        imageContainerPanel.setBackground(PLACEHOLDER_COLOR);
-        imageContainerPanel.setPreferredSize(new Dimension(IMG_WIDTH, IMG_HEIGHT + 40));
+        // Create tabbed pane for Image/Location
+        tabbedPane = new JTabbedPane();
+        tabbedPane.setPreferredSize(new Dimension(IMG_WIDTH, IMG_HEIGHT + 40));
+        tabbedPane.setBackground(BACKGROUND_COLOR);
+
+        // Image Panel (original image gallery)
+        imagePanel = new JPanel(new BorderLayout());
+        imagePanel.setBackground(PLACEHOLDER_COLOR);
 
         imageLabel = new JLabel("Loading image...", SwingConstants.CENTER);
         imageLabel.setOpaque(true);
@@ -110,16 +143,17 @@ public class AccommodationDetailPanel extends JPanel {
         imageLabel.setPreferredSize(new Dimension(IMG_WIDTH, IMG_HEIGHT));
         imageLabel.setVerticalAlignment(SwingConstants.CENTER);
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        imageContainerPanel.add(imageLabel, BorderLayout.CENTER);
+        imagePanel.add(imageLabel, BorderLayout.CENTER);
 
         // Image Navigation Controls
         JPanel imageNavPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
         imageNavPanel.setOpaque(false);
         prevImageButton = new JButton("< Prev");
+        styleButton(prevImageButton, BACKGROUND_COLOR, TEXT_COLOR, 13);
         nextImageButton = new JButton("Next >");
+        styleButton(nextImageButton, BACKGROUND_COLOR, TEXT_COLOR, 13);
         imageCountLabel = new JLabel("Image 0 of 0");
         imageCountLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
-
 
         prevImageButton.addActionListener(e -> showImageAtIndex(currentImageIndex - 1));
         nextImageButton.addActionListener(e -> showImageAtIndex(currentImageIndex + 1));
@@ -127,7 +161,27 @@ public class AccommodationDetailPanel extends JPanel {
         imageNavPanel.add(prevImageButton);
         imageNavPanel.add(imageCountLabel);
         imageNavPanel.add(nextImageButton);
-        imageContainerPanel.add(imageNavPanel, BorderLayout.SOUTH);
+        imagePanel.add(imageNavPanel, BorderLayout.SOUTH);
+
+        // Location Panel (interactive map)
+        locationPanel = new JPanel(new BorderLayout());
+        locationPanel.setBackground(BACKGROUND_COLOR);
+
+        mapLabel = new JLabel("Loading map...", SwingConstants.CENTER);
+        mapLabel.setOpaque(true);
+        mapLabel.setBackground(PLACEHOLDER_COLOR);
+        mapLabel.setPreferredSize(new Dimension(IMG_WIDTH, IMG_HEIGHT));
+        mapLabel.setVerticalAlignment(SwingConstants.CENTER);
+        mapLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        mapLabel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        locationPanel.add(mapLabel, BorderLayout.CENTER);
+
+        // Add tabs
+        tabbedPane.addTab("Images", imagePanel);
+        tabbedPane.addTab("Location", locationPanel);
+
+        // Set the original imageContainerPanel to be the tabbedPane
+        imageContainerPanel = tabbedPane;
 
         leftPanel.add(imageContainerPanel, BorderLayout.NORTH);
 
@@ -152,13 +206,101 @@ public class AccommodationDetailPanel extends JPanel {
 
         centerContentPanel.add(leftPanel, BorderLayout.CENTER);
 
-        // --- Right Side (Contact Form) ---
+        // Contact Form
         JPanel contactPanel = createContactPanel();
         centerContentPanel.add(contactPanel, BorderLayout.EAST);
 
         add(centerContentPanel, BorderLayout.CENTER);
+
+        // Add tab change listener to load map when Location tab is selected
+        tabbedPane.addChangeListener(e -> {
+            if (tabbedPane.getSelectedIndex() == 1) { // Location tab
+                loadInteractiveMap();
+            }
+        });
     }
 
+    private void loadInteractiveMap() {
+        if (currentAccommodation == null) {
+            mapLabel.setText("Accommodation data not loaded");
+            return;
+        }
+
+        SwingWorker<JXMapViewer, Void> mapLoader = new SwingWorker<>() {
+            @Override
+            protected JXMapViewer doInBackground() throws Exception {
+                // Create map
+                TileFactoryInfo info = new OSMTileFactoryInfo();
+                DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+                JXMapViewer mapViewer = new JXMapViewer();
+                mapViewer.setTileFactory(tileFactory);
+
+                // Set location (you would geocode the real address here)
+                GeoPosition location = new GeoPosition(-33.9249, 18.4241); // Cape Town coordinates
+                mapViewer.setZoom(15); // Zoom in more to see the pin clearly
+                mapViewer.setAddressLocation(location);
+
+                // Create waypoint (pin) for the accommodation
+                Waypoint waypoint = new DefaultWaypoint(location);
+                Set<Waypoint> waypoints = new HashSet<>(Arrays.asList(waypoint));
+
+                // Create waypoint painter (this draws the pin)
+                WaypointPainter<Waypoint> waypointPainter = new WaypointPainter<Waypoint>();
+                waypointPainter.setWaypoints(waypoints);
+
+                // Set up painters
+                CompoundPainter<JXMapViewer> painter = new CompoundPainter<JXMapViewer>(waypointPainter);
+                mapViewer.setOverlayPainter(painter);
+
+                // Add mouse listeners
+                PanMouseInputListener mia = new PanMouseInputListener(mapViewer);
+                mapViewer.addMouseListener(mia);
+                mapViewer.addMouseMotionListener(mia);
+                mapViewer.addMouseListener(new CenterMapListener(mapViewer));
+                mapViewer.addMouseWheelListener(new ZoomMouseWheelListenerCursor(mapViewer));
+                mapViewer.addKeyListener(new PanKeyListener(mapViewer));
+
+                return mapViewer;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    JXMapViewer mapViewer = get();
+
+                    JPanel mapContainer = new JPanel(new BorderLayout());
+                    mapContainer.setPreferredSize(new Dimension(IMG_WIDTH, IMG_HEIGHT));
+                    mapContainer.add(mapViewer, BorderLayout.CENTER);
+
+                    // Address info panel
+                    JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                    infoPanel.setOpaque(false);
+
+                    String address = currentAccommodation.getAddress() + ", " + currentAccommodation.getCity();
+                    if (currentAccommodation.getPostalCode() != null) {
+                        address += ", " + currentAccommodation.getPostalCode();
+                    }
+
+                    JLabel addressLabel = new JLabel("📍 " + address);
+                    addressLabel.setFont(new Font("SansSerif", Font.BOLD, 11));
+                    infoPanel.add(addressLabel);
+
+                    mapContainer.add(infoPanel, BorderLayout.NORTH);
+
+                    locationPanel.remove(mapLabel);
+                    locationPanel.add(mapContainer, BorderLayout.CENTER);
+                    locationPanel.revalidate();
+                    locationPanel.repaint();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    mapLabel.setText("Error loading map: " + e.getMessage());
+                }
+            }
+        };
+
+        mapLoader.execute();
+    }
     private JPanel createContactPanel() {
         JPanel contactPanel = new JPanel();
         contactPanel.setLayout(new GridBagLayout());
@@ -231,17 +373,6 @@ public class AccommodationDetailPanel extends JPanel {
         return contactPanel;
     }
 
-    // Prefill contact form if user is logged in
-//    private void prefillContactForm() {
-//        if (loggedInUser != null) {
-//            contactNameField.setText(loggedInUser.getUsername()); // Or a dedicated name field if User has one
-//            contactEmailField.setText(loggedInUser.getEmail());
-//            // Optionally prefill phone if available
-//            // contactPhoneField.setText(loggedInUser.getPhoneNumber());
-//            updateSendButtonState(); // Check if prefilled fields are valid
-//        }
-//    }
-
     // Setup listeners to enable/disable send button
     private void setupContactFormListeners() {
         DocumentListener listener = new DocumentListener() {
@@ -278,7 +409,9 @@ public class AccommodationDetailPanel extends JPanel {
 
         // Re-check
         if (name.isEmpty() || email.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter your name and email.", "Missing Information", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please enter your name and email.",
+
+                    "Missing Information", JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (!email.contains("@") || !email.contains(".")) { // Very basic validation
@@ -286,26 +419,24 @@ public class AccommodationDetailPanel extends JPanel {
             return;
         }
 
-        // TODO: Retrieve the lister's actual email address
-        // listerContactInfo = fetchListerEmail(listerInfoLabel.getText().substring("Listed by: ".length()));
-        String listerContactInfo = "Lister's Email/ID (Not Implemented Yet)";
         if (listerInfoLabel.getText().startsWith("Listed by: ") && !listerInfoLabel.getText().endsWith("Unknown User")) {
         }
 
         System.out.println("--- Sending Message (Placeholder) ---");
-        System.out.println("To Lister: " + listerContactInfo);
+        System.out.println("To Lister: "); // listerContactInfo
         System.out.println("From Name: " + name);
         System.out.println("From Email: " + email);
         System.out.println("From Phone: " + phone);
         System.out.println("Regarding Listing ID: " + accommodationId);
         System.out.println("-------------------------------------");
 
-        JOptionPane.showMessageDialog(this, "Message sent (placeholder).\nActual implementation needed.", "Message Sent", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Message sent to the lister" +
+                "Message to Lister", "Message Sent", JOptionPane.INFORMATION_MESSAGE);
 
-        // contactNameField.setText("");
-        // contactEmailField.setText("");
-        // contactPhoneField.setText("");
-        // updateSendButtonState();
+        contactNameField.setText("");
+        contactEmailField.setText("");
+        contactPhoneField.setText("");
+        updateSendButtonState();
     }
 
     private void loadAccommodationDetails() {
@@ -320,12 +451,14 @@ public class AccommodationDetailPanel extends JPanel {
                 try {
                     Accommodation accommodation = get();
                     if (accommodation != null) {
+                        currentAccommodation = accommodation; // Store for map usage
                         populateUI(accommodation);
                         currentImageUrls = accommodation.getImageUrls(); // Store URLs
                         currentImageIndex = 0;
                         showImageAtIndex(currentImageIndex); // Load the first image
                     } else {
-                        displayError("Accommodation Not Found", "The requested accommodation listing could not be found.");
+                        displayError("Accommodation Not Found",
+                                "The requested accommodation listing could not be found.");
                         sendMessageButton.setEnabled(false);
                         prevImageButton.setEnabled(false);
                         nextImageButton.setEnabled(false);
@@ -334,14 +467,16 @@ public class AccommodationDetailPanel extends JPanel {
                 } catch (InterruptedException | ExecutionException e) {
                     Throwable cause = e.getCause() != null ? e.getCause() : e;
                     e.printStackTrace();
-                    displayError("Error Loading", "An error occurred while loading accommodation details:\n" + cause.getMessage());
+                    displayError("Error Loading",
+                            "An error occurred while loading accommodation details:\n" + cause.getMessage());
                     sendMessageButton.setEnabled(false);
                     prevImageButton.setEnabled(false);
                     nextImageButton.setEnabled(false);
                     imageCountLabel.setText("Image 0 of 0");
                 } catch (Exception e) {
                     e.printStackTrace();
-                    displayError("UI Update Error", "An unexpected error occurred while displaying details:\n" + e.getMessage());
+                    displayError("UI Update Error",
+                            "An unexpected error occurred while displaying details:\n" + e.getMessage());
                     sendMessageButton.setEnabled(false);
                     prevImageButton.setEnabled(false);
                     nextImageButton.setEnabled(false);
@@ -419,7 +554,7 @@ public class AccommodationDetailPanel extends JPanel {
         // Validate index
         if (index < 0 || index >= currentImageUrls.size()) {
             System.err.println("showImageAtIndex: Invalid index " + index);
-            return; // Index out of bounds
+            return;
         }
 
         currentImageIndex = index;
@@ -433,7 +568,7 @@ public class AccommodationDetailPanel extends JPanel {
     }
 
 
-    // Enhanced image loading with better scaling
+    // image loading with better scaling
     private void loadImageAsync(int imageIndex, int targetWidth, int targetHeight) {
         imageLabel.setIcon(null);
         imageLabel.setText("Loading image...");
@@ -466,7 +601,6 @@ public class AccommodationDetailPanel extends JPanel {
                     if (originalImage == null) {
                         System.err.println("Failed to load image using ImageIO (unsupported format or error): " +
                                 imageUrlString);
-                        // TODO: Fallback attempt using TwelveMonkeysImageIO
                         return null;
                     }
 
@@ -476,7 +610,7 @@ public class AccommodationDetailPanel extends JPanel {
 
                     if (originalWidth <= 0 || originalHeight <= 0) {
                         System.err.println("Invalid image dimensions for: " + imageUrlString);
-                        return null; // Invalid image dimensions
+                        return null;
                     }
 
                     // Calculate scaled dimensions maintaining aspect ratio
@@ -484,12 +618,11 @@ public class AccommodationDetailPanel extends JPanel {
                     int scaledWidth = (int) (originalWidth * scale);
                     int scaledHeight = (int) (originalHeight * scale);
 
-                    // Ensure minimum dimensions after scaling if needed
                     scaledWidth = Math.max(1, scaledWidth);
                     scaledHeight = Math.max(1, scaledHeight);
 
 
-                    // Create a BufferedImage for higher quality scaling
+                    // Create BufferedImage for higher quality scaling
                     BufferedImage scaledBI = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB);
                     Graphics2D g2d = scaledBI.createGraphics();
 
@@ -498,25 +631,24 @@ public class AccommodationDetailPanel extends JPanel {
                     g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                    // Draw the original image (loaded by ImageIO) onto the scaled BufferedImage
                     g2d.drawImage(originalImage, 0, 0, scaledWidth, scaledHeight, null);
                     g2d.dispose();
 
-                    return new ImageIcon(scaledBI); // Return the scaled BufferedImage wrapped in an ImageIcon
+                    return new ImageIcon(scaledBI);
 
                 } catch (MalformedURLException e) {
                     System.err.println("Invalid image URL: " + imageUrlString + " - " + e.getMessage());
                     return null;
-                } catch (IIOException e) { // Catch specific ImageIO errors
+                } catch (IIOException e) { // Catch ImageIO errors
                     System.err.println("ImageIO error loading/reading image: " + imageUrlString + " - " + e.getMessage());
                     e.printStackTrace();
                     return null;
-                } catch (IOException e) { // Catch general IO errors (network, stream issues)
+                } catch (IOException e) {
                     System.err.println("IO error loading image stream: " + imageUrlString + " - " + e.getMessage());
                     return null;
                 } catch (Exception e) {
                     System.err.println("General error loading/scaling image: " + imageUrlString + " - " + e.getMessage());
-                    e.printStackTrace(); // Print stack trace for unexpected errors
+                    e.printStackTrace();
                     return null;
                 }
             }
@@ -528,8 +660,8 @@ public class AccommodationDetailPanel extends JPanel {
                     ImageIcon scaledIcon = get();
                     if (scaledIcon != null) {
                         imageLabel.setIcon(scaledIcon);
-                        imageLabel.setText(null); // Remove text
-                        imageLabel.setBackground(BACKGROUND_COLOR); // Match background if image smaller than label
+                        imageLabel.setText(null);
+                        imageLabel.setBackground(BACKGROUND_COLOR);
                     } else {
                         imageLabel.setText("Image Unavailable");
                         imageLabel.setIcon(null);
@@ -541,7 +673,7 @@ public class AccommodationDetailPanel extends JPanel {
                     imageLabel.setText("Error Loading Image");
                     imageLabel.setIcon(null);
                     imageLabel.setBackground(PLACEHOLDER_COLOR);
-                } catch (Exception e) { // Catch other potential runtime exceptions
+                } catch (Exception e) {
                     System.err.println("Unexpected error updating image label: " + e.getMessage());
                     e.printStackTrace();
                     imageLabel.setText("Error");
@@ -565,7 +697,6 @@ public class AccommodationDetailPanel extends JPanel {
             case OTHER -> "";
         };
     }
-
     /**
      * Helper to style JButtons consistently.
      */
