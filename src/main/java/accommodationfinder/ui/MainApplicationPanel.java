@@ -98,13 +98,13 @@ public class MainApplicationPanel {
 
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
-        loadInitialListings(); // Load data asynchronously
-        showLoggedOutState();  // Set initial auth state
+        loadInitialListings();
+        showLoggedOutState();
     }
 
     // Data Loading
 
-    private void loadInitialListings() {
+    protected void loadInitialListings() {
         // Display loading message
         listingGridPanel.removeAll();
         listingGridPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
@@ -170,7 +170,7 @@ public class MainApplicationPanel {
         searchPanel.add(searchLabel);
         searchField = new JTextField(30);
         styleTextField(searchField);
-        searchField.setToolTipText("Enter keywords and press Enter to search");
+        searchField.setToolTipText("Enter words and press Enter to search");
         searchField.addActionListener(e -> updateDisplayedListings());
         searchPanel.add(searchField);
 
@@ -193,8 +193,6 @@ public class MainApplicationPanel {
 
         orderByComboBox.addActionListener(e -> updateDisplayedListings());
         orderByPanel.add(orderByComboBox);
-
-
 
 
         // Filter Button
@@ -235,7 +233,7 @@ public class MainApplicationPanel {
      * @param rawKeywords The raw text entered by the user in the search field.
      * @return A new list containing only accommodations matching the keywords.
      */
-    private List<Accommodation> performSearch(List<Accommodation> inputList, String rawKeywords) {
+     List<Accommodation> performSearch(List<Accommodation> inputList, String rawKeywords) {
         String processedKeywords = rawKeywords.trim().toLowerCase();
 
         // If search is empty, return the original list
@@ -428,6 +426,7 @@ public class MainApplicationPanel {
         welcomeLabel = new JLabel("Welcome, " + username);
         welcomeLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         logoutButton = new JButton("Logout");
+        styleButton(logoutButton, BACKGROUND_COLOR, TEXT_COLOR, 13);
         logoutButton.addActionListener(e -> mainWindow.handleLogout());
         authAreaPanel.add(welcomeLabel);
         authAreaPanel.add(Box.createRigidArea(new Dimension(10, 0)));
@@ -457,8 +456,6 @@ public class MainApplicationPanel {
         authAreaPanel.repaint();
     }
 
-
-
     private void refreshListingGrid(List<Accommodation> listings) {
         listingGridPanel.removeAll();
 
@@ -475,7 +472,6 @@ public class MainApplicationPanel {
             }
         }
 
-        // Reset scroll pane to top AFTER components are  added/removed
         SwingUtilities.invokeLater(() -> {
             if (scrollPane != null && scrollPane.getViewport() != null) {
                 scrollPane.getViewport().setViewPosition(new Point(0, 0));
@@ -483,12 +479,27 @@ public class MainApplicationPanel {
             else { System.err.println("Warning: scrollPane/viewport null during scroll reset."); }
         });
 
-        // Tell the layout manager to recalculate and repaint
         listingGridPanel.revalidate();
         listingGridPanel.repaint();
     }
 
-    // displayLoadingError
+    /**
+     * Resets all active filters and clears the search field, then refreshes the listings.
+     */
+    public void clearAllFiltersAndSearch() {
+        if (currentFilterCriteria != null) {
+            currentFilterCriteria.reset();
+        }
+
+        if (searchField != null) {
+            searchField.setText("");
+        }
+
+        updateDisplayedListings();
+        System.out.println("Filters and search have been cleared via menu.");
+    }
+
+
     private void displayLoadingError(String message) {
         listingGridPanel.removeAll();
         listingGridPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
@@ -522,8 +533,8 @@ public class MainApplicationPanel {
         return searchField;
     }
 
-    // Method to return the main panel for MainWindow to display
     public JPanel getMainPanel() {
         return mainPanel;
     }
+
 }

@@ -701,11 +701,10 @@ public class AccommodationDetailPanel extends JPanel {
      * Helper to style JButtons consistently.
      */
     private void styleButton(JButton button, Color bgColor, Color fgColor, int fontSize) {
-        button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
+        button.setFont(new Font("SansSerif", Font.PLAIN, fontSize));
         button.setBackground(bgColor);
         button.setForeground(fgColor);
         button.setFocusPainted(false);
-        // TODO: Add hover effect listener
     }
 
     // Method to return this panel for MainWindow

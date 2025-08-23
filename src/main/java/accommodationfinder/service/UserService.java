@@ -31,14 +31,18 @@ public class UserService {
     private static final long JWT_EXPIRATION_MS = 1000 * 60 * 60 * 24;
 
     public UserService(UserDao userDao) {
+        this(userDao, loadJwtSecretKeyFromConfig());
+    }
+
+    UserService(UserDao userDao, Key secretKey) {
         this.userDao = userDao;
-        this.jwtSecretKey = loadJwtSecretKeyFromConfig();
+        this.jwtSecretKey = secretKey;
     }
 
 
-    private Key loadJwtSecretKeyFromConfig() {
+    private static Key loadJwtSecretKeyFromConfig() {
         Properties properties = new Properties();
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream("application.properties")) {
+        try (InputStream input = UserService.class.getClassLoader().getResourceAsStream("application.properties")) {
             if (input == null) {
                 throw new IllegalStateException("Unable to find application.properties file!");
             }
@@ -51,6 +55,24 @@ public class UserService {
         } catch (IOException e) {
             throw new IllegalStateException("Error loading application.properties file!", e);
         }
+    }
+
+    public void updateUserFullName(Long userId, String newFullName) throws SQLException {
+        if (newFullName == null || newFullName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Full Name cannot be empty.");
+        }
+        userDao.updateFullName(userId, newFullName.trim());
+        System.out.println("User full name updated for ID: " + userId);
+    }
+
+    public void changeUserPassword(Long userId, String newPlainTextPassword) throws SQLException {
+        if (newPlainTextPassword == null || newPlainTextPassword.length() < 8) {
+            throw new IllegalArgumentException("New password must be at least 8 characters long.");
+        }
+        // Hash new password
+        String newHashedPassword = hashPassword(newPlainTextPassword);
+        userDao.updatePassword(userId, newHashedPassword);
+        System.out.println("User password updated for ID: " + userId);
     }
 
     public Long registerUser(User user) throws SQLException {
@@ -98,8 +120,7 @@ public class UserService {
         user.setRegistrationDate(LocalDateTime.now());
 
         try {
-            Long userId = userDao.createUser(user);
-            return userId;
+            return userDao.createUser(user);
         } catch (SQLException sqlException) {
             System.err.println("Error creating user in the database " + sqlException.getMessage());
             throw sqlException;
@@ -110,7 +131,7 @@ public class UserService {
     public String loginUser(String usernameOrEmail, String plainTextPassword) throws Exception {
         User user = null;
         try {
-            // Try finding by username first
+            // Try finding by username
             user = userDao.getUserByUsername(usernameOrEmail);
 
             // If not found by username, try by email
@@ -119,7 +140,7 @@ public class UserService {
             }
 
         } catch (SQLException e) {
-            // Log the database error and throw a generic login failure exception
+            // Log database error and throw exception
             System.err.println("Database error during login lookup for: " + usernameOrEmail + " - " + e.getMessage());
             throw new Exception("Login failed due to a database error. Please try again later.");
         }
@@ -169,6 +190,7 @@ public class UserService {
         }
     }
 
+
     /**
      * Validates the JWT token and extracts user claims if valid.
      *
@@ -185,7 +207,7 @@ public class UserService {
                     .build()
                     .parseSignedClaims(jwtToken)
                     .getPayload();
-        } catch (JwtException | IllegalArgumentException e) { // Catch potential errors
+        } catch (JwtException | IllegalArgumentException e) {
             System.err.println("JWT validation/parsing failed: " + e.getMessage());
             return null;
         }
@@ -225,12 +247,12 @@ public class UserService {
                 return null;
             }
         }
-        return null; // Token invalid or claims couldn't be extracted
+        return null;
     }
 
 
 
-    //  Password Verification Method (using Argon2-jvm)
+    //  Password Verification using Argon2-jvm
     private boolean verifyPassword(String plainTextPassword, String hashedPassword) {
         Argon2 argon2 = Argon2Factory.create();
         try {
@@ -238,7 +260,7 @@ public class UserService {
         } catch (Exception e) {
             // Password verification failed
             System.err.println("Password verification error: " + e.getMessage());
-            return false; // Verification failed
+            return false;
         }
     }
 

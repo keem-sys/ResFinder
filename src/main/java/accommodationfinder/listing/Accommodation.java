@@ -317,9 +317,37 @@ public class Accommodation {
 
     // toString() method
 
+
     @Override
     public String toString() {
-        return STR."Accommodation{id=\{id}, title='\{title}', type=\{type}, price=\{price} ZAR, priceFrequency=\{priceFrequency}, bedrooms=\{bedrooms}, bathrooms=\{bathrooms}, city='\{city}', status=\{status}, nsfasAccredited=\{nsfasAccredited}, listedBy=\{listedBy != null ? listedBy.getUsername() : "null"}}";
+        return "Accommodation{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", type=" + type +
+                ", address='" + address + '\'' +
+                ", city='" + city + '\'' +
+                ", postalCode='" + postalCode + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", price=" + price +
+                ", priceFrequency=" + priceFrequency +
+                ", bedrooms=" + bedrooms +
+                ", bathrooms=" + bathrooms +
+                ", maxOccupancy=" + maxOccupancy +
+                ", internetIncluded=" + internetIncluded +
+                ", utilitiesIncluded=" + utilitiesIncluded +
+                ", parkingAvailable=" + parkingAvailable +
+                ", leaseTerm='" + leaseTerm + '\'' +
+                ", availableFrom=" + availableFrom +
+                ", availableUntil=" + availableUntil +
+                ", imageUrls=" + imageUrls +
+                ", status=" + status +
+                ", listingDate=" + listingDate +
+                ", lastUpdatedDate=" + lastUpdatedDate +
+                ", nsfasAccredited=" + nsfasAccredited +
+                ", listedBy=" + listedBy +
+                '}';
     }
 
     // equals() and hashCode() override
