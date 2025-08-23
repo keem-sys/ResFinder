@@ -1,182 +1,222 @@
 package accommodationfinder.ui;
 
 import javax.swing.*;
-import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Calendar;
 
-public class ContactGui extends JFrame {
-    private JLabel lblTitle, lblDescription, lblFirstName, lblLastName, lblEmail, lblMessage, lblCopyRight, lblSubTitle;
+public class ContactPanel extends JPanel {
+
+    private final MainWindow mainWindow;
+
+    // UI Components
     private JTextField txtFirstName, txtLastName, txtEmail;
     private JTextArea txtMessage;
-    private JPanel panelMain, panelWest, panelEast,panelSouth;
     private JButton btnSend;
 
-    public ContactGui() {
+    private static final Color BACKGROUND_COLOR = new Color(253, 251, 245);
+    private static final Color FIELD_BACKGROUND_COLOR = new Color(230, 230, 230);
+    private static final Color TEXT_COLOR = new Color(50, 50, 50);
 
-        lblFirstName = new JLabel("First Name");
-        lblLastName = new JLabel("Last Name");
-        lblEmail = new JLabel("Email");
+    public ContactPanel(MainWindow mainWindow) {
+        this.mainWindow = mainWindow;
 
-        lblMessage = new JLabel("Message");
+        // Main Panel Setup
+        setLayout(new BorderLayout(10, 10));
+        setBackground(BACKGROUND_COLOR);
+        setBorder(new EmptyBorder(15, 25, 15, 25));
 
-        lblTitle = new JLabel("Contact Us");
-        lblSubTitle = new JLabel("Reach Out!");
-        lblDescription = new JLabel("<html><div style='width:300px; text-align:left;'>"+"We’d love to hear from you! Whether you have questions, feedback, or need support, feel free to reach out using any of the methods below.</div></html>");
+        // Top Panel
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topPanel.setOpaque(false);
+        JButton backButton = new JButton("< Back to Main View");
+        styleButton(backButton, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 13);
+        backButton.addActionListener(e -> this.mainWindow.showMainApplicationView());
+        topPanel.add(backButton);
+        add(topPanel, BorderLayout.NORTH);
 
+        // Main Content Panel
+        JPanel mainContentPanel = new JPanel(new GridLayout(1, 2, 40, 0));
+        mainContentPanel.setOpaque(false);
+        mainContentPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        // Information Panel
+        JPanel infoPanel = createInfoPanel();
+        mainContentPanel.add(infoPanel);
+
+        // Right Side
+        JPanel formPanel = createFormPanel();
+        mainContentPanel.add(formPanel);
+
+
+        JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        southPanel.setOpaque(false);
         int year = Calendar.getInstance().get(Calendar.YEAR);
-        lblCopyRight = new JLabel("© "+year+" ResFinder ");
+        JLabel lblCopyRight = new JLabel("© " + year + " ResFinder ");
+        lblCopyRight.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        lblCopyRight.setForeground(TEXT_COLOR.darker());
+        southPanel.add(lblCopyRight);
 
-        lblTitle.setFont(new Font("Roboto", Font.BOLD, 36));
-        lblSubTitle.setFont(new Font("Roboto", Font.BOLD, 16));
-        lblDescription.setFont(new Font("Roboto", Font.PLAIN,16));
-        lblFirstName.setFont(new Font("Roboto", Font.BOLD,14));
-        lblLastName.setFont(new Font("Roboto", Font.BOLD,14));
-        lblEmail.setFont(new Font("Roboto", Font.BOLD,14));
-        lblMessage.setFont(new Font("Roboto", Font.BOLD,14));
+        add(mainContentPanel, BorderLayout.CENTER);
+        add(southPanel, BorderLayout.SOUTH);
+    }
 
-        txtFirstName = new JTextField();
-        txtLastName = new JTextField();
-        txtEmail = new JTextField();
+    private JPanel createInfoPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        txtMessage = new JTextArea();
-        txtMessage.setLineWrap(true);
-        txtMessage.setWrapStyleWord(true);
-        txtMessage.setRows(5);
-        txtMessage.setColumns(30);
+        JLabel lblTitle = new JLabel("Contact Us");
+        lblTitle.setFont(new Font("SansSerif", Font.BOLD, 36));
+        lblTitle.setForeground(TEXT_COLOR);
+        lblTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        int sizeField = Toolkit.getDefaultToolkit().getScreenResolution() / 8;
-        txtFirstName.setColumns((int)(sizeField * 1.5));
-        txtLastName.setColumns((int)(sizeField * 1.5));
-        txtEmail.setColumns((sizeField) / 5);
-        txtMessage.setRows(5);
+        JLabel lblSubTitle = new JLabel("Reach Out!");
+        lblSubTitle.setFont(new Font("SansSerif", Font.BOLD, 18));
+        lblSubTitle.setForeground(TEXT_COLOR);
+        lblSubTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        Color peach = new Color(199, 250, 250, 255);
-        int padding = 100;
-        panelMain = new JPanel();
-        Border peachBorder = BorderFactory.createLineBorder(peach,20);
-        Border padBorder = BorderFactory.createEmptyBorder(padding, padding, padding, padding);
-        Border compundBorder = BorderFactory.createCompoundBorder(padBorder,peachBorder);
-        panelMain.setBorder(compundBorder);
-        panelMain.setBackground(Color.WHITE);
+        JLabel lblDescription = new JLabel("<html><div style='width:300px; text-align:left;'>" +
+                "We’d love to hear from you! Whether you have questions, feedback, or need support, " +
+                "feel free to reach out using the form.</div></html>");
+        lblDescription.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        lblDescription.setForeground(TEXT_COLOR);
+        lblDescription.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+        panel.add(lblTitle);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(lblSubTitle);
+        panel.add(Box.createVerticalStrut(20));
+        panel.add(lblDescription);
+        panel.add(Box.createVerticalGlue());
 
-        panelWest = new JPanel();
-        panelWest.setBorder(BorderFactory.createEmptyBorder(padding,padding,0,0));
-        panelWest.setBackground(Color.WHITE);
+        return panel;
+    }
 
-        panelEast = new JPanel();
-        panelEast.setBorder(BorderFactory.createEmptyBorder(padding,0,0,padding));
-        panelEast.setBackground(Color.WHITE);
+    private JPanel createFormPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setOpaque(false);
+        panel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY), "Send us a Message",
+                TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
+                new Font("SansSerif", Font.BOLD, 14), TEXT_COLOR)
+        );
 
-        panelSouth = new JPanel();
-        panelSouth.setBackground(Color.WHITE);
-        panelSouth.setBorder(BorderFactory.createEmptyBorder(0,0,5,0));
-        btnSend = new JButton("Send");
-        btnSend.setPreferredSize(new Dimension(80,30));
-
-        btnSend.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (txtFirstName.getText().isEmpty() || txtLastName.getText().isEmpty() || txtEmail.getText().isEmpty() || txtMessage.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "No information entered, Please fill in all fields", "Input Error", JOptionPane.ERROR_MESSAGE);
-                }else {
-                    JOptionPane.showMessageDialog(null, "Message Successfully Sent");
-                }
-                txtFirstName.setText("");
-                txtLastName.setText("");
-                txtEmail.setText("");
-                txtMessage.setText("");
-                txtFirstName.requestFocus();
-            }
-        });
-
-        }
-
-        public void setGUI(){
-        this.setTitle("Contact Page");
-
-        JScrollPane message = new JScrollPane(txtMessage);
-        message.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-
-        panelWest.setLayout(new BoxLayout(panelWest, BoxLayout.Y_AXIS));
-        panelWest.add(lblTitle);
-        panelWest.add(Box.createVerticalStrut(10));
-        panelWest.add(lblSubTitle);
-        panelWest.add(Box.createVerticalStrut(15));
-        panelWest.add(lblDescription);
-
-        panelEast.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10,10,10,10);
-
-        gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.NONE;
+        gbc.insets = new Insets(10, 10, 10, 10);
         gbc.anchor = GridBagConstraints.WEST;
 
         gbc.gridx = 0; gbc.gridy = 0;
-            panelEast.add(lblFirstName, gbc);
-            gbc.gridx = 1;
-            panelEast.add(lblLastName, gbc);
+        panel.add(new JLabel("First Name:"), gbc);
+        gbc.gridx = 1;
+        panel.add(new JLabel("Last Name:"), gbc);
 
-            gbc.gridx = 0; gbc.gridy = 1;
-            gbc.fill = GridBagConstraints.NONE;
-            panelEast.add(txtFirstName, gbc);
-            gbc.gridx = 1;
-            panelEast.add(txtLastName, gbc);
+        gbc.gridx = 0; gbc.gridy = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 0.5;
+        txtFirstName = new JTextField(15);
+        styleTextField(txtFirstName);
+        panel.add(txtFirstName, gbc);
+        gbc.gridx = 1;
+        txtLastName = new JTextField(15);
+        styleTextField(txtLastName);
+        panel.add(txtLastName, gbc);
 
-            gbc.gridx = 0;gbc.gridy = 2;
-            gbc.gridwidth = 1;
-            panelEast.add(lblEmail, gbc);
+        // Email
+        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        panel.add(new JLabel("Email:"), gbc);
 
-            gbc.gridy = 3;
-            gbc.fill = GridBagConstraints.HORIZONTAL;
-            gbc.gridwidth = 2;
-            gbc.weighty = 1.0;
-            panelEast.add(txtEmail, gbc);
+        gbc.gridx = 0; gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        txtEmail = new JTextField();
+        styleTextField(txtEmail);
+        panel.add(txtEmail, gbc);
 
-            gbc.gridy = 4;
-            gbc.fill = GridBagConstraints.NONE;
-            gbc.gridwidth = 1;
-            panelEast.add(lblMessage, gbc);
+        // Message
+        gbc.gridx = 0; gbc.gridy = 4;
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        panel.add(new JLabel("Message:"), gbc);
 
-            gbc.gridy = 5;
-            gbc.fill = GridBagConstraints.BOTH;
-            gbc.gridwidth = 1;
-            gbc.weighty = 1.0;
-            panelEast.add(message, gbc);
+        gbc.gridx = 0; gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        txtMessage = new JTextArea(5, 30);
+        styleTextArea(txtMessage);
+        JScrollPane messageScrollPane = new JScrollPane(txtMessage);
+        panel.add(messageScrollPane, gbc);
 
-            gbc.gridy= 6;
-            gbc.gridwidth = 2;
-            gbc.fill = GridBagConstraints.NONE;
-            gbc.anchor = GridBagConstraints.WEST;
-            gbc.weightx = 1.0;
-            panelEast.add(btnSend,gbc);
+        // Send Button
+        gbc.gridx = 0; gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.weighty = 0;
+        btnSend = new JButton("Send");
+        styleButton(btnSend, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 12);
+        btnSend.addActionListener(e -> sendMessage());
+        panel.add(btnSend, gbc);
 
-            panelSouth.setLayout(new GridBagLayout());
-            GridBagConstraints gbcSouth = new GridBagConstraints();
-            gbcSouth.anchor = GridBagConstraints.CENTER;
-            panelSouth.add(lblCopyRight, gbcSouth);
+        return panel;
+    }
 
-        panelMain.setLayout(new BorderLayout());
-        panelMain.add(panelWest, BorderLayout.WEST);
-        panelMain.add(panelEast, BorderLayout.EAST);
-        panelMain.add(panelSouth, BorderLayout.SOUTH);
-        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+    private void sendMessage() {
+        if (txtFirstName.getText().trim().isEmpty() || txtLastName.getText().trim().isEmpty() ||
+                txtEmail.getText().trim().isEmpty() || txtMessage.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill in all fields before sending.",
+                    "Input Error", JOptionPane.ERROR_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Message sent successfully!",
+                    "Message Sent", JOptionPane.INFORMATION_MESSAGE);
 
-        this.setLayout(new BorderLayout());
-        this.add(panelMain);
-        this.setMaximumSize(new Dimension(screen.width,screen.height));
-        this.pack();
-        this.setLocationRelativeTo(null);
-        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        this.setVisible(true);
-        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        }
-
-        public JFrame getContactGui() {
-            return this;
+            txtFirstName.setText("");
+            txtLastName.setText("");
+            txtEmail.setText("");
+            txtMessage.setText("");
+            txtFirstName.requestFocusInWindow();
         }
     }
+
+    private void styleTextField(JTextField field) {
+        field.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        field.setBackground(FIELD_BACKGROUND_COLOR);
+        field.setForeground(TEXT_COLOR);
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(FIELD_BACKGROUND_COLOR.darker()),
+                new EmptyBorder(5, 8, 5, 8)
+        ));
+    }
+
+    private void styleTextArea(JTextArea area) {
+        area.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        area.setBackground(FIELD_BACKGROUND_COLOR);
+        area.setForeground(TEXT_COLOR);
+        area.setLineWrap(true);
+        area.setWrapStyleWord(true);
+        area.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(FIELD_BACKGROUND_COLOR.darker()),
+                new EmptyBorder(5, 8, 5, 8)
+        ));
+    }
+
+    private void styleButton(JButton button, Color bgColor, Color fgColor, int fontSize) {
+        button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
+        button.setBackground(bgColor);
+        button.setForeground(fgColor);
+        button.setFocusPainted(false);
+    }
+
+
+    public JPanel getContactPanel() {
+        return this;
+    }
+}

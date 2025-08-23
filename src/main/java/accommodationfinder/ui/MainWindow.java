@@ -9,7 +9,6 @@ import accommodationfinder.data.DatabaseConnection;
 import accommodationfinder.data.UserDao;
 
 import javax.swing.*;
-import java.awt.*;
 import java.sql.SQLException;
 import java.util.prefs.Preferences;
 
@@ -21,6 +20,7 @@ public class MainWindow extends JFrame {
     private LoginPanel loginPanel;
     private MainApplicationPanel mainApplicationPanel;
     private AccommodationDetailPanel accommodationDetailPanel;
+    private ContactPanel contactPanel;
 
     private AccommodationDao accommodationDao;
     private AccommodationService accommodationService;
@@ -51,6 +51,7 @@ public class MainWindow extends JFrame {
             this.mainApplicationPanel = new MainApplicationPanel(accommodationService, userService, this);
             this.registrationPanel = new RegistrationPanel(userService, this);
             this.loginPanel = new LoginPanel(userService, this);
+            this.contactPanel = new ContactPanel(this);
 
             // Initialise MenuBar
             this.menuBarManager = new MenuBarManager(this);
@@ -180,6 +181,13 @@ public class MainWindow extends JFrame {
         UserProfileDialog userProfileDialog = new UserProfileDialog(this, userService, currentUser);
         userProfileDialog.setVisible(true);
 
+    }
+
+    public void switchToContactPanel() {
+        setContentPane(contactPanel.getContactPanel());
+        revalidate();
+        repaint();
+        System.out.println("Switched to Contact Panel");
     }
 
     public void showAboutDialog() {
