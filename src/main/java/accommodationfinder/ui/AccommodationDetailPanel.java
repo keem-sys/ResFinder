@@ -10,6 +10,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +23,25 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
+import org.jxmapviewer.JXMapViewer;
+import org.jxmapviewer.OSMTileFactoryInfo;
+import org.jxmapviewer.input.CenterMapListener;
+import org.jxmapviewer.input.PanKeyListener;
+import org.jxmapviewer.input.PanMouseInputListener;
+import org.jxmapviewer.input.ZoomMouseWheelListenerCursor;
+import org.jxmapviewer.viewer.DefaultTileFactory;
+import org.jxmapviewer.viewer.GeoPosition;
+import org.jxmapviewer.viewer.TileFactoryInfo;
+import java.io.File;
+import org.jxmapviewer.painter.CompoundPainter;
+import org.jxmapviewer.painter.Painter;
+import org.jxmapviewer.viewer.DefaultWaypoint;
+import org.jxmapviewer.viewer.Waypoint;
+import org.jxmapviewer.viewer.WaypointPainter;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 public class AccommodationDetailPanel extends JPanel {
 
     private final AccommodationService accommodationService;
@@ -31,7 +52,7 @@ public class AccommodationDetailPanel extends JPanel {
     private JLabel titleLabel;
     private JLabel imageLabel;
     private JTextArea detailsTextArea;
-    private JPanel imageContainerPanel;
+    private JTabbedPane imageContainerPanel;
     private JButton prevImageButton;
     private JButton nextImageButton;
     private JLabel imageCountLabel;
@@ -43,9 +64,18 @@ public class AccommodationDetailPanel extends JPanel {
     private JButton sendMessageButton;
     private JLabel listerInfoLabel;
 
+    // New Tab Components
+    private JTabbedPane tabbedPane;
+    private JPanel imagePanel;
+    private JPanel locationPanel;
+    private JLabel mapLabel;
+
     // State for Image Gallery
     private List<String> currentImageUrls;
     private int currentImageIndex = 0;
+
+    // Current accommodation for map display
+    private Accommodation currentAccommodation;
 
     // Formatters
     private static final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(
@@ -98,10 +128,14 @@ public class AccommodationDetailPanel extends JPanel {
         JPanel leftPanel = new JPanel(new BorderLayout(10, 15));
         leftPanel.setOpaque(false);
 
-        // Image Gallery Panel
-        imageContainerPanel = new JPanel(new BorderLayout());
-        imageContainerPanel.setBackground(PLACEHOLDER_COLOR);
-        imageContainerPanel.setPreferredSize(new Dimension(IMG_WIDTH, IMG_HEIGHT + 40));
+        // Create tabbed pane for Image/Location
+        tabbedPane = new JTabbedPane();
+        tabbedPane.setPreferredSize(new Dimension(IMG_WIDTH, IMG_HEIGHT + 40));
+        tabbedPane.setBackground(BACKGROUND_COLOR);
+
+        // Image Panel (original image gallery)
+        imagePanel = new JPanel(new BorderLayout());
+        imagePanel.setBackground(PLACEHOLDER_COLOR);
 
         imageLabel = new JLabel("Loading image...", SwingConstants.CENTER);
         imageLabel.setOpaque(true);
@@ -109,7 +143,7 @@ public class AccommodationDetailPanel extends JPanel {
         imageLabel.setPreferredSize(new Dimension(IMG_WIDTH, IMG_HEIGHT));
         imageLabel.setVerticalAlignment(SwingConstants.CENTER);
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        imageContainerPanel.add(imageLabel, BorderLayout.CENTER);
+        imagePanel.add(imageLabel, BorderLayout.CENTER);
 
         // Image Navigation Controls
         JPanel imageNavPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
@@ -121,14 +155,33 @@ public class AccommodationDetailPanel extends JPanel {
         imageCountLabel = new JLabel("Image 0 of 0");
         imageCountLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
 
-
         prevImageButton.addActionListener(e -> showImageAtIndex(currentImageIndex - 1));
         nextImageButton.addActionListener(e -> showImageAtIndex(currentImageIndex + 1));
 
         imageNavPanel.add(prevImageButton);
         imageNavPanel.add(imageCountLabel);
         imageNavPanel.add(nextImageButton);
-        imageContainerPanel.add(imageNavPanel, BorderLayout.SOUTH);
+        imagePanel.add(imageNavPanel, BorderLayout.SOUTH);
+
+        // Location Panel (interactive map)
+        locationPanel = new JPanel(new BorderLayout());
+        locationPanel.setBackground(BACKGROUND_COLOR);
+
+        mapLabel = new JLabel("Loading map...", SwingConstants.CENTER);
+        mapLabel.setOpaque(true);
+        mapLabel.setBackground(PLACEHOLDER_COLOR);
+        mapLabel.setPreferredSize(new Dimension(IMG_WIDTH, IMG_HEIGHT));
+        mapLabel.setVerticalAlignment(SwingConstants.CENTER);
+        mapLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        mapLabel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        locationPanel.add(mapLabel, BorderLayout.CENTER);
+
+        // Add tabs
+        tabbedPane.addTab("Images", imagePanel);
+        tabbedPane.addTab("Location", locationPanel);
+
+        // Set the original imageContainerPanel to be the tabbedPane
+        imageContainerPanel = tabbedPane;
 
         leftPanel.add(imageContainerPanel, BorderLayout.NORTH);
 
@@ -158,8 +211,96 @@ public class AccommodationDetailPanel extends JPanel {
         centerContentPanel.add(contactPanel, BorderLayout.EAST);
 
         add(centerContentPanel, BorderLayout.CENTER);
+
+        // Add tab change listener to load map when Location tab is selected
+        tabbedPane.addChangeListener(e -> {
+            if (tabbedPane.getSelectedIndex() == 1) { // Location tab
+                loadInteractiveMap();
+            }
+        });
     }
 
+    private void loadInteractiveMap() {
+        if (currentAccommodation == null) {
+            mapLabel.setText("Accommodation data not loaded");
+            return;
+        }
+
+        SwingWorker<JXMapViewer, Void> mapLoader = new SwingWorker<>() {
+            @Override
+            protected JXMapViewer doInBackground() throws Exception {
+                // Create map
+                TileFactoryInfo info = new OSMTileFactoryInfo();
+                DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+                JXMapViewer mapViewer = new JXMapViewer();
+                mapViewer.setTileFactory(tileFactory);
+
+                // Set location (you would geocode the real address here)
+                GeoPosition location = new GeoPosition(-33.9249, 18.4241); // Cape Town coordinates
+                mapViewer.setZoom(15); // Zoom in more to see the pin clearly
+                mapViewer.setAddressLocation(location);
+
+                // Create waypoint (pin) for the accommodation
+                Waypoint waypoint = new DefaultWaypoint(location);
+                Set<Waypoint> waypoints = new HashSet<>(Arrays.asList(waypoint));
+
+                // Create waypoint painter (this draws the pin)
+                WaypointPainter<Waypoint> waypointPainter = new WaypointPainter<Waypoint>();
+                waypointPainter.setWaypoints(waypoints);
+
+                // Set up painters
+                CompoundPainter<JXMapViewer> painter = new CompoundPainter<JXMapViewer>(waypointPainter);
+                mapViewer.setOverlayPainter(painter);
+
+                // Add mouse listeners
+                PanMouseInputListener mia = new PanMouseInputListener(mapViewer);
+                mapViewer.addMouseListener(mia);
+                mapViewer.addMouseMotionListener(mia);
+                mapViewer.addMouseListener(new CenterMapListener(mapViewer));
+                mapViewer.addMouseWheelListener(new ZoomMouseWheelListenerCursor(mapViewer));
+                mapViewer.addKeyListener(new PanKeyListener(mapViewer));
+
+                return mapViewer;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    JXMapViewer mapViewer = get();
+
+                    JPanel mapContainer = new JPanel(new BorderLayout());
+                    mapContainer.setPreferredSize(new Dimension(IMG_WIDTH, IMG_HEIGHT));
+                    mapContainer.add(mapViewer, BorderLayout.CENTER);
+
+                    // Address info panel
+                    JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                    infoPanel.setOpaque(false);
+
+                    String address = currentAccommodation.getAddress() + ", " + currentAccommodation.getCity();
+                    if (currentAccommodation.getPostalCode() != null) {
+                        address += ", " + currentAccommodation.getPostalCode();
+                    }
+
+                    JLabel addressLabel = new JLabel("📍 " + address);
+                    addressLabel.setFont(new Font("SansSerif", Font.BOLD, 11));
+                    infoPanel.add(addressLabel);
+
+                    mapContainer.add(infoPanel, BorderLayout.NORTH);
+
+                    locationPanel.remove(mapLabel);
+                    locationPanel.add(mapContainer, BorderLayout.CENTER);
+                    locationPanel.revalidate();
+                    locationPanel.repaint();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    mapLabel.setText("Error loading map: " + e.getMessage());
+                }
+            }
+        };
+
+        mapLoader.execute();
+    }
     private JPanel createContactPanel() {
         JPanel contactPanel = new JPanel();
         contactPanel.setLayout(new GridBagLayout());
@@ -310,6 +451,7 @@ public class AccommodationDetailPanel extends JPanel {
                 try {
                     Accommodation accommodation = get();
                     if (accommodation != null) {
+                        currentAccommodation = accommodation; // Store for map usage
                         populateUI(accommodation);
                         currentImageUrls = accommodation.getImageUrls(); // Store URLs
                         currentImageIndex = 0;
@@ -555,7 +697,6 @@ public class AccommodationDetailPanel extends JPanel {
             case OTHER -> "";
         };
     }
-
     /**
      * Helper to style JButtons consistently.
      */
