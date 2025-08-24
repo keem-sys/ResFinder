@@ -3,6 +3,7 @@ package accommodationfinder.ui;
 import accommodationfinder.service.UserService;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.Arrays;
 
@@ -17,10 +18,10 @@ public class LoginPanel extends JPanel {
     private final UserService userService;
     private final MainWindow mainWindow;
 
+    // Define Colors based on Wireframe
     private static final Color BACKGROUND_COLOR = new Color(253, 251, 245); // Beige background
-    private static final Color FIELD_BACKGROUND_COLOR = new Color(230, 230, 230); // Light gray for fields/buttons
     private static final Color TEXT_COLOR = new Color(50, 50, 50); // Dark gray for text
-    private static final Color ERROR_COLOR = Color.RED;
+    private static final Color ERROR_COLOR = new Color(211, 47, 47);
 
     public LoginPanel(UserService userService, MainWindow mainWindow) {
         this.userService = userService;
@@ -31,12 +32,11 @@ public class LoginPanel extends JPanel {
         setBackground(BACKGROUND_COLOR);
         setBorder(new EmptyBorder(15, 25, 15, 25));
 
-        // Top Bar
+        // Top Bar (Back Button)
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topPanel.setOpaque(false);
         backButton = new JButton("<- Back to Main View");
-
-        styleButton(backButton, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 13);
+        styleButton(backButton, 13);
         topPanel.add(backButton);
         add(topPanel, BorderLayout.NORTH);
 
@@ -74,7 +74,6 @@ public class LoginPanel extends JPanel {
         usernameOrEmailField = new JTextField(25);
         styleTextField(usernameOrEmailField);
         gbc.gridx = 1;
-        gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         formPanel.add(usernameOrEmailField, gbc);
@@ -84,14 +83,12 @@ public class LoginPanel extends JPanel {
         styleLabel(passwordLabel);
         gbc.gridx = 0;
         gbc.gridy = 2;
-        gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(passwordLabel, gbc);
 
         passwordField = new JPasswordField(25);
         styleTextField(passwordField);
         gbc.gridx = 1;
-        gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         formPanel.add(passwordField, gbc);
@@ -99,15 +96,12 @@ public class LoginPanel extends JPanel {
         // Remember Me Checkbox
         rememberMeChkBox = new JCheckBox("Remember Me");
         rememberMeChkBox.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        rememberMeChkBox.setForeground(TEXT_COLOR);
         rememberMeChkBox.setOpaque(false);
-        gbc.gridx = 1;
-        gbc.gridy = 3;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(0, 8, 15, 8);
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
         formPanel.add(rememberMeChkBox, gbc);
-        gbc.insets = new Insets(8, 8, 8, 8);
 
         // Error Message Label
         errorMessageLabel = new JLabel(" ");
@@ -118,26 +112,23 @@ public class LoginPanel extends JPanel {
         gbc.gridy = 4;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(0, 8, 8, 8);
         formPanel.add(errorMessageLabel, gbc);
-        gbc.gridwidth = 1; // Reset
-        gbc.insets = new Insets(8, 8, 8, 8); // Reset
 
-
-        // Log In Button
-        loginButton = new JButton("Log In");
-        styleButton(loginButton, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 15);
-        loginButton.setPreferredSize(new Dimension(200, 40));
+        // Log In Button (Centered)
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        buttonPanel.setOpaque(false);
+        loginButton = new JButton("Login");
+        styleButton(loginButton, 14);
+        buttonPanel.add(loginButton);
         gbc.gridx = 1;
         gbc.gridy = 5;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
         gbc.insets = new Insets(15, 8, 30, 8);
-        formPanel.add(loginButton, gbc);
         gbc.gridwidth = 1; // Reset
         gbc.insets = new Insets(8, 8, 8, 8); // Reset
+        formPanel.add(buttonPanel, gbc);
 
         // Sign Up Prompt
         JPanel registerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0)); // Centered flow layout
@@ -145,7 +136,7 @@ public class LoginPanel extends JPanel {
         registerPromptLabel = new JLabel("Don't have an account?");
         styleLabel(registerPromptLabel);
         registrationButton = new JButton("Sign Up!");
-        styleButton(registrationButton, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 13); // Style sign up button
+        styleButton(registrationButton,  13); // Style sign up button
         registerPanel.add(registerPromptLabel);
         registerPanel.add(registrationButton);
         gbc.gridx = 0;
@@ -154,19 +145,27 @@ public class LoginPanel extends JPanel {
         gbc.anchor = GridBagConstraints.CENTER;
         formPanel.add(registerPanel, gbc);
 
+
+        // Add formPanel to the centering wrapper
         centerWrapper.add(formPanel, new GridBagConstraints());
+        // Add the centering wrapper to the main panel's center
         add(centerWrapper, BorderLayout.CENTER);
 
 
+        // Login Button Action
         loginButton.addActionListener(e -> performLogin());
+
+        // Password Field Action
         passwordField.addActionListener(e -> performLogin());
 
+        // Back Button Action
         backButton.addActionListener(e -> {
             System.out.println("Back button clicked - Switching to Main View");
             clearInputs();
             mainWindow.showMainApplicationView();
         });
 
+        // Registration Button Action
         registrationButton.addActionListener(e -> {
             System.out.println("Sign Up button clicked on Login Panel - Switching to Registration Panel");
             clearInputs();
@@ -193,10 +192,10 @@ public class LoginPanel extends JPanel {
         // Basic validation
         if (usernameOrEmail.isEmpty() || password.isEmpty()) {
             setErrorMessage("Username/Email and Password are required");
-            Arrays.fill(passwordChars, ' ');
+            Arrays.fill(passwordChars, ' '); // Clear password array
             return;
         } else {
-            setErrorMessage(" ");
+            setErrorMessage(" "); // Clear previous error message
         }
 
         try {
@@ -214,8 +213,10 @@ public class LoginPanel extends JPanel {
                 System.out.println("JWT token marked for clearing.");
             }
 
+            // Notify MainWindow of successful login
             mainWindow.handleLoginSuccess(jwtToken, true);
 
+            // Clear input fields on success
             clearInputs();
 
         } catch (Exception authenticationException) {
@@ -261,25 +262,19 @@ public class LoginPanel extends JPanel {
     /**
      * Helper to style JTextField and JPasswordField consistently.
      */
-    private void styleTextField(JTextField field) {
+    private void styleTextField(JTextComponent field) {
         field.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        field.setBackground(FIELD_BACKGROUND_COLOR);
         field.setForeground(TEXT_COLOR);
-        field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(FIELD_BACKGROUND_COLOR.darker(), 1),
-                new EmptyBorder(5, 8, 5, 8) // Internal padding
-        ));
-        field.setCaretColor(TEXT_COLOR);
     }
 
     /**
      * Helper to style JButtons consistently.
      */
-    private void styleButton(JButton button, Color bgColor, Color fgColor, int fontSize) {
+    private void styleButton(JButton button, int fontSize) {
         button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
-        button.setBackground(bgColor);
-        button.setForeground(fgColor);
+        button.setForeground(TEXT_COLOR);
         button.setFocusPainted(false);
+        // TODO: Add hover effect listener
     }
 
     /**

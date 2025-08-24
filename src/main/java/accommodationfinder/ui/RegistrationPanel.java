@@ -22,9 +22,8 @@ public class RegistrationPanel extends JPanel {
 
     // Colors
     private static final Color BACKGROUND_COLOR = new Color(253, 251, 245); // Beige background
-    private static final Color FIELD_BACKGROUND_COLOR = new Color(230, 230, 230); // Light gray for fields/buttons
     private static final Color TEXT_COLOR = new Color(50, 50, 50); // Dark gray for text
-    private static final Color ERROR_COLOR = Color.RED;
+    private static final Color ERROR_COLOR = new Color(211, 47, 47);
 
     public RegistrationPanel(UserService userService, MainWindow mainWindow) {
         this.userService = userService;
@@ -35,11 +34,11 @@ public class RegistrationPanel extends JPanel {
         setBackground(BACKGROUND_COLOR);
         setBorder(new EmptyBorder(15, 25, 15, 25)); // Padding
 
-        // Top Bar
+        // Top Bar (Back Button)
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topPanel.setOpaque(false);
         backButton = new JButton("<- Back to Main View");
-        styleButton(backButton, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 13);
+        styleButton(backButton, 13);
         topPanel.add(backButton);
         add(topPanel, BorderLayout.NORTH);
 
@@ -85,8 +84,8 @@ public class RegistrationPanel extends JPanel {
         JLabel usernameLabel = new JLabel("Username:");
         styleLabel(usernameLabel);
         gbc.gridx = 0;
-        gbc.gridy++;
-        gbc.fill = GridBagConstraints.NONE;
+        gbc.gridy++; // y=2
+        gbc.fill = GridBagConstraints.NONE; // Reset fill
         gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(usernameLabel, gbc);
 
@@ -101,7 +100,7 @@ public class RegistrationPanel extends JPanel {
         JLabel emailLabel = new JLabel("Email:");
         styleLabel(emailLabel);
         gbc.gridx = 0;
-        gbc.gridy++;
+        gbc.gridy++; // y=3
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(emailLabel, gbc);
@@ -117,7 +116,7 @@ public class RegistrationPanel extends JPanel {
         JLabel passwordLabel = new JLabel("Password:");
         styleLabel(passwordLabel);
         gbc.gridx = 0;
-        gbc.gridy++;
+        gbc.gridy++; // y=4
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(passwordLabel, gbc);
@@ -133,7 +132,7 @@ public class RegistrationPanel extends JPanel {
         JLabel confirmPasswordLabel = new JLabel("Confirm Password:");
         styleLabel(confirmPasswordLabel);
         gbc.gridx = 0;
-        gbc.gridy++;
+        gbc.gridy++; // y=5
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(confirmPasswordLabel, gbc);
@@ -150,8 +149,8 @@ public class RegistrationPanel extends JPanel {
         termsCheckBox.setFont(new Font("SansSerif", Font.PLAIN, 13));
         termsCheckBox.setForeground(TEXT_COLOR);
         termsCheckBox.setOpaque(false);
-        gbc.gridx = 1;
-        gbc.gridy++;
+        gbc.gridx = 1; // Align with fields
+        gbc.gridy++; // y=6
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(0, 8, 15, 8);
@@ -164,7 +163,7 @@ public class RegistrationPanel extends JPanel {
         errorMsgLbl.setFont(new Font("SansSerif", Font.PLAIN, 12));
         errorMsgLbl.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridx = 0;
-        gbc.gridy++;
+        gbc.gridy++; // y=7
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -175,10 +174,10 @@ public class RegistrationPanel extends JPanel {
 
         // Create Account Button
         createAccountButton = new JButton("Create an Account");
-        styleButton(createAccountButton, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 15);
+        styleButton(createAccountButton, 15);
         createAccountButton.setPreferredSize(new Dimension(200, 40));
         gbc.gridx = 1;
-        gbc.gridy++;
+        gbc.gridy++; // y=8
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
@@ -193,17 +192,19 @@ public class RegistrationPanel extends JPanel {
         loginPromptLabel = new JLabel("Already have an account?");
         styleLabel(loginPromptLabel);
         loginButton = new JButton("Login"); // Added Login button
-        styleButton(loginButton, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 13);
+        styleButton(loginButton, 13);
         loginPromptPanel.add(loginPromptLabel);
         loginPromptPanel.add(loginButton);
         gbc.gridx = 0;
-        gbc.gridy++;
+        gbc.gridy++; // y=9
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         formPanel.add(loginPromptPanel, gbc);
 
 
+        // Add formPanel to the centering wrapper
         centerWrapper.add(formPanel, new GridBagConstraints());
+        // Add wrapper to the main panel's center
         add(centerWrapper, BorderLayout.CENTER);
 
         // Action Listeners
@@ -213,14 +214,16 @@ public class RegistrationPanel extends JPanel {
         backButton.addActionListener(e -> {
             clearInputFields();
             setErrorMessage(" ");
-            mainWindow.showMainApplicationView();
+            mainWindow.showMainApplicationView(); // Go back to main listings/view
         });
 
         loginButton.addActionListener(e -> {
             clearInputFields();
             setErrorMessage(" ");
-            mainWindow.switchToLoginPanel();
+            mainWindow.switchToLoginPanel(); // Switch to Login Panel
         });
+
+        // Request initial focus
     }
 
 
@@ -233,7 +236,7 @@ public class RegistrationPanel extends JPanel {
         String password = new String(passwordChars);
         char[] confirmPasswordChars = confirmPasswordField.getPassword();
         String confirmPassword = new String(confirmPasswordChars);
-        boolean termsAccepted = termsCheckBox.isSelected();
+        boolean termsAccepted = termsCheckBox.isSelected(); // Get checkbox state
 
         // Clear password arrays immediately after copying
         Arrays.fill(passwordChars, ' ');
@@ -296,7 +299,7 @@ public class RegistrationPanel extends JPanel {
                     "Registration Complete",
                     JOptionPane.INFORMATION_MESSAGE);
 
-            clearInputFields();
+            clearInputFields(); // Clear form
             mainWindow.switchToLoginPanel(); // Switch to log in panel after success
 
         } catch (SQLException sqlException) {
@@ -352,8 +355,8 @@ public class RegistrationPanel extends JPanel {
         emailField.setText("");
         passwordField.setText("");
         confirmPasswordField.setText("");
-        termsCheckBox.setSelected(false);
-        errorMsgLbl.setText(" ");
+        termsCheckBox.setSelected(false); // Clear checkbox
+        errorMsgLbl.setText(" "); // Clear error message
     }
 
     /**
@@ -372,19 +375,12 @@ public class RegistrationPanel extends JPanel {
 
     private void styleTextField(JTextField field) {
         field.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        field.setBackground(FIELD_BACKGROUND_COLOR);
         field.setForeground(TEXT_COLOR);
-        field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(FIELD_BACKGROUND_COLOR.darker(), 1),
-                new EmptyBorder(5, 8, 5, 8)
-        ));
     }
 
-    private void styleButton(JButton button, Color bgColor, Color fgColor, int fontSize) {
+    private void styleButton(JButton button, int fontSize) {
         button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
-        button.setBackground(bgColor);
-        button.setForeground(fgColor);
-        button.setFocusPainted(false);
+        button.setForeground(TEXT_COLOR);
     }
 
     public JPanel getRegistrationPanel() {
