@@ -36,7 +36,7 @@ public class LoginPanel extends JPanel {
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topPanel.setOpaque(false);
         backButton = new JButton("<- Back to Main View");
-        styleButton(backButton, 13);
+        styleButton(backButton, 15);
         topPanel.add(backButton);
         add(topPanel, BorderLayout.NORTH);
 
@@ -118,14 +118,15 @@ public class LoginPanel extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         buttonPanel.setOpaque(false);
         loginButton = new JButton("Login");
-        styleButton(loginButton, 14);
-        buttonPanel.add(loginButton);
+        styleButton(loginButton, 15);
+        loginButton.setPreferredSize(new Dimension(150, 30));
         gbc.gridx = 1;
         gbc.gridy = 5;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
         gbc.insets = new Insets(15, 8, 30, 8);
+        buttonPanel.add(loginButton);
         gbc.gridwidth = 1; // Reset
         gbc.insets = new Insets(8, 8, 8, 8); // Reset
         formPanel.add(buttonPanel, gbc);
@@ -136,7 +137,7 @@ public class LoginPanel extends JPanel {
         registerPromptLabel = new JLabel("Don't have an account?");
         styleLabel(registerPromptLabel);
         registrationButton = new JButton("Sign Up!");
-        styleButton(registrationButton,  13); // Style sign up button
+        styleButton(registrationButton,  13);
         registerPanel.add(registerPromptLabel);
         registerPanel.add(registrationButton);
         gbc.gridx = 0;
@@ -274,7 +275,6 @@ public class LoginPanel extends JPanel {
         button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
         button.setForeground(TEXT_COLOR);
         button.setFocusPainted(false);
-        // TODO: Add hover effect listener
     }
 
     /**

@@ -199,7 +199,7 @@ public class MainApplicationPanel {
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         filterPanel.setOpaque(false);
         filterButton = new JButton("Filters");
-        styleButton(filterButton, BUTTON_BACKGROUND_COLOR, TEXT_COLOR, 13);
+        styleButton(filterButton, 13);
         filterButton.setToolTipText("Apply filters to listings");
 
         filterButton.addActionListener(e -> {
@@ -426,7 +426,7 @@ public class MainApplicationPanel {
         welcomeLabel = new JLabel("Welcome, " + username);
         welcomeLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         logoutButton = new JButton("Logout");
-        styleButton(logoutButton, BACKGROUND_COLOR, TEXT_COLOR, 13);
+        styleButton(logoutButton, 14);
         logoutButton.addActionListener(e -> mainWindow.handleLogout());
         authAreaPanel.add(welcomeLabel);
         authAreaPanel.add(Box.createRigidArea(new Dimension(10, 0)));
@@ -439,11 +439,11 @@ public class MainApplicationPanel {
     public void showLoggedOutState() {
         authAreaPanel.removeAll();
         signUpButton = new JButton("Sign Up");
-        styleButton(signUpButton, BACKGROUND_COLOR, TEXT_COLOR, 14);
+        styleButton(signUpButton, 14);
         signUpButton.setPreferredSize(new Dimension(90, 35));
 
         loginButton = new JButton("Login");
-        styleButton(loginButton, BACKGROUND_COLOR, TEXT_COLOR, 14);
+        styleButton(loginButton, 14);
         loginButton.setPreferredSize(new Dimension(90, 35));
 
 
@@ -513,10 +513,9 @@ public class MainApplicationPanel {
     /**
      * Helper to style JButtons consistently.
      */
-    private void styleButton(JButton button, Color bgColor, Color fgColor, int fontSize) {
+    private void styleButton(JButton button, int fontSize) {
         button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
-        button.setBackground(bgColor);
-        button.setForeground(fgColor);
+        button.setForeground(TEXT_COLOR);
         button.setFocusPainted(false);
     }
 

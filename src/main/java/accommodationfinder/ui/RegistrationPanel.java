@@ -38,7 +38,7 @@ public class RegistrationPanel extends JPanel {
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topPanel.setOpaque(false);
         backButton = new JButton("<- Back to Main View");
-        styleButton(backButton, 13);
+        styleButton(backButton, 15);
         topPanel.add(backButton);
         add(topPanel, BorderLayout.NORTH);
 

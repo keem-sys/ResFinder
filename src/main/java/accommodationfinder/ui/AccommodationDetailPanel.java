@@ -109,7 +109,7 @@ public class AccommodationDetailPanel extends JPanel {
         topPanel.setOpaque(false);
 
         JButton backButton = new JButton("<- Back to Main View");
-        styleButton(backButton, BUTTON_BACKGROUND_COLOR, TEXT_COLOR, 13);
+        styleButton(backButton, 14);
         backButton.addActionListener(e -> mainWindow.showMainApplicationView());
         topPanel.add(backButton, BorderLayout.WEST);
 
@@ -149,9 +149,9 @@ public class AccommodationDetailPanel extends JPanel {
         JPanel imageNavPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
         imageNavPanel.setOpaque(false);
         prevImageButton = new JButton("< Prev");
-        styleButton(prevImageButton, BACKGROUND_COLOR, TEXT_COLOR, 13);
+        styleButton(prevImageButton, 13);
         nextImageButton = new JButton("Next >");
-        styleButton(nextImageButton, BACKGROUND_COLOR, TEXT_COLOR, 13);
+        styleButton(nextImageButton, 13);
         imageCountLabel = new JLabel("Image 0 of 0");
         imageCountLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
 
@@ -361,7 +361,7 @@ public class AccommodationDetailPanel extends JPanel {
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         sendMessageButton = new JButton("Send Message");
-        styleButton(sendMessageButton, BUTTON_BACKGROUND_COLOR, TEXT_COLOR, 12);
+        styleButton(sendMessageButton, 12);
         sendMessageButton.addActionListener(e -> handleSendMessage());
         contactPanel.add(sendMessageButton, gbc);
 
@@ -697,13 +697,10 @@ public class AccommodationDetailPanel extends JPanel {
             case OTHER -> "";
         };
     }
-    /**
-     * Helper to style JButtons consistently.
-     */
-    private void styleButton(JButton button, Color bgColor, Color fgColor, int fontSize) {
-        button.setFont(new Font("SansSerif", Font.PLAIN, fontSize));
-        button.setBackground(bgColor);
-        button.setForeground(fgColor);
+
+    private void styleButton(JButton button, int fontSize) {
+        button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
+        button.setForeground(TEXT_COLOR);
         button.setFocusPainted(false);
     }
 
