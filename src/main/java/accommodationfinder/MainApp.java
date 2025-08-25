@@ -11,7 +11,7 @@ public class MainApp {
         try {
             UIManager.setLookAndFeel(new FlatLightLaf());
             UIManager.put("Button.arc", 8);
-            UIManager.put("Component.focusWith",1);
+            UIManager.put("Component.focusWidth",1);
             UIManager.put("TextComponent.arc",6);
         } catch (Exception e) {
             // Fallback to system L&F if FlatLaf fails (e.g., missing JAR)

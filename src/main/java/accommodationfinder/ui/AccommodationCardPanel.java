@@ -37,7 +37,6 @@ public class AccommodationCardPanel extends JPanel {
         this.accommodation = accommodation;
         this.mainWindow = mainWindow;
 
-
         initComponents();
     }
 

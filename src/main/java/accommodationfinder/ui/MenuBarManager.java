@@ -125,4 +125,3 @@ public class MenuBarManager {
         menuItem.setMargin(new Insets(5, 5, 5, 5));
     }
 }
-
