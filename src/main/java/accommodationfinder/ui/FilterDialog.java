@@ -33,7 +33,7 @@ public class FilterDialog extends JDialog {
     private JButton cancelButton;
 
     private static final Color DIALOG_BACKGROUND_COLOR = new Color(245, 245, 245);
-    private static final Color SECTION_BORDER_COLOR = Color.LIGHT_GRAY;
+    private static final Color TEXT_COLOR = new Color(50, 50, 50);
     private static final Font LABEL_FONT = new Font("SansSerif", Font.PLAIN, 13);
     private static final Font FIELD_FONT = new Font("SansSerif", Font.PLAIN, 13);
 
@@ -61,7 +61,6 @@ public class FilterDialog extends JDialog {
         mainFilterPanel.setLayout(new BoxLayout(mainFilterPanel, BoxLayout.Y_AXIS));
         mainFilterPanel.setOpaque(false);
 
-
         // Accommodation Type Section
         typeCheckBoxes = new ArrayList<>();
         typeCheckboxesPanel = new JPanel(new GridLayout(0, 2, 5, 5));
@@ -86,13 +85,11 @@ public class FilterDialog extends JDialog {
         minPriceField = new JTextField(8);
         minPriceField.setFont(FIELD_FONT);
         pricePanel.add(minPriceField);
-        pricePanel.add(Box.createHorizontalStrut(10));
         pricePanel.add(new JLabel("Max:"));
         maxPriceField = new JTextField(8);
         maxPriceField.setFont(FIELD_FONT);
         pricePanel.add(maxPriceField);
         mainFilterPanel.add(pricePanel);
-        mainFilterPanel.add(Box.createVerticalStrut(15));
 
         // Rooms Section
         JPanel roomsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
@@ -163,10 +160,9 @@ public class FilterDialog extends JDialog {
 
 
     private TitledBorder createTitledSectionBorder(String title) {
-        TitledBorder titledBorder  = BorderFactory.createTitledBorder(BorderFactory.createLineBorder
-                (SECTION_BORDER_COLOR), title);
-        titledBorder.setTitleFont(LABEL_FONT.deriveFont(Font.BOLD));
-        return titledBorder;
+        return BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor")), // Use FlatLaf border color
+                title, TitledBorder.LEFT, TitledBorder.TOP, LABEL_FONT, TEXT_COLOR);
     }
 
     private static String capitalize(String str) {

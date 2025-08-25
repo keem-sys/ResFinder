@@ -31,7 +31,7 @@ public class ContactPanel extends JPanel {
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topPanel.setOpaque(false);
         JButton backButton = new JButton("< Back to Main View");
-        styleButton(backButton, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 13);
+        styleButton(backButton, 15);
         backButton.addActionListener(e -> this.mainWindow.showMainApplicationView());
         topPanel.add(backButton);
         add(topPanel, BorderLayout.NORTH);
@@ -162,7 +162,7 @@ public class ContactPanel extends JPanel {
         gbc.anchor = GridBagConstraints.EAST;
         gbc.weighty = 0;
         btnSend = new JButton("Send");
-        styleButton(btnSend, FIELD_BACKGROUND_COLOR, TEXT_COLOR, 12);
+        styleButton(btnSend, 13);
         btnSend.addActionListener(e -> sendMessage());
         panel.add(btnSend, gbc);
 
@@ -208,10 +208,9 @@ public class ContactPanel extends JPanel {
         ));
     }
 
-    private void styleButton(JButton button, Color bgColor, Color fgColor, int fontSize) {
+    private void styleButton(JButton button, int fontSize) {
         button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
-        button.setBackground(bgColor);
-        button.setForeground(fgColor);
+        button.setForeground(TEXT_COLOR);
         button.setFocusPainted(false);
     }
 
