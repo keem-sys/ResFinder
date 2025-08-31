@@ -1,6 +1,7 @@
 package accommodationfinder.ui;
 
 import accommodationfinder.listing.Accommodation;
+import accommodationfinder.map.MapManager;
 import accommodationfinder.service.AccommodationService;
 
 import javax.imageio.IIOException;
@@ -21,85 +22,52 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
-import org.jxmapviewer.JXMapViewer;
-import org.jxmapviewer.OSMTileFactoryInfo;
-import org.jxmapviewer.input.CenterMapListener;
-import org.jxmapviewer.input.PanKeyListener;
-import org.jxmapviewer.input.PanMouseInputListener;
-import org.jxmapviewer.input.ZoomMouseWheelListenerCursor;
-import org.jxmapviewer.viewer.*;
-
-import org.jxmapviewer.painter.CompoundPainter;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import java.awt.geom.Point2D;
-import java.awt.BasicStroke;
 
 public class AccommodationDetailPanel extends JPanel {
 
     private final AccommodationService accommodationService;
     private final MainWindow mainWindow;
     private final Long accommodationId;
-    private static final String NOMINATIM_API_URL = "https://nominatim.openstreetmap.org/search";
-    private GeoPosition accommodationLocation = null; // Cache the geocoded location
+    private final MapManager mapManager;
+
 
     // UI Components
     private JLabel titleLabel;
     private JLabel imageLabel;
     private JTextArea detailsTextArea;
-    private JTabbedPane imageContainerPanel;
     private JButton prevImageButton;
     private JButton nextImageButton;
     private JLabel imageCountLabel;
-
-    // Contact Form Components
     private JTextField contactNameField;
     private JTextField contactEmailField;
     private JTextField contactPhoneField;
     private JButton sendMessageButton;
     private JLabel listerInfoLabel;
-
-    // New Tab Components
     private JTabbedPane tabbedPane;
     private JPanel imagePanel;
     private JPanel locationPanel;
     private JLabel mapLabel;
 
-    // State for Image Gallery
+    // State
     private List<String> currentImageUrls;
     private int currentImageIndex = 0;
-
-    // Current accommodation for map display
     private Accommodation currentAccommodation;
 
-    // Formatters
-    private static final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(
-            Locale.forLanguageTag("en-ZA") );
+    // Formatters & Constants
+    private static final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("en-ZA"));
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy 'at' HH:mm");
-
-    // Constants
     private static final Color BACKGROUND_COLOR = new Color(253, 251, 245);
     private static final Color PLACEHOLDER_COLOR = new Color(230, 230, 230);
-    private static final Color BUTTON_BACKGROUND_COLOR = new Color(230, 230, 230);
     private static final Color TEXT_COLOR = new Color(50, 50, 50);
     private static final int IMG_WIDTH = 550;
     private static final int IMG_HEIGHT = 400;
 
-    public AccommodationDetailPanel(AccommodationService accommodationService, MainWindow mainWindow, Long accommodationId) {
+    public AccommodationDetailPanel(AccommodationService accommodationService, MainWindow mainWindow,
+                                    Long accommodationId) {
         this.accommodationService = accommodationService;
         this.mainWindow = mainWindow;
         this.accommodationId = accommodationId;
+        this.mapManager = new MapManager();
 
         setLayout(new BorderLayout(10, 10));
         setBorder(new EmptyBorder(15, 25, 15, 25));
@@ -136,7 +104,7 @@ public class AccommodationDetailPanel extends JPanel {
 
         // Create tabbed pane for Image/Location
         tabbedPane = new JTabbedPane();
-        tabbedPane.setPreferredSize(new Dimension(IMG_WIDTH, IMG_HEIGHT + 40));
+        tabbedPane.setPreferredSize(new Dimension(IMG_WIDTH, IMG_HEIGHT + 70));
         tabbedPane.setBackground(BACKGROUND_COLOR);
 
         // Image Panel (original image gallery)
@@ -169,7 +137,7 @@ public class AccommodationDetailPanel extends JPanel {
         imageNavPanel.add(nextImageButton);
         imagePanel.add(imageNavPanel, BorderLayout.SOUTH);
 
-        // Location Panel (interactive map)
+        // Location Panel
         locationPanel = new JPanel(new BorderLayout());
         locationPanel.setBackground(BACKGROUND_COLOR);
 
@@ -185,11 +153,7 @@ public class AccommodationDetailPanel extends JPanel {
         // Add tabs
         tabbedPane.addTab("Images", imagePanel);
         tabbedPane.addTab("Location", locationPanel);
-
-        // Set the original imageContainerPanel to be the tabbedPane
-        imageContainerPanel = tabbedPane;
-
-        leftPanel.add(imageContainerPanel, BorderLayout.NORTH);
+        leftPanel.add(tabbedPane, BorderLayout.NORTH);
 
         // Details Area
         detailsTextArea = new JTextArea("Loading details...");
@@ -220,174 +184,65 @@ public class AccommodationDetailPanel extends JPanel {
 
         // Add tab change listener to load map when Location tab is selected
         tabbedPane.addChangeListener(e -> {
-            if (tabbedPane.getSelectedIndex() == 1) { // Location tab
-                loadInteractiveMap();
+            if (tabbedPane.getSelectedComponent() == locationPanel) {
+                if (locationPanel.getComponent(0) == mapLabel) {
+                    loadInteractiveMap();
+                }
             }
         });
     }
+
     private void loadInteractiveMap() {
         if (currentAccommodation == null) {
             mapLabel.setText("Accommodation data not loaded");
             return;
         }
 
-        SwingWorker<JXMapViewer, Void> mapLoader = new SwingWorker<>() {
+        mapLabel.setText("Loading map...");
+
+        SwingWorker<JPanel, Void> mapLoader = new SwingWorker<>() {
             @Override
-            protected JXMapViewer doInBackground() throws Exception {
-                // Create map
-                TileFactoryInfo info = new OSMTileFactoryInfo();
-                DefaultTileFactory tileFactory = new DefaultTileFactory(info);
-                JXMapViewer mapViewer = new JXMapViewer();
-                mapViewer.setTileFactory(tileFactory);
+            protected JPanel doInBackground() throws Exception {
+                // --- DELEGATE all map creation to the MapManager ---
+                Component mapViewer = mapManager.createMapViewer(currentAccommodation);
 
-                // Geocode the accommodation address if not already cached
-                if (accommodationLocation == null) {
-                    accommodationLocation = geocodeAddress(currentAccommodation);
-                }
+                // --- Build the final panel to display ---
+                JPanel mapContainer = new JPanel(new BorderLayout());
+                mapContainer.add(mapViewer, BorderLayout.CENTER);
 
-                // Use geocoded location or fallback to Cape Town
-                GeoPosition location = accommodationLocation != null ?
-                        accommodationLocation : new GeoPosition(-33.9249, 18.4241);
+                // Address info panel
+                JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                infoPanel.setOpaque(false);
+                String address = currentAccommodation.getAddress() + ", " + currentAccommodation.getCity();
+                JLabel addressLabel = new JLabel("📍 " + address);
+                addressLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
+                infoPanel.add(addressLabel);
+                mapContainer.add(infoPanel, BorderLayout.NORTH);
 
-                mapViewer.setZoom(4); // Zoom in more to see the pin clearly
-                mapViewer.setAddressLocation(location);
-
-                // Create waypoint (pin) for the accommodation
-                Waypoint waypoint = new DefaultWaypoint(location);
-                Set<Waypoint> waypoints = new HashSet<>(Arrays.asList(waypoint));
-
-                // Create waypoint painter (this draws the pin)
-                RedWaypointPainter waypointPainter = new RedWaypointPainter();
-                waypointPainter.setWaypoints(waypoints);
-
-                // Set up painters
-                CompoundPainter<JXMapViewer> painter = new CompoundPainter<JXMapViewer>(waypointPainter);
-                mapViewer.setOverlayPainter(painter);
-
-                // Add mouse listeners
-                PanMouseInputListener mia = new PanMouseInputListener(mapViewer);
-                mapViewer.addMouseListener(mia);
-                mapViewer.addMouseMotionListener(mia);
-                mapViewer.addMouseListener(new CenterMapListener(mapViewer));
-                mapViewer.addMouseWheelListener(new ZoomMouseWheelListenerCursor(mapViewer));
-                mapViewer.addKeyListener(new PanKeyListener(mapViewer));
-
-                return mapViewer;
+                return mapContainer;
             }
 
             @Override
             protected void done() {
                 try {
-                    JXMapViewer mapViewer = get();
-
-                    JPanel mapContainer = new JPanel(new BorderLayout());
-                    mapContainer.setPreferredSize(new Dimension(IMG_WIDTH, IMG_HEIGHT));
-                    mapContainer.add(mapViewer, BorderLayout.CENTER);
-
-                    // Address info panel
-                    JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-                    infoPanel.setOpaque(false);
-
-                    String address = currentAccommodation.getAddress() + ", " + currentAccommodation.getCity();
-                    if (currentAccommodation.getPostalCode() != null) {
-                        address += ", " + currentAccommodation.getPostalCode();
-                    }
-
-                    // Add geocoding status indicator
-                    String locationStatus = accommodationLocation != null ? "📍 " : "📍 (approx.) ";
-                    JLabel addressLabel = new JLabel(locationStatus + address);
-                    addressLabel.setFont(new Font("SansSerif", Font.BOLD, 11));
-                    infoPanel.add(addressLabel);
-
-                    mapContainer.add(infoPanel, BorderLayout.NORTH);
-
+                    JPanel mapContainer = get();
                     locationPanel.remove(mapLabel);
                     locationPanel.add(mapContainer, BorderLayout.CENTER);
                     locationPanel.revalidate();
                     locationPanel.repaint();
-
                 } catch (Exception e) {
                     e.printStackTrace();
-                    mapLabel.setText("Error loading map: " + e.getMessage());
+                    locationPanel.remove(mapLabel); // Remove loading label
+                    JLabel errorLabel = new JLabel("Error loading map: " + e.getMessage());
+                    errorLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                    locationPanel.add(errorLabel);
+                    locationPanel.revalidate();
+                    locationPanel.repaint();
                 }
             }
         };
 
         mapLoader.execute();
-    }
-
-    private GeoPosition geocodeAddress(Accommodation accommodation) {
-        try {
-            // Build the address string
-            StringBuilder addressBuilder = new StringBuilder();
-            addressBuilder.append(accommodation.getAddress());
-            addressBuilder.append(", ").append(accommodation.getCity());
-            if (accommodation.getPostalCode() != null && !accommodation.getPostalCode().trim().isEmpty()) {
-                addressBuilder.append(", ").append(accommodation.getPostalCode());
-            }
-            addressBuilder.append(", South Africa"); // Assuming all addresses are in South Africa
-
-            String fullAddress = addressBuilder.toString();
-            System.out.println("Geocoding address: " + fullAddress);
-
-            // URL encode the address
-            String encodedAddress = URLEncoder.encode(fullAddress, StandardCharsets.UTF_8);
-
-            // Build the API request URL
-            String requestUrl = NOMINATIM_API_URL + "?q=" + encodedAddress +
-                    "&format=json&limit=1&countrycodes=za"; // Limit to South Africa
-
-            // Make HTTP request
-            URL url = new URL(requestUrl);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("User-Agent", "AccommodationFinder/1.0");
-            connection.setConnectTimeout(5000); // 5 second timeout
-            connection.setReadTimeout(10000); // 10 second timeout
-
-            int responseCode = connection.getResponseCode();
-            if (responseCode == 200) {
-                try (BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(connection.getInputStream()))) {
-
-                    StringBuilder response = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        response.append(line);
-                    }
-
-                    // Parse JSON response manually
-                    String jsonResponse = response.toString();
-
-                    // Simple regex-based JSON parsing for lat/lon
-                    Pattern latPattern = Pattern.compile("\"lat\"\\s*:\\s*\"?([+-]?\\d*\\.?\\d+)\"?");
-                    Pattern lonPattern = Pattern.compile("\"lon\"\\s*:\\s*\"?([+-]?\\d*\\.?\\d+)\"?");
-
-                    Matcher latMatcher = latPattern.matcher(jsonResponse);
-                    Matcher lonMatcher = lonPattern.matcher(jsonResponse);
-
-                    if (latMatcher.find() && lonMatcher.find()) {
-                        try {
-                            double lat = Double.parseDouble(latMatcher.group(1));
-                            double lon = Double.parseDouble(lonMatcher.group(1));
-
-                            System.out.println("Geocoded to: " + lat + ", " + lon);
-                            return new GeoPosition(lat, lon);
-                        } catch (NumberFormatException e) {
-                            System.err.println("Error parsing coordinates: " + e.getMessage());
-                        }
-                    }
-                }
-            } else {
-                System.err.println("Geocoding API returned status code: " + responseCode);
-            }
-
-        } catch (Exception e) {
-            System.err.println("Error geocoding address: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        return null; // Return null if geocoding fails
     }
 
     private JPanel createContactPanel() {
@@ -485,7 +340,7 @@ public class AccommodationDetailPanel extends JPanel {
     private void updateSendButtonState() {
         boolean enabled = !contactNameField.getText().trim().isEmpty()
                 && !contactEmailField.getText().trim().isEmpty();
-        // Basic email format check
+        // email format check
         enabled = enabled && contactEmailField.getText().trim().contains("@");
         sendMessageButton.setEnabled(enabled);
     }
@@ -540,11 +395,11 @@ public class AccommodationDetailPanel extends JPanel {
                 try {
                     Accommodation accommodation = get();
                     if (accommodation != null) {
-                        currentAccommodation = accommodation; // Store for map usage
+                        currentAccommodation = accommodation;
                         populateUI(accommodation);
-                        currentImageUrls = accommodation.getImageUrls(); // Store URLs
+                        currentImageUrls = accommodation.getImageUrls();
                         currentImageIndex = 0;
-                        showImageAtIndex(currentImageIndex); // Load the first image
+                        showImageAtIndex(currentImageIndex);
                     } else {
                         displayError("Accommodation Not Found",
                                 "The requested accommodation listing could not be found.");
@@ -583,20 +438,6 @@ public class AccommodationDetailPanel extends JPanel {
         imageLabel.setIcon(null);
         JOptionPane.showMessageDialog(AccommodationDetailPanel.this,
                 message, title, JOptionPane.ERROR_MESSAGE);
-    }
-
-    // Optional: Method to handle multiple locations if you want to show multiple pins
-    private Set<Waypoint> createWaypointsForMultipleLocations(List<Accommodation> accommodations) {
-        Set<Waypoint> waypoints = new HashSet<>();
-
-        for (Accommodation acc : accommodations) {
-            GeoPosition location = geocodeAddress(acc);
-            if (location != null) {
-                waypoints.add(new DefaultWaypoint(location));
-            }
-        }
-
-        return waypoints;
     }
 
 
@@ -807,54 +648,7 @@ public class AccommodationDetailPanel extends JPanel {
         button.setFocusPainted(false);
     }
 
-    private static class RedWaypointPainter extends WaypointPainter<Waypoint> {
 
-        public RedWaypointPainter() {
-            setRenderer(new RedWaypointRenderer());
-        }
-
-        private static class RedWaypointRenderer implements WaypointRenderer<Waypoint> {
-            @Override
-            public void paintWaypoint(Graphics2D g, JXMapViewer map, Waypoint waypoint) {
-                Point2D point = map.getTileFactory().geoToPixel(waypoint.getPosition(), map.getZoom());
-
-                int x = (int) point.getX();
-                int y = (int) point.getY();
-
-                // Draw pin shape (teardrop)
-                int pinWidth = 32;
-                int pinHeight = 48;
-                int pinX = x - pinWidth/2;
-                int pinY = y - pinHeight;
-
-                // Draw shadow
-                g.setColor(new Color(0, 0, 0, 50));
-                g.fillOval(pinX + 2, pinY + 2, pinWidth, pinWidth);
-                int[] shadowXPoints = {x + 2, pinX + 2, pinX + pinWidth + 2};
-                int[] shadowYPoints = {y + 2, pinY + pinWidth/2 + 2, pinY + pinWidth/2 + 2};
-                g.fillPolygon(shadowXPoints, shadowYPoints, 3);
-
-                // Draw red pin body (circle)
-                g.setColor(Color.RED);
-                g.fillOval(pinX, pinY, pinWidth, pinWidth);
-
-                // Draw pin point (triangle)
-                int[] xPoints = {x, pinX, pinX + pinWidth};
-                int[] yPoints = {y, pinY + pinWidth/2, pinY + pinWidth/2};
-                g.fillPolygon(xPoints, yPoints, 3);
-
-                // Add white border to circle
-                g.setColor(Color.WHITE);
-                g.setStroke(new BasicStroke(3));
-                g.drawOval(pinX, pinY, pinWidth, pinWidth);
-
-                // Add center dot
-                g.setColor(Color.WHITE);
-                g.fillOval(x - 6, pinY + pinWidth/2 - 6, 12, 12);
-
-            }
-        }
-    }
 
     // Method to return this panel for MainWindow
     public JPanel getDetailPanel() {
