@@ -11,9 +11,13 @@ public class ContactPanel extends JPanel {
     private final MainWindow mainWindow;
 
     // UI Components
-    private JTextField txtFirstName, txtLastName, txtEmail;
+    private JTextField txtFirstName, txtLastName, txtEmail, txtSubject;
     private JTextArea txtMessage;
     private JButton btnSend;
+    private JComboBox<String> cmbCategory;
+    private JRadioButton radioStudent, radioLandlord;
+    private ButtonGroup userRoleGroup;
+
 
     private static final Color BACKGROUND_COLOR = new Color(253, 251, 245);
     private static final Color FIELD_BACKGROUND_COLOR = new Color(230, 230, 230);
@@ -90,6 +94,30 @@ public class ContactPanel extends JPanel {
         panel.add(lblSubTitle);
         panel.add(Box.createVerticalStrut(20));
         panel.add(lblDescription);
+        panel.add(Box.createVerticalStrut(30));
+
+        // Alternative Contact Info
+        JLabel lblAltContact = new JLabel("<html><div style='width:300px; text-align:left;'>" +
+                "<b>Alternative Contact:</b><br>" +
+                "For direct inquiries, you can also email us at: support@resfinder.app" +
+                "</div></html>");
+        lblAltContact.setFont(new Font("SansSerif", Font.PLAIN, 15));
+        lblAltContact.setForeground(TEXT_COLOR);
+        lblAltContact.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(lblAltContact);
+
+        panel.add(Box.createVerticalStrut(15));
+
+        //FAQ
+        JLabel lblFaq = new JLabel("<html><div style='width:300px; text-align:left;'>" +
+                "Have a common question? Check out our <b>FAQ</b> section first!" +
+                "</div></html>");
+        lblFaq.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        lblFaq.setForeground(TEXT_COLOR);
+        lblFaq.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(lblFaq);
+
+
         panel.add(Box.createVerticalGlue());
 
         return panel;
@@ -105,16 +133,52 @@ public class ContactPanel extends JPanel {
         );
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(8, 10, 8, 10);
         gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        // User Role
         gbc.gridx = 0; gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        panel.add(new JLabel("I am a:"), gbc);
+
+        gbc.gridy = 1;
+        JPanel radioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        radioPanel.setOpaque(false);
+        radioStudent = new JRadioButton("Student");
+        radioStudent.setOpaque(false);
+        radioLandlord = new JRadioButton("Landlord / Property Manager");
+        radioLandlord.setOpaque(false);
+        userRoleGroup = new ButtonGroup();
+        userRoleGroup.add(radioStudent);
+        userRoleGroup.add(radioLandlord);
+        radioStudent.setSelected(true);
+        radioPanel.add(radioStudent);
+        radioPanel.add(Box.createHorizontalStrut(10));
+        radioPanel.add(radioLandlord);
+        panel.add(radioPanel, gbc);
+
+        // Category
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        panel.add(new JLabel("Category:"), gbc);
+
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        String[] categories = {"General Inquiry", "Technical Support / Report a Bug",
+                "Feedback / Suggestion", "Report a Listing", "Landlord / Partnership Inquiry"};
+        cmbCategory = new JComboBox<>(categories);
+        cmbCategory.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        panel.add(cmbCategory, gbc);
+
+        // First Name / Last Name
+        gbc.gridy = 4;
+        gbc.gridwidth = 1;
         panel.add(new JLabel("First Name:"), gbc);
         gbc.gridx = 1;
         panel.add(new JLabel("Last Name:"), gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0; gbc.gridy = 5;
         gbc.weightx = 0.5;
         txtFirstName = new JTextField(15);
         styleTextField(txtFirstName);
@@ -125,27 +189,37 @@ public class ContactPanel extends JPanel {
         panel.add(txtLastName, gbc);
 
         // Email
-        gbc.gridx = 0; gbc.gridy = 2;
-        gbc.fill = GridBagConstraints.NONE;
+        gbc.gridx = 0; gbc.gridy = 6;
         gbc.weightx = 0;
         panel.add(new JLabel("Email:"), gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3;
+        gbc.gridx = 0; gbc.gridy = 7;
         gbc.gridwidth = 2;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
         txtEmail = new JTextField();
         styleTextField(txtEmail);
         panel.add(txtEmail, gbc);
 
-        // Message
-        gbc.gridx = 0; gbc.gridy = 4;
+        // Subject
+        gbc.gridx = 0; gbc.gridy = 8;
         gbc.gridwidth = 1;
-        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        panel.add(new JLabel("Subject:"), gbc);
+
+        gbc.gridx = 0; gbc.gridy = 9;
+        gbc.gridwidth = 2;
+        gbc.weightx = 1.0;
+        txtSubject = new JTextField();
+        styleTextField(txtSubject);
+        panel.add(txtSubject, gbc);
+
+        // Message
+        gbc.gridx = 0; gbc.gridy = 10;
+        gbc.gridwidth = 1;
         gbc.weightx = 0;
         panel.add(new JLabel("Message:"), gbc);
 
-        gbc.gridx = 0; gbc.gridy = 5;
+        gbc.gridx = 0; gbc.gridy = 11;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1.0;
@@ -156,7 +230,7 @@ public class ContactPanel extends JPanel {
         panel.add(messageScrollPane, gbc);
 
         // Send Button
-        gbc.gridx = 0; gbc.gridy = 6;
+        gbc.gridx = 0; gbc.gridy = 12;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.EAST;
@@ -171,20 +245,63 @@ public class ContactPanel extends JPanel {
 
     private void sendMessage() {
         if (txtFirstName.getText().trim().isEmpty() || txtLastName.getText().trim().isEmpty() ||
-                txtEmail.getText().trim().isEmpty() || txtMessage.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill in all fields before sending.",
+                txtEmail.getText().trim().isEmpty() || txtSubject.getText().trim().isEmpty() ||
+                txtMessage.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill in all required fields before sending.",
                     "Input Error", JOptionPane.ERROR_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Message sent successfully!",
-                    "Message Sent", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
 
-            txtFirstName.setText("");
-            txtLastName.setText("");
-            txtEmail.setText("");
-            txtMessage.setText("");
-            txtFirstName.requestFocusInWindow();
+        if (cmbCategory.getSelectedIndex() == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a category.",
+                    "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // If validation passes
+        JOptionPane.showMessageDialog(this, "Thank you! Your message has been sent successfully!",
+                "Message Sent", JOptionPane.INFORMATION_MESSAGE);
+
+        // Clear all fields
+        txtFirstName.setText("");
+        txtLastName.setText("");
+        txtEmail.setText("");
+        txtSubject.setText("");
+        txtMessage.setText("");
+        cmbCategory.setSelectedIndex(0);
+        radioStudent.setSelected(true);
+
+        // Reset editable status in case they were pre-filled for a logged-in user
+        txtFirstName.setEditable(true);
+        txtLastName.setEditable(true);
+        txtEmail.setEditable(true);
+
+        txtFirstName.requestFocusInWindow();
+    }
+
+    /**
+     * Populates the form with user details if a user is logged in.
+     * Also makes the fields non-editable to prevent changes.
+     * @param fullName The user's full name.
+     * @param email    The user's email address.
+     */
+    public void setUserDetails(String fullName, String email) {
+        if (fullName != null) {
+            // split for first/last name
+            String[] names = fullName.split(" ", 2);
+            txtFirstName.setText(names[0]);
+            txtFirstName.setEditable(false);
+            if (names.length > 1) {
+                txtLastName.setText(names[1]);
+                txtLastName.setEditable(false);
+            }
+        }
+        if (email != null) {
+            txtEmail.setText(email);
+            txtEmail.setEditable(false);
         }
     }
+
 
     private void styleTextField(JTextField field) {
         field.setFont(new Font("SansSerif", Font.PLAIN, 14));
