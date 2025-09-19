@@ -22,6 +22,7 @@ public class MainWindow extends JFrame {
     private LoginPanel loginPanel;
     private MainApplicationPanel mainApplicationPanel;
     private AccommodationDetailPanel accommodationDetailPanel;
+    private SavedListingsPanel savedListingsPanel;
     private ContactPanel contactPanel;
     private FaqPanel faqPanel;
 
@@ -55,6 +56,7 @@ public class MainWindow extends JFrame {
             this.mainApplicationPanel = new MainApplicationPanel(accommodationService, userService, this);
             this.registrationPanel = new RegistrationPanel(userService, this);
             this.loginPanel = new LoginPanel(userService, this);
+            this.savedListingsPanel = new SavedListingsPanel(this);
             this.contactPanel = new ContactPanel(this);
             this.faqPanel = new FaqPanel(this);
 
@@ -186,6 +188,17 @@ public class MainWindow extends JFrame {
         UserProfileDialog userProfileDialog = new UserProfileDialog(this, userService, currentUser);
         userProfileDialog.setVisible(true);
 
+    }
+
+    public void showSavedListings() {
+        if (savedListingsPanel != null) {
+            savedListingsPanel.loadSavedListings();
+        }
+
+        setContentPane(savedListingsPanel);
+        revalidate();
+        repaint();
+        System.out.println("Switched to Saved Listings Panel");
     }
 
     public void switchToContactPanel() {

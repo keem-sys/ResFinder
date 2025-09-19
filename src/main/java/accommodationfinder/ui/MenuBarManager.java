@@ -12,7 +12,7 @@ public class MenuBarManager {
     private JMenuItem profileMenuItem;
     private JMenuItem logInMenuItem;
     private JMenuItem signUpMenuItem;
-    private JMenuItem faqMenuItem;
+    private JMenuItem savedListingsMenuItem;
 
     public MenuBarManager(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
@@ -73,11 +73,15 @@ public class MenuBarManager {
         accountMenu.add(signUpMenuItem);
 
         accountMenu.addSeparator();
-
         profileMenuItem = new JMenuItem("My Profile");
         styleMenuItem(profileMenuItem);
         profileMenuItem.addActionListener(e -> mainWindow.showUserProfileDialog());
         accountMenu.add(profileMenuItem);
+
+        savedListingsMenuItem = new JMenuItem("My Saved Listings");
+        styleMenuItem(savedListingsMenuItem);
+        savedListingsMenuItem.addActionListener(e -> mainWindow.showSavedListings());
+        accountMenu.add(savedListingsMenuItem);
 
         // Help Menu
         JMenuItem contactMenuItem = new JMenuItem("Contact Us");
@@ -85,7 +89,7 @@ public class MenuBarManager {
         contactMenuItem.addActionListener(e -> mainWindow.switchToContactPanel());
         helpMenu.add(contactMenuItem);
 
-        faqMenuItem = new JMenuItem("View FAQ");
+        JMenuItem faqMenuItem = new JMenuItem("View FAQ");
         styleMenuItem(faqMenuItem);
         faqMenuItem.addActionListener(e -> mainWindow.switchToFaqPanel());
         helpMenu.add(faqMenuItem);
