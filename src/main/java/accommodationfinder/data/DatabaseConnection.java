@@ -127,7 +127,7 @@ public class DatabaseConnection {
         String createTableSQL = """
         CREATE TABLE IF NOT EXISTS SAVED_LISTINGS (
             user_id BIGINT NOT NULL,
-            accommodation_id BIGINT NOT NULL,  // Changed to BIGINT to match ACCOMMODATIONS.id
+            accommodation_id BIGINT NOT NULL, 
             saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (user_id, accommodation_id),
             FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE,

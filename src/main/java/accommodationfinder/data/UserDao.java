@@ -3,8 +3,6 @@ package accommodationfinder.data;
 import accommodationfinder.auth.User;
 
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class UserDao {
     private final DatabaseConnection dbConnection;

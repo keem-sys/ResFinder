@@ -233,7 +233,6 @@ public class UserService {
                 }
 
                 if (userId != null) {
-                    // Fetch user from DAO using the ID
                     return userDao.getUserById(userId);
                 } else {
                     System.err.println("User ID not found or invalid type in JWT claims.");
@@ -258,7 +257,6 @@ public class UserService {
         try {
             return argon2.verify(hashedPassword, plainTextPassword.toCharArray());
         } catch (Exception e) {
-            // Password verification failed
             System.err.println("Password verification error: " + e.getMessage());
             return false;
         }
@@ -274,7 +272,6 @@ public class UserService {
         char[] passwordChars = plainTextPassword.toCharArray();
 
         try {
-            // Hash password
             return argon2.hash(iterations, memory, parallelism, passwordChars);
         } finally {
             argon2.wipeArray(passwordChars);
