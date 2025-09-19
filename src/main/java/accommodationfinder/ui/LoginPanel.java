@@ -290,7 +290,6 @@ public class LoginPanel extends JPanel {
         });
     }
 
-    // Method needed by MainWindow to switch panels
     public JPanel getLoginPanel() {
         return this;
     }

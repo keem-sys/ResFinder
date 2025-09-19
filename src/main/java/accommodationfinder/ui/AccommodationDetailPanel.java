@@ -15,9 +15,9 @@ public class AccommodationDetailPanel extends JPanel {
 
     private final AccommodationService accommodationService;
     private final MainWindow mainWindow;
-    private final Long accommodationId;
     private final MapManager mapManager;
     private Accommodation currentAccommodation;
+    private Long currentAccommodationId;
 
 
     // UI Components
@@ -25,6 +25,7 @@ public class AccommodationDetailPanel extends JPanel {
     private JTextArea detailsTextArea;
     private JLabel mapLabel;
     private JPanel locationPanel;
+    private JTabbedPane tabbedPane;
 
 
     // Sub-Panels
@@ -41,10 +42,9 @@ public class AccommodationDetailPanel extends JPanel {
     private static final int IMG_HEIGHT = 400;
 
 
-    public AccommodationDetailPanel(AccommodationService accommodationService, MainWindow mainWindow, Long accommodationId) {
+    public AccommodationDetailPanel(AccommodationService accommodationService, MainWindow mainWindow) {
         this.accommodationService = accommodationService;
         this.mainWindow = mainWindow;
-        this.accommodationId = accommodationId;
         this.mapManager = new MapManager();
 
         setLayout(new BorderLayout(10, 10));
@@ -52,7 +52,6 @@ public class AccommodationDetailPanel extends JPanel {
         setBackground(BACKGROUND_COLOR);
 
         initComponents();
-        loadAccommodationDetails();
     }
 
     private void initComponents() {
@@ -76,7 +75,7 @@ public class AccommodationDetailPanel extends JPanel {
         leftPanel.setOpaque(false);
 
         imageGalleryPanel = new ImageGalleryPanel(IMG_WIDTH, IMG_HEIGHT);
-        contactListerPanel = new ContactListerPanel(accommodationId);
+        contactListerPanel = new ContactListerPanel();
 
         locationPanel = new JPanel(new BorderLayout());
         locationPanel.setBackground(BACKGROUND_COLOR);
@@ -85,7 +84,7 @@ public class AccommodationDetailPanel extends JPanel {
         mapLabel.setBackground(new Color(230, 230, 230));
         locationPanel.add(mapLabel, BorderLayout.CENTER);
 
-        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Images", imageGalleryPanel);
         tabbedPane.addTab("Location", locationPanel);
         leftPanel.add(tabbedPane, BorderLayout.NORTH);
@@ -108,12 +107,62 @@ public class AccommodationDetailPanel extends JPanel {
         add(centerContentPanel, BorderLayout.CENTER);
 
         tabbedPane.addChangeListener(e -> {
-            if (tabbedPane.getSelectedComponent() == locationPanel) {
-                if (locationPanel.getComponentCount() > 0 && locationPanel.getComponent(0) == mapLabel) {
+            if (tabbedPane.getSelectedIndex() == 1) {
+                if (locationPanel.getComponent(0) == mapLabel) {
                     loadInteractiveMap();
                 }
             }
         });
+    }
+
+    public void loadAccommodationDetails(Long accommodationId) {
+        this.currentAccommodationId = accommodationId;
+        resetUIForLoading();
+
+        SwingWorker<Accommodation, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Accommodation doInBackground() throws Exception {
+                return accommodationService.getListingById(currentAccommodationId);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    Accommodation accommodation = get();
+                    if (accommodation != null) {
+                        currentAccommodation = accommodation;
+                        populateUI(accommodation);
+                        imageGalleryPanel.setImageUrls(accommodation.getImageUrls());
+                        contactListerPanel.updatePanelInfo(accommodation.getId(), accommodation.getListedBy());
+                    } else {
+                        displayError("Accommodation Not Found", "The requested listing could not be found.");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    displayError("Error Loading", "An error occurred while loading details: " +
+                            e.getMessage());
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    private void resetUIForLoading() {
+        titleLabel.setText("Loading...");
+        detailsTextArea.setText("Loading details...");
+        detailsTextArea.setCaretPosition(0);
+        imageGalleryPanel.setImageUrls(null);
+        contactListerPanel.reset();
+
+        locationPanel.removeAll();
+        mapLabel = new JLabel("Select this tab to load the map", SwingConstants.CENTER);
+        mapLabel.setOpaque(true);
+        mapLabel.setBackground(new Color(230, 230, 230));
+        locationPanel.add(mapLabel, BorderLayout.CENTER);
+        tabbedPane.setSelectedIndex(0);
+
+        revalidate();
+        repaint();
     }
 
     private void loadInteractiveMap() {
@@ -167,35 +216,6 @@ public class AccommodationDetailPanel extends JPanel {
         mapLoader.execute();
     }
 
-    private void loadAccommodationDetails() {
-        SwingWorker<Accommodation, Void> worker = new SwingWorker<>() {
-            @Override
-            protected Accommodation doInBackground() throws Exception {
-                return accommodationService.getListingById(accommodationId);
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    Accommodation accommodation = get();
-                    if (accommodation != null) {
-                        currentAccommodation = accommodation;
-                        populateUI(accommodation);
-
-                        imageGalleryPanel.setImageUrls(accommodation.getImageUrls());
-                        contactListerPanel.setListerInfo(accommodation.getListedBy());
-
-                    } else {
-                        displayError("Accommodation Not Found", "The requested listing could not be found.");
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    displayError("Error Loading", "An error occurred while loading details: " + e.getMessage());
-                }
-            }
-        };
-        worker.execute();
-    }
 
     private void populateUI(Accommodation acc) {
         titleLabel.setText(acc.getTitle());

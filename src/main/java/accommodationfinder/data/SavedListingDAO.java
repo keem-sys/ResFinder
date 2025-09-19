@@ -130,8 +130,10 @@ public class SavedListingDAO {
                 rs.getBoolean("utilities_included"),
                 rs.getBoolean("parking_available"),
                 rs.getString("lease_term"),
-                rs.getTimestamp("available_from") != null ? rs.getTimestamp("available_from").toLocalDateTime() : null,
-                rs.getTimestamp("available_until") != null ? rs.getTimestamp("available_until").toLocalDateTime() : null,
+                rs.getTimestamp("available_from") != null ?
+                        rs.getTimestamp("available_from").toLocalDateTime() : null,
+                rs.getTimestamp("available_until") != null ?
+                        rs.getTimestamp("available_until").toLocalDateTime() : null,
                 rs.getBoolean("nsfas_accredited"),
                 listedBy
         );

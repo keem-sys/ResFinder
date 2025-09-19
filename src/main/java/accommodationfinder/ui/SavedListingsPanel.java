@@ -91,7 +91,7 @@ public class SavedListingsPanel extends JPanel {
             protected void done() {
                 try {
                     List<Accommodation> savedListings = get();
-                    refreshListingGrid(savedListings); // Update UI on the Event Dispatch Thread
+                    refreshListingGrid(savedListings);
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                     displayMessage("Error loading saved listings. Please try again.");
@@ -145,5 +145,9 @@ public class SavedListingsPanel extends JPanel {
         button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
         button.setForeground(TEXT_COLOR);
         button.setFocusPainted(false);
+    }
+
+    public JPanel getSavedListingsPanel() {
+        return this;
     }
 }

@@ -10,6 +10,7 @@ import accommodationfinder.data.DatabaseConnection;
 import accommodationfinder.data.UserDao;
 
 import javax.swing.*;
+import java.awt.*;
 import java.sql.SQLException;
 import java.util.prefs.Preferences;
 
@@ -25,6 +26,10 @@ public class MainWindow extends JFrame {
     private SavedListingsPanel savedListingsPanel;
     private ContactPanel contactPanel;
     private FaqPanel faqPanel;
+
+    private JPanel mainCardPanel;
+    private CardLayout cardLayout;
+
 
     private AccommodationDao accommodationDao;
     private AccommodationService accommodationService;
@@ -59,14 +64,23 @@ public class MainWindow extends JFrame {
             this.savedListingsPanel = new SavedListingsPanel(this);
             this.contactPanel = new ContactPanel(this);
             this.faqPanel = new FaqPanel(this);
+            this.accommodationDetailPanel = new AccommodationDetailPanel(accommodationService, this);
 
             // Initialise MenuBar
             this.menuBarManager = new MenuBarManager(this);
             JMenuBar menuBar = menuBarManager.createMenuBar();
             this.setJMenuBar(menuBar);
 
-
-            setContentPane(mainApplicationPanel.getMainPanel());
+            cardLayout = new CardLayout();
+            mainCardPanel = new JPanel(cardLayout);
+            mainCardPanel.add(mainApplicationPanel.getMainPanel(), "main");
+            mainCardPanel.add(registrationPanel.getRegistrationPanel(), "register");
+            mainCardPanel.add(loginPanel.getLoginPanel(), "login");
+            mainCardPanel.add(savedListingsPanel.getSavedListingsPanel(), "savedListings");
+            mainCardPanel.add(contactPanel.getContactPanel(), "contact");
+            mainCardPanel.add(faqPanel.getFaqPanel(), "faq");
+            mainCardPanel.add(accommodationDetailPanel.getDetailPanel(), "detail");
+            setContentPane(mainCardPanel);
 
             // JWT Check
             String storedJwtToken = getJwtFromPreferences();
@@ -146,9 +160,9 @@ public class MainWindow extends JFrame {
             System.err.println("Login success handled, but failed to retrieve user details from token.");
             // Clear invalid persisted token if userFetch failed
             if (getJwtFromPreferences() != null && getJwtFromPreferences().equals(jwtToken)) {
-                saveJwtToPreferences(null); // Clear bad token
+                saveJwtToPreferences(null);
             }
-            handleLogout(); // Revert to logged-out state
+            handleLogout();
         }
     }
 
@@ -177,6 +191,7 @@ public class MainWindow extends JFrame {
         return prefs.get("jwtToken", null);
     }
 
+    // Show/Switch To Methods
 
     public void showUserProfileDialog() {
         if (currentUser == null) {
@@ -190,28 +205,55 @@ public class MainWindow extends JFrame {
 
     }
 
+    public void showMainApplicationView() {
+
+        if (mainApplicationPanel == null) {
+            System.err.println("Error: MainApplicationPanel is null when trying to show it.");
+            throw new IllegalStateException("MainApplicationPanel cannot be null when showing the main app view");
+        }
+
+        if (currentUser != null) {
+            mainApplicationPanel.showLoggedInState(currentUser.getUsername());
+        } else {
+            mainApplicationPanel.showLoggedOutState();
+        }
+
+        cardLayout.show(mainCardPanel, "main");
+        System.out.println("Switched to Main Application Panel");
+    }
+
+    public void switchToRegistrationPanel() {
+        cardLayout.show(mainCardPanel, "register");
+        registrationPanel.requestInitialFocus();
+        System.out.println("Switched to registration panel");
+    }
+
+    public void switchToLoginPanel() {
+        cardLayout.show(mainCardPanel, "login");
+        loginPanel.requestInitialFocus();
+        System.out.println("Switched to login panel");
+    }
+
     public void showSavedListings() {
         if (savedListingsPanel != null) {
             savedListingsPanel.loadSavedListings();
         }
 
-        setContentPane(savedListingsPanel);
-        revalidate();
-        repaint();
+        cardLayout.show(mainCardPanel, "savedListings");
         System.out.println("Switched to Saved Listings Panel");
     }
 
     public void switchToContactPanel() {
-        setContentPane(contactPanel.getContactPanel());
-        revalidate();
-        repaint();
+        if (currentUser != null) {
+            contactPanel.setUserDetails(currentUser.getFullName(), currentUser.getEmail());
+        }
+
+        cardLayout.show(mainCardPanel, "contact");
         System.out.println("Switched to Contact Panel");
     }
 
     public void switchToFaqPanel() {
-        setContentPane(faqPanel.getFaqPanel());
-        revalidate();
-        repaint();
+        cardLayout.show(mainCardPanel, "faq");
         System.out.println("Switched to Faq Panel");
     }
 
@@ -236,22 +278,6 @@ public class MainWindow extends JFrame {
         }
     }
 
-    public void switchToRegistrationPanel() {
-        setContentPane(registrationPanel.getRegistrationPanel());
-        revalidate();
-        repaint();
-        registrationPanel.requestInitialFocus();
-        System.out.println("Switched to registration panel");
-    }
-
-    public void switchToLoginPanel() {
-        setContentPane(loginPanel.getLoginPanel());
-        revalidate();
-        repaint();
-        loginPanel.requestInitialFocus();
-        System.out.println("Switched to login panel");
-    }
-
     public void saveJwtToPreferences(String jwtToken) {
         Preferences prefs = Preferences.userNodeForPackage(getClass());
         if (jwtToken != null) {
@@ -261,26 +287,6 @@ public class MainWindow extends JFrame {
         }
     }
 
-    public void showMainApplicationView() {
-
-        if (mainApplicationPanel == null) {
-            System.err.println("Error: MainApplicationPanel is null when trying to show it.");
-            throw new IllegalStateException("MainApplicationPanel cannot be null when showing the main app view");
-        }
-
-        if (currentUser != null) {
-            mainApplicationPanel.showLoggedInState(currentUser.getUsername());
-        } else {
-            mainApplicationPanel.showLoggedOutState();
-        }
-
-        setContentPane(mainApplicationPanel.getMainPanel());
-        revalidate();
-        repaint();
-        System.out.println("Switched to Main Application Panel");
-    }
-
-
     /**
      * Switches the main window content to show the detailed view for a specific accommodation.
      * Fetches the accommodation data using the provided ID.
@@ -289,40 +295,13 @@ public class MainWindow extends JFrame {
      */
     public void switchToDetailedView(Long accommodationId) {
         System.out.println("Attempting to switch to detailed view for ID: " + accommodationId);
-        try {
-            Accommodation accommodation = accommodationService.getListingById(accommodationId);
-
-            if (accommodation != null) {
-                accommodationDetailPanel = new AccommodationDetailPanel(accommodationService, this, accommodationId);
-                setContentPane(accommodationDetailPanel.getDetailPanel());
-                revalidate();
-                repaint();
-                System.out.println("Successfully switched to detailed view for: " + accommodation.getTitle());
-            }
-            else {
-                System.err.println("Accommodation with ID " + accommodationId + " not found.");
-                JOptionPane.showMessageDialog(this,
-                        "Could not find details for the selected accommodation.",
-                        "Listing Not Found",
-                        JOptionPane.WARNING_MESSAGE);
-                showMainApplicationView();
-            }
-
-            if (mainApplicationPanel != null) {
-                if (currentUser != null) mainApplicationPanel.showLoggedInState(currentUser.getUsername());
-                else mainApplicationPanel.showLoggedOutState();
-            }
-
-
-        } catch (SQLException e) {
-            System.err.println("Database error fetching accommodation details for ID " + accommodationId + ": " + e.getMessage());
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                    "An error occurred while retrieving accommodation details.\nPlease try again later.",
-                    "Database Error",
-                    JOptionPane.ERROR_MESSAGE);
-            showMainApplicationView();
+        if (accommodationDetailPanel != null) {
+            accommodationDetailPanel.loadAccommodationDetails(accommodationId);
         }
+
+        // 2. Switch the view
+        cardLayout.show(mainCardPanel, "detail");
+        System.out.println("Successfully switched to detailed view card.");
     }
 
     public User getCurrentUser() {

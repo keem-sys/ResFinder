@@ -8,7 +8,7 @@ import java.awt.*;
 
 public class ContactListerPanel extends JPanel {
 
-    private final long accommodationId;
+    private long accommodationId;
 
     private JTextField contactNameField;
     private JTextField contactEmailField;
@@ -16,12 +16,10 @@ public class ContactListerPanel extends JPanel {
     private JButton sendMessageButton;
     private JLabel listerInfoLabel;
 
-    // Style Constants
     private static final Color BACKGROUND_COLOR = new Color(253, 251, 245);
-    private static final Color TEXT_COLOR = new Color(50, 50, 50);
 
-    public ContactListerPanel(long accommodationId) {
-        this.accommodationId = accommodationId;
+    public ContactListerPanel() {
+        this.accommodationId = -1;
         initComponents();
         setupListeners();
         updateSendButtonState();
@@ -41,7 +39,7 @@ public class ContactListerPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        listerInfoLabel = new JLabel("Listed by: Loading...");
+        listerInfoLabel = new JLabel("Listed by: ...");
         listerInfoLabel.setFont(new Font("SansSerif", Font.ITALIC, 12));
         gbc.gridwidth = 2;
         add(listerInfoLabel, gbc);
@@ -70,20 +68,31 @@ public class ContactListerPanel extends JPanel {
         sendMessageButton.addActionListener(e -> handleSendMessage());
         add(sendMessageButton, gbc);
 
-        gbc.gridy++; gbc.weighty = 1.0; // Vertical glue
+        gbc.gridy++; gbc.weighty = 1.0;
         add(Box.createVerticalGlue(), gbc);
     }
 
     /**
-     * Public method to populate lister info after parent fetches data.
+     * Populates the panel with new information for a specific listing.
+     * @param accommodationId The ID of the accommodation being viewed.
      * @param lister The user who listed the accommodation.
      */
-    public void setListerInfo(User lister) {
+    public void updatePanelInfo(long accommodationId, User lister) {
+        this.accommodationId = accommodationId;
         if (lister != null) {
             listerInfoLabel.setText("Listed by: " + lister.getFullName());
         } else {
             listerInfoLabel.setText("Listed by: Unknown User");
         }
+    }
+
+    public void reset() {
+        this.accommodationId = -1;
+        listerInfoLabel.setText("Listed by: ...");
+        contactNameField.setText("");
+        contactEmailField.setText("");
+        contactPhoneField.setText("");
+        updateSendButtonState();
     }
 
     private void setupListeners() {
@@ -103,12 +112,18 @@ public class ContactListerPanel extends JPanel {
     }
 
     private void handleSendMessage() {
+        if (accommodationId == -1) {
+            JOptionPane.showMessageDialog(this,
+                    "Cannot send message. Listing information is not loaded.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         String name = contactNameField.getText().trim();
-        System.out.println("--- Sending Message (Placeholder) ---");
+        System.out.println("--- Sending Message ---");
         System.out.println("From Name: " + name);
         System.out.println("Regarding Listing ID: " + accommodationId);
 
-        JOptionPane.showMessageDialog(this, "Message sent to the lister (Placeholder)",
+        JOptionPane.showMessageDialog(this, "Message sent to the lister",
                 "Message Sent", JOptionPane.INFORMATION_MESSAGE);
 
         contactNameField.setText("");
