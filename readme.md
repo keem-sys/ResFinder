@@ -36,7 +36,7 @@ CPUT students often encounter significant difficulties in finding appropriate ac
     - "Remember Me" functionality using Java Preferences API for persistent JWT storage (basic implementation).
     - Client-side and server-side input validation for registration and login forms.
     - Basic error handling and user feedback in UI.
-      <br><br/>
+
 - **Accommodation Listing Management:**
     - Display of accommodation listings.
     - Detailed view for individual accommodation listings.
@@ -46,18 +46,22 @@ CPUT students often encounter significant difficulties in finding appropriate ac
     - Keyword search functionality.
     - Filtering by accommodation type, suburbs and accreditation type.
 
-- **Contact Us Feature:**
-    - Basic "Contact Us" form for user inquiries.
+- **Guides Centre*
+    - "Contact Us" form for user inquiries.
+    - FAQ Panel for user questions
 
 - **UI Structure:**
     - Login Panel.
     - Registration Panel.
     - Main Application Panel
     - Detail view of Listing Panel
+    - Bookmark a listing and access bookmarked listings
+    - Modify Profile Information
 
-**Planned Features (Future Terms):**
 - **Map Integration:**
     - Display accommodation listings on an interactive map.
+
+**Planned Features (Future Terms):**
     - Indicate campus locations.
 
 - **System and User Documentation:**
