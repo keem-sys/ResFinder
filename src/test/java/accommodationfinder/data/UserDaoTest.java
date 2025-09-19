@@ -58,7 +58,11 @@ class UserDaoTest {
 
 
     @AfterEach
-    void tearDown() {
+    void tearDown() throws SQLException {
+        try (Connection conn = testDbConnection.getConnection();
+             Statement statement = conn.createStatement()) {
+            statement.execute("DROP ALL OBJECTS");
+        }
     }
 
     @Test

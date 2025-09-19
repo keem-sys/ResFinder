@@ -1,6 +1,7 @@
 package accommodationfinder.service;
 
 import accommodationfinder.auth.User;
+import accommodationfinder.data.DatabaseConnection;
 import accommodationfinder.data.SavedListingDAO;
 import accommodationfinder.data.UserDao;
 import de.mkammerer.argon2.Argon2;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,16 +35,16 @@ class UserServiceTest {
     @Mock
     private SavedListingDAO mockSavedListingDAO;
 
+    @InjectMocks
     private UserService userService;
     private Key testSecretKey;
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        // secret key for tests
-        String secretString = "89a84479f3ce1998304cea5342b530f8d0eae1588aef348a7dc8b399996c91d0t";
-        testSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretString));
-
+    void setUp() throws SQLException {
+        if (testSecretKey == null) {
+            String secretString = "89a84479f3ce1998304cea5342b530f8d0eae1588aef348a7dc8b399996c91d0t";
+            testSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretString));
+        }
         userService = new UserService(mockUserDao, mockSavedListingDAO, testSecretKey);
     }
 
