@@ -15,6 +15,7 @@ public class ContactListerPanel extends JPanel {
     private JTextField contactPhoneField;
     private JButton sendMessageButton;
     private JLabel listerInfoLabel;
+    private JLabel replyTimeLabel;
 
     private static final Color BACKGROUND_COLOR = new Color(253, 251, 245);
 
@@ -39,11 +40,20 @@ public class ContactListerPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(5, 5, 5, 5);
 
+        replyTimeLabel = new JLabel("Typically replies within 12 hours");
+        replyTimeLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        replyTimeLabel.setForeground(Color.GRAY);
+        replyTimeLabel.setVisible(false);
+        gbc.gridwidth = 2;
+        add(replyTimeLabel, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 5, 10, 5);
         listerInfoLabel = new JLabel("Listed by: ...");
         listerInfoLabel.setFont(new Font("SansSerif", Font.ITALIC, 12));
-        gbc.gridwidth = 2;
         add(listerInfoLabel, gbc);
         gbc.gridwidth = 1;
+        gbc.insets = new Insets(5, 5, 5, 5);
 
         gbc.gridy++;
         add(new JLabel("Your Name: *"), gbc);
@@ -81,14 +91,17 @@ public class ContactListerPanel extends JPanel {
         this.accommodationId = accommodationId;
         if (lister != null) {
             listerInfoLabel.setText("Listed by: " + lister.getFullName());
+            replyTimeLabel.setVisible(true);
         } else {
             listerInfoLabel.setText("Listed by: Unknown User");
+            replyTimeLabel.setVisible(false);
         }
     }
 
     public void reset() {
         this.accommodationId = -1;
         listerInfoLabel.setText("Listed by: ...");
+        replyTimeLabel.setVisible(false);
         contactNameField.setText("");
         contactEmailField.setText("");
         contactPhoneField.setText("");
