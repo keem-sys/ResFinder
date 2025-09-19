@@ -11,6 +11,7 @@ import accommodationfinder.data.UserDao;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentListener;
 import java.sql.SQLException;
 import java.util.prefs.Preferences;
 
@@ -140,11 +141,12 @@ public class MainWindow extends JFrame {
         if (user != null) {
             this.currentJwtToken = jwtToken;
             this.currentUser = user;
-            System.out.println("Login successful for user: " + currentUser.getUsername() + " (ID: " + currentUser.getId() + ")");
+            System.out.println("Login successful for user: " + currentUser.getUsername() +
+                    " (ID: " + currentUser.getId() + ")");
 
-            // Update UI in MainApplicationPanel
             if (mainApplicationPanel != null) {
                 mainApplicationPanel.showLoggedInState(currentUser.getUsername());
+                mainApplicationPanel.loadInitialListings();
             }
 
             if (menuBarManager != null) {
@@ -154,7 +156,8 @@ public class MainWindow extends JFrame {
             showMainApplicationView();
 
             if (showSuccessMessage) {
-                JOptionPane.showMessageDialog(this, "Login Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Login Successful!",
+                        "Success", JOptionPane.INFORMATION_MESSAGE);
             }
         } else {
             System.err.println("Login success handled, but failed to retrieve user details from token.");
@@ -176,7 +179,9 @@ public class MainWindow extends JFrame {
         // Update the UI in MainApplicationPanel
         if (mainApplicationPanel != null) {
             mainApplicationPanel.showLoggedOutState();
+            mainApplicationPanel.loadInitialListings();
         }
+
 
         // Update menu state when logged out
         if (menuBarManager != null) {

@@ -49,7 +49,7 @@ public class AccommodationCardPanel extends JPanel {
         this.userService = mainWindow.getUserService();
         loadIcons();
         initComponents();
-        setInitialSaveState();
+        updateSaveStateAsync();
     }
 
     private void loadIcons() {
@@ -200,7 +200,7 @@ public class AccommodationCardPanel extends JPanel {
         mainWindow.switchToDetailedView(accommodation.getId());
     }
 
-    private void setInitialSaveState() {
+    public void updateSaveStateAsync() {
         User currentUser = mainWindow.getCurrentUser();
         if (currentUser == null) {
             this.isSaved = false;
