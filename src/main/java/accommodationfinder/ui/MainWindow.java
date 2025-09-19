@@ -3,16 +3,19 @@ package accommodationfinder.ui;
 import accommodationfinder.auth.User;
 import accommodationfinder.data.AccommodationDao;
 import accommodationfinder.data.SavedListingDAO;
-import accommodationfinder.listing.Accommodation;
 import accommodationfinder.service.AccommodationService;
 import accommodationfinder.service.UserService;
 import accommodationfinder.data.DatabaseConnection;
 import accommodationfinder.data.UserDao;
 
+import java.util.List;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentListener;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
 public class MainWindow extends JFrame {
@@ -47,6 +50,7 @@ public class MainWindow extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
+        setAppIcon();
         try {
             databaseConnection = new DatabaseConnection();
             databaseConnection.initializeDatabase();
@@ -315,6 +319,34 @@ public class MainWindow extends JFrame {
 
     public UserService getUserService() {
         return userService;
+    }
+
+    /**
+     * Loads the application icons from the resources folder and sets them on the main frame.
+     * This method is robust and works even when the application is packaged as a JAR.
+     */
+    private void setAppIcon() {
+        try {
+            List<Image> icons = new ArrayList<>();
+
+            InputStream icon16Stream = getClass().getResourceAsStream("/icons/icon16x16.png");
+            InputStream icon32Stream = getClass().getResourceAsStream("/icons/icon32x32.png");
+            InputStream icon48Stream = getClass().getResourceAsStream("/icons/icon48x48.png");
+            InputStream icon64Stream = getClass().getResourceAsStream("/icons/icon64x64.png");
+
+            if (icon16Stream != null && icon32Stream != null && icon48Stream != null && icon64Stream != null) {
+                icons.add(ImageIO.read(icon16Stream));
+                icons.add(ImageIO.read(icon32Stream));
+                icons.add(ImageIO.read(icon48Stream));
+                icons.add(ImageIO.read(icon64Stream));
+                setIconImages(icons);
+            } else {
+                System.err.println("Icon files not found in resources/icons/");
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading icon files.");
+            e.printStackTrace();
+        }
     }
 
     public String getCurrentJwtToken() {
