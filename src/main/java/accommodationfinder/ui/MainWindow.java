@@ -2,6 +2,7 @@ package accommodationfinder.ui;
 
 import accommodationfinder.auth.User;
 import accommodationfinder.data.AccommodationDao;
+import accommodationfinder.data.SavedListingDAO;
 import accommodationfinder.listing.Accommodation;
 import accommodationfinder.service.AccommodationService;
 import accommodationfinder.service.UserService;
@@ -15,6 +16,7 @@ import java.util.prefs.Preferences;
 public class MainWindow extends JFrame {
     private DatabaseConnection databaseConnection;
     private UserDao userDao;
+    private SavedListingDAO savedListingDAO;
     private UserService userService;
     private RegistrationPanel registrationPanel;
     private LoginPanel loginPanel;
@@ -44,8 +46,9 @@ public class MainWindow extends JFrame {
 
             userDao = new UserDao(databaseConnection);
             accommodationDao = new AccommodationDao(databaseConnection, userDao);
+            savedListingDAO = new SavedListingDAO(databaseConnection);
 
-            userService = new UserService(userDao);
+            userService = new UserService(userDao, savedListingDAO);
             accommodationService = new AccommodationService(accommodationDao, userDao);
 
             // Initialize UI Panels
@@ -311,6 +314,10 @@ public class MainWindow extends JFrame {
 
     public User getCurrentUser() {
         return currentUser;
+    }
+
+    public UserService getUserService() {
+        return userService;
     }
 
     public String getCurrentJwtToken() {

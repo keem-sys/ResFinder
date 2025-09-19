@@ -1,7 +1,9 @@
 package accommodationfinder.service;
 
 import accommodationfinder.auth.User;
+import accommodationfinder.data.SavedListingDAO;
 import accommodationfinder.data.UserDao;
+import accommodationfinder.listing.Accommodation;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
 import io.jsonwebtoken.Claims;
@@ -17,27 +19,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 public class UserService {
     private final UserDao userDao;
+    private final SavedListingDAO savedListingDAO;
     private final Key jwtSecretKey;
     private static final long JWT_EXPIRATION_MS = 1000 * 60 * 60 * 24;
 
-    public UserService(UserDao userDao) {
-        this(userDao, loadJwtSecretKeyFromConfig());
+    public UserService(UserDao userDao, SavedListingDAO savedListingDAO) {
+        this(userDao, savedListingDAO, loadJwtSecretKeyFromConfig());
     }
 
-    UserService(UserDao userDao, Key secretKey) {
+    UserService(UserDao userDao, SavedListingDAO savedListingDAO, Key secretKey) {
         this.userDao = userDao;
+        this.savedListingDAO = savedListingDAO;
         this.jwtSecretKey = secretKey;
     }
+
 
 
     private static Key loadJwtSecretKeyFromConfig() {
@@ -276,5 +278,21 @@ public class UserService {
         } finally {
             argon2.wipeArray(passwordChars);
         }
+    }
+
+    public void addSavedListing(long userId, long accommodationId) throws SQLException {
+        savedListingDAO.createSavedListing(userId, accommodationId);
+    }
+
+    public void removeSavedListing(long userId, long accommodationId) throws SQLException {
+        savedListingDAO.removeSavedListing(userId, accommodationId);
+    }
+
+    public boolean isListingSaved(long userId, long accommodationId) throws SQLException {
+        return savedListingDAO.isListingSaved(userId, accommodationId);
+    }
+
+    public List<Accommodation> getSavedListingsForUser(long userId) throws SQLException {
+        return savedListingDAO.getSavedListingsForUser(userId);
     }
 }

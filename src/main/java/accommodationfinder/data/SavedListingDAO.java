@@ -91,14 +91,14 @@ public class SavedListingDAO {
     }
 
 
-    public void removeSavedListing(long userId, int accommodationId) throws SQLException {
+    public void removeSavedListing(long userId, long accommodationId) throws SQLException {
         String sql = "DELETE FROM SAVED_LISTINGS WHERE user_id = ? AND accommodation_id = ?";
 
         try (Connection connection = dbConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
             preparedStatement.setLong(1, userId);
-            preparedStatement.setInt(2, accommodationId);
+            preparedStatement.setLong(2, accommodationId);
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
