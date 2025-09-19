@@ -21,6 +21,7 @@ public class MainWindow extends JFrame {
     private MainApplicationPanel mainApplicationPanel;
     private AccommodationDetailPanel accommodationDetailPanel;
     private ContactPanel contactPanel;
+    private FaqPanel faqPanel;
 
     private AccommodationDao accommodationDao;
     private AccommodationService accommodationService;
@@ -52,6 +53,7 @@ public class MainWindow extends JFrame {
             this.registrationPanel = new RegistrationPanel(userService, this);
             this.loginPanel = new LoginPanel(userService, this);
             this.contactPanel = new ContactPanel(this);
+            this.faqPanel = new FaqPanel(this);
 
             // Initialise MenuBar
             this.menuBarManager = new MenuBarManager(this);
@@ -188,6 +190,13 @@ public class MainWindow extends JFrame {
         revalidate();
         repaint();
         System.out.println("Switched to Contact Panel");
+    }
+
+    public void switchToFaqPanel() {
+        setContentPane(faqPanel.getFaqPanel());
+        revalidate();
+        repaint();
+        System.out.println("Switched to Faq Panel");
     }
 
     public void showAboutDialog() {

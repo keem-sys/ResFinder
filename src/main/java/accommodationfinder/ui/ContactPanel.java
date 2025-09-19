@@ -117,6 +117,12 @@ public class ContactPanel extends JPanel {
         lblFaq.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(lblFaq);
 
+        lblFaq.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Change cursor to a hand on hover
+        lblFaq.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                mainWindow.switchToFaqPanel();
+            }
+        });
 
         panel.add(Box.createVerticalGlue());
 

@@ -12,6 +12,7 @@ public class MenuBarManager {
     private JMenuItem profileMenuItem;
     private JMenuItem logInMenuItem;
     private JMenuItem signUpMenuItem;
+    private JMenuItem faqMenuItem;
 
     public MenuBarManager(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
@@ -83,6 +84,11 @@ public class MenuBarManager {
         styleMenuItem(contactMenuItem);
         contactMenuItem.addActionListener(e -> mainWindow.switchToContactPanel());
         helpMenu.add(contactMenuItem);
+
+        faqMenuItem = new JMenuItem("View FAQ");
+        styleMenuItem(faqMenuItem);
+        faqMenuItem.addActionListener(e -> mainWindow.switchToFaqPanel());
+        helpMenu.add(faqMenuItem);
 
         helpMenu.addSeparator();
 
