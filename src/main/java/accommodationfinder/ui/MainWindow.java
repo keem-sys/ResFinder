@@ -2,25 +2,38 @@ package accommodationfinder.ui;
 
 import accommodationfinder.auth.User;
 import accommodationfinder.data.AccommodationDao;
-import accommodationfinder.listing.Accommodation;
+import accommodationfinder.data.SavedListingDAO;
 import accommodationfinder.service.AccommodationService;
 import accommodationfinder.service.UserService;
 import accommodationfinder.data.DatabaseConnection;
 import accommodationfinder.data.UserDao;
 
+import java.util.List;
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
 public class MainWindow extends JFrame {
     private DatabaseConnection databaseConnection;
     private UserDao userDao;
+    private SavedListingDAO savedListingDAO;
     private UserService userService;
     private RegistrationPanel registrationPanel;
     private LoginPanel loginPanel;
     private MainApplicationPanel mainApplicationPanel;
     private AccommodationDetailPanel accommodationDetailPanel;
+    private SavedListingsPanel savedListingsPanel;
     private ContactPanel contactPanel;
+    private FaqPanel faqPanel;
+
+    private JPanel mainCardPanel;
+    private CardLayout cardLayout;
+
 
     private AccommodationDao accommodationDao;
     private AccommodationService accommodationService;
@@ -37,29 +50,42 @@ public class MainWindow extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
+        setAppIcon();
         try {
             databaseConnection = new DatabaseConnection();
             databaseConnection.initializeDatabase();
 
             userDao = new UserDao(databaseConnection);
             accommodationDao = new AccommodationDao(databaseConnection, userDao);
+            savedListingDAO = new SavedListingDAO(databaseConnection);
 
-            userService = new UserService(userDao);
+            userService = new UserService(userDao, savedListingDAO);
             accommodationService = new AccommodationService(accommodationDao, userDao);
 
             // Initialize UI Panels
             this.mainApplicationPanel = new MainApplicationPanel(accommodationService, userService, this);
             this.registrationPanel = new RegistrationPanel(userService, this);
             this.loginPanel = new LoginPanel(userService, this);
+            this.savedListingsPanel = new SavedListingsPanel(this);
             this.contactPanel = new ContactPanel(this);
+            this.faqPanel = new FaqPanel(this);
+            this.accommodationDetailPanel = new AccommodationDetailPanel(accommodationService, this);
 
             // Initialise MenuBar
             this.menuBarManager = new MenuBarManager(this);
             JMenuBar menuBar = menuBarManager.createMenuBar();
             this.setJMenuBar(menuBar);
 
-
-            setContentPane(mainApplicationPanel.getMainPanel());
+            cardLayout = new CardLayout();
+            mainCardPanel = new JPanel(cardLayout);
+            mainCardPanel.add(mainApplicationPanel.getMainPanel(), "main");
+            mainCardPanel.add(registrationPanel.getRegistrationPanel(), "register");
+            mainCardPanel.add(loginPanel.getLoginPanel(), "login");
+            mainCardPanel.add(savedListingsPanel.getSavedListingsPanel(), "savedListings");
+            mainCardPanel.add(contactPanel.getContactPanel(), "contact");
+            mainCardPanel.add(faqPanel.getFaqPanel(), "faq");
+            mainCardPanel.add(accommodationDetailPanel.getDetailPanel(), "detail");
+            setContentPane(mainCardPanel);
 
             // JWT Check
             String storedJwtToken = getJwtFromPreferences();
@@ -119,11 +145,12 @@ public class MainWindow extends JFrame {
         if (user != null) {
             this.currentJwtToken = jwtToken;
             this.currentUser = user;
-            System.out.println("Login successful for user: " + currentUser.getUsername() + " (ID: " + currentUser.getId() + ")");
+            System.out.println("Login successful for user: " + currentUser.getUsername() +
+                    " (ID: " + currentUser.getId() + ")");
 
-            // Update UI in MainApplicationPanel
             if (mainApplicationPanel != null) {
                 mainApplicationPanel.showLoggedInState(currentUser.getUsername());
+                mainApplicationPanel.loadInitialListings();
             }
 
             if (menuBarManager != null) {
@@ -133,15 +160,16 @@ public class MainWindow extends JFrame {
             showMainApplicationView();
 
             if (showSuccessMessage) {
-                JOptionPane.showMessageDialog(this, "Login Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Login Successful!",
+                        "Success", JOptionPane.INFORMATION_MESSAGE);
             }
         } else {
             System.err.println("Login success handled, but failed to retrieve user details from token.");
             // Clear invalid persisted token if userFetch failed
             if (getJwtFromPreferences() != null && getJwtFromPreferences().equals(jwtToken)) {
-                saveJwtToPreferences(null); // Clear bad token
+                saveJwtToPreferences(null);
             }
-            handleLogout(); // Revert to logged-out state
+            handleLogout();
         }
     }
 
@@ -155,7 +183,9 @@ public class MainWindow extends JFrame {
         // Update the UI in MainApplicationPanel
         if (mainApplicationPanel != null) {
             mainApplicationPanel.showLoggedOutState();
+            mainApplicationPanel.loadInitialListings();
         }
+
 
         // Update menu state when logged out
         if (menuBarManager != null) {
@@ -170,6 +200,7 @@ public class MainWindow extends JFrame {
         return prefs.get("jwtToken", null);
     }
 
+    // Show/Switch To Methods
 
     public void showUserProfileDialog() {
         if (currentUser == null) {
@@ -183,11 +214,56 @@ public class MainWindow extends JFrame {
 
     }
 
+    public void showMainApplicationView() {
+
+        if (mainApplicationPanel == null) {
+            System.err.println("Error: MainApplicationPanel is null when trying to show it.");
+            throw new IllegalStateException("MainApplicationPanel cannot be null when showing the main app view");
+        }
+
+        if (currentUser != null) {
+            mainApplicationPanel.showLoggedInState(currentUser.getUsername());
+        } else {
+            mainApplicationPanel.showLoggedOutState();
+        }
+
+        cardLayout.show(mainCardPanel, "main");
+        System.out.println("Switched to Main Application Panel");
+    }
+
+    public void switchToRegistrationPanel() {
+        cardLayout.show(mainCardPanel, "register");
+        registrationPanel.requestInitialFocus();
+        System.out.println("Switched to registration panel");
+    }
+
+    public void switchToLoginPanel() {
+        cardLayout.show(mainCardPanel, "login");
+        loginPanel.requestInitialFocus();
+        System.out.println("Switched to login panel");
+    }
+
+    public void showSavedListings() {
+        if (savedListingsPanel != null) {
+            savedListingsPanel.loadSavedListings();
+        }
+
+        cardLayout.show(mainCardPanel, "savedListings");
+        System.out.println("Switched to Saved Listings Panel");
+    }
+
     public void switchToContactPanel() {
-        setContentPane(contactPanel.getContactPanel());
-        revalidate();
-        repaint();
+        if (currentUser != null) {
+            contactPanel.setUserDetails(currentUser.getFullName(), currentUser.getEmail());
+        }
+
+        cardLayout.show(mainCardPanel, "contact");
         System.out.println("Switched to Contact Panel");
+    }
+
+    public void switchToFaqPanel() {
+        cardLayout.show(mainCardPanel, "faq");
+        System.out.println("Switched to Faq Panel");
     }
 
     public void showAboutDialog() {
@@ -211,22 +287,6 @@ public class MainWindow extends JFrame {
         }
     }
 
-    public void switchToRegistrationPanel() {
-        setContentPane(registrationPanel.getRegistrationPanel());
-        revalidate();
-        repaint();
-        registrationPanel.requestInitialFocus();
-        System.out.println("Switched to registration panel");
-    }
-
-    public void switchToLoginPanel() {
-        setContentPane(loginPanel.getLoginPanel());
-        revalidate();
-        repaint();
-        loginPanel.requestInitialFocus();
-        System.out.println("Switched to login panel");
-    }
-
     public void saveJwtToPreferences(String jwtToken) {
         Preferences prefs = Preferences.userNodeForPackage(getClass());
         if (jwtToken != null) {
@@ -236,26 +296,6 @@ public class MainWindow extends JFrame {
         }
     }
 
-    public void showMainApplicationView() {
-
-        if (mainApplicationPanel == null) {
-            System.err.println("Error: MainApplicationPanel is null when trying to show it.");
-            throw new IllegalStateException("MainApplicationPanel cannot be null when showing the main app view");
-        }
-
-        if (currentUser != null) {
-            mainApplicationPanel.showLoggedInState(currentUser.getUsername());
-        } else {
-            mainApplicationPanel.showLoggedOutState();
-        }
-
-        setContentPane(mainApplicationPanel.getMainPanel());
-        revalidate();
-        repaint();
-        System.out.println("Switched to Main Application Panel");
-    }
-
-
     /**
      * Switches the main window content to show the detailed view for a specific accommodation.
      * Fetches the accommodation data using the provided ID.
@@ -264,44 +304,49 @@ public class MainWindow extends JFrame {
      */
     public void switchToDetailedView(Long accommodationId) {
         System.out.println("Attempting to switch to detailed view for ID: " + accommodationId);
-        try {
-            Accommodation accommodation = accommodationService.getListingById(accommodationId);
-
-            if (accommodation != null) {
-                accommodationDetailPanel = new AccommodationDetailPanel(accommodationService, this, accommodationId);
-                setContentPane(accommodationDetailPanel.getDetailPanel());
-                revalidate();
-                repaint();
-                System.out.println("Successfully switched to detailed view for: " + accommodation.getTitle());
-            }
-            else {
-                System.err.println("Accommodation with ID " + accommodationId + " not found.");
-                JOptionPane.showMessageDialog(this,
-                        "Could not find details for the selected accommodation.",
-                        "Listing Not Found",
-                        JOptionPane.WARNING_MESSAGE);
-                showMainApplicationView();
-            }
-
-            if (mainApplicationPanel != null) {
-                if (currentUser != null) mainApplicationPanel.showLoggedInState(currentUser.getUsername());
-                else mainApplicationPanel.showLoggedOutState();
-            }
-
-
-        } catch (SQLException e) {
-            System.err.println("Database error fetching accommodation details for ID " + accommodationId + ": " + e.getMessage());
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                    "An error occurred while retrieving accommodation details.\nPlease try again later.",
-                    "Database Error",
-                    JOptionPane.ERROR_MESSAGE);
-            showMainApplicationView();
+        if (accommodationDetailPanel != null) {
+            accommodationDetailPanel.loadAccommodationDetails(accommodationId);
         }
+
+        // 2. Switch the view
+        cardLayout.show(mainCardPanel, "detail");
+        System.out.println("Successfully switched to detailed view card.");
     }
 
     public User getCurrentUser() {
         return currentUser;
+    }
+
+    public UserService getUserService() {
+        return userService;
+    }
+
+    /**
+     * Loads the application icons from the resources folder and sets them on the main frame.
+     * This method is robust and works even when the application is packaged as a JAR.
+     */
+    private void setAppIcon() {
+        try {
+            List<Image> icons = new ArrayList<>();
+
+            InputStream icon16Stream = getClass().getResourceAsStream("/icons/icon16x16.png");
+            InputStream icon32Stream = getClass().getResourceAsStream("/icons/icon32x32.png");
+            InputStream icon48Stream = getClass().getResourceAsStream("/icons/icon48x48.png");
+            InputStream icon64Stream = getClass().getResourceAsStream("/icons/icon64x64.png");
+
+            if (icon16Stream != null && icon32Stream != null && icon48Stream != null && icon64Stream != null) {
+                icons.add(ImageIO.read(icon16Stream));
+                icons.add(ImageIO.read(icon32Stream));
+                icons.add(ImageIO.read(icon48Stream));
+                icons.add(ImageIO.read(icon64Stream));
+                setIconImages(icons);
+            } else {
+                System.err.println("Icon files not found in resources/icons/");
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading icon files.");
+            e.printStackTrace();
+        }
     }
 
     public String getCurrentJwtToken() {

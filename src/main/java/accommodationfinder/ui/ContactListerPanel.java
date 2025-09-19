@@ -8,20 +8,19 @@ import java.awt.*;
 
 public class ContactListerPanel extends JPanel {
 
-    private final long accommodationId;
+    private long accommodationId;
 
     private JTextField contactNameField;
     private JTextField contactEmailField;
     private JTextField contactPhoneField;
     private JButton sendMessageButton;
     private JLabel listerInfoLabel;
+    private JLabel replyTimeLabel;
 
-    // Style Constants
     private static final Color BACKGROUND_COLOR = new Color(253, 251, 245);
-    private static final Color TEXT_COLOR = new Color(50, 50, 50);
 
-    public ContactListerPanel(long accommodationId) {
-        this.accommodationId = accommodationId;
+    public ContactListerPanel() {
+        this.accommodationId = -1;
         initComponents();
         setupListeners();
         updateSendButtonState();
@@ -41,11 +40,20 @@ public class ContactListerPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        listerInfoLabel = new JLabel("Listed by: Loading...");
-        listerInfoLabel.setFont(new Font("SansSerif", Font.ITALIC, 12));
+        replyTimeLabel = new JLabel("Typically replies within 12 hours");
+        replyTimeLabel.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        replyTimeLabel.setForeground(Color.GRAY);
+        replyTimeLabel.setVisible(false);
         gbc.gridwidth = 2;
+        add(replyTimeLabel, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 5, 10, 5);
+        listerInfoLabel = new JLabel("Listed by: ...");
+        listerInfoLabel.setFont(new Font("SansSerif", Font.ITALIC, 12));
         add(listerInfoLabel, gbc);
         gbc.gridwidth = 1;
+        gbc.insets = new Insets(5, 5, 5, 5);
 
         gbc.gridy++;
         add(new JLabel("Your Name: *"), gbc);
@@ -70,20 +78,34 @@ public class ContactListerPanel extends JPanel {
         sendMessageButton.addActionListener(e -> handleSendMessage());
         add(sendMessageButton, gbc);
 
-        gbc.gridy++; gbc.weighty = 1.0; // Vertical glue
+        gbc.gridy++; gbc.weighty = 1.0;
         add(Box.createVerticalGlue(), gbc);
     }
 
     /**
-     * Public method to populate lister info after parent fetches data.
+     * Populates the panel with new information for a specific listing.
+     * @param accommodationId The ID of the accommodation being viewed.
      * @param lister The user who listed the accommodation.
      */
-    public void setListerInfo(User lister) {
+    public void updatePanelInfo(long accommodationId, User lister) {
+        this.accommodationId = accommodationId;
         if (lister != null) {
             listerInfoLabel.setText("Listed by: " + lister.getFullName());
+            replyTimeLabel.setVisible(true);
         } else {
             listerInfoLabel.setText("Listed by: Unknown User");
+            replyTimeLabel.setVisible(false);
         }
+    }
+
+    public void reset() {
+        this.accommodationId = -1;
+        listerInfoLabel.setText("Listed by: ...");
+        replyTimeLabel.setVisible(false);
+        contactNameField.setText("");
+        contactEmailField.setText("");
+        contactPhoneField.setText("");
+        updateSendButtonState();
     }
 
     private void setupListeners() {
@@ -103,12 +125,18 @@ public class ContactListerPanel extends JPanel {
     }
 
     private void handleSendMessage() {
+        if (accommodationId == -1) {
+            JOptionPane.showMessageDialog(this,
+                    "Cannot send message. Listing information is not loaded.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         String name = contactNameField.getText().trim();
-        System.out.println("--- Sending Message (Placeholder) ---");
+        System.out.println("--- Sending Message ---");
         System.out.println("From Name: " + name);
         System.out.println("Regarding Listing ID: " + accommodationId);
 
-        JOptionPane.showMessageDialog(this, "Message sent to the lister (Placeholder)",
+        JOptionPane.showMessageDialog(this, "Message sent to the lister",
                 "Message Sent", JOptionPane.INFORMATION_MESSAGE);
 
         contactNameField.setText("");

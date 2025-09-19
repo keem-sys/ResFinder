@@ -8,6 +8,8 @@ import accommodationfinder.service.UserService;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +17,7 @@ import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
-public class MainApplicationPanel {
+public class MainApplicationPanel implements ComponentListener {
 
     private JPanel mainPanel;
 
@@ -57,7 +59,7 @@ public class MainApplicationPanel {
 
 
     public MainApplicationPanel(AccommodationService accommodationService, UserService userService,
-                                MainWindow mainWindow) {
+                                MainWindow mainWindow)  {
         this.accommodationService = accommodationService;
         this.userService = userService;
         this.mainWindow = mainWindow;
@@ -100,6 +102,7 @@ public class MainApplicationPanel {
 
         loadInitialListings();
         showLoggedOutState();
+        mainPanel.addComponentListener(this);
     }
 
     // Data Loading
@@ -526,6 +529,33 @@ public class MainApplicationPanel {
                 new EmptyBorder(4, 6, 4, 6)
         ));
     }
+
+    private void refreshCardSaveStates() {
+        System.out.println("Refreshing save states for visible cards...");
+        SwingUtilities.invokeLater(() -> {
+            if (listingGridPanel != null) {
+                for (Component comp : listingGridPanel.getComponents()) {
+                    if (comp instanceof AccommodationCardPanel) {
+                        ((AccommodationCardPanel) comp).updateSaveStateAsync();
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void componentShown(ComponentEvent e) {
+        refreshCardSaveStates();
+    }
+
+    @Override
+    public void componentResized(ComponentEvent e) { }
+
+    @Override
+    public void componentMoved(ComponentEvent e) { }
+
+    @Override
+    public void componentHidden(ComponentEvent e) { }
 
 
     public JTextField getSearchField() {

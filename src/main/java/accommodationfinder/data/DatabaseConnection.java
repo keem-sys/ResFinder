@@ -47,6 +47,7 @@ public class DatabaseConnection {
             System.out.println("Initializing database schema and data for..." + this.jdbcUrl);
             createUsersTableIfNotExists(connection);
             createAccommodationsTableIfNotExists(connection);
+            createSavedListingsTableIfNotExists(connection);
             initializeSampleDataIfEmpty(connection);
             System.out.println("Database initialization complete.");
         } catch (SQLException e) {
@@ -117,6 +118,27 @@ public class DatabaseConnection {
             System.out.println("ACCOMMODATIONS table created or verified.");
         } catch (SQLException e) {
             System.err.println("Error creating ACCOMMODATIONS table: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    // Create Saved Listings Table
+    private void createSavedListingsTableIfNotExists(Connection connection) throws  SQLException {
+        String createTableSQL = """
+        CREATE TABLE IF NOT EXISTS SAVED_LISTINGS (
+            user_id BIGINT NOT NULL,
+            accommodation_id BIGINT NOT NULL, 
+            saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (user_id, accommodation_id),
+            FOREIGN KEY (user_id) REFERENCES USERS(id) ON DELETE CASCADE,
+            FOREIGN KEY (accommodation_id) REFERENCES ACCOMMODATIONS(id) ON DELETE CASCADE
+        );""";
+
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(createTableSQL);
+            System.out.println("SAVED_LISTINGS table created or verified.");
+        } catch (SQLException e) {
+            System.err.println("Error creating SAVED_LISTINGS table: " + e.getMessage());
             throw e;
         }
     }
