@@ -1,12 +1,10 @@
--- Drop all objects if they exist to ensure a clean slate
-DROP ALL OBJECTS;
+DROP TABLE IF EXISTS USERS;
 
--- Create the users table for testing
-CREATE TABLE users (
-                       id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                       full_name VARCHAR(255) NOT NULL,
-                       username VARCHAR(100) NOT NULL UNIQUE,
-                       email VARCHAR(255) NOT NULL UNIQUE,
-                       password_hash VARCHAR(255) NOT NULL,
-                       registration_date TIMESTAMP NOT NULL
+CREATE TABLE IF NOT EXISTS USERS (
+     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+     full_name VARCHAR(255) NOT NULL,
+     username VARCHAR(255) UNIQUE NOT NULL,
+     email VARCHAR(255) UNIQUE NOT NULL,
+     password_hash VARCHAR(255) NOT NULL,
+     registration_date TIMESTAMP NOT NULL
 );

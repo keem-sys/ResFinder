@@ -1,6 +1,8 @@
 package accommodationfinder.ui;
 
+import accommodationfinder.auth.User;
 import accommodationfinder.listing.Accommodation; // Import Accommodation class
+import accommodationfinder.service.UserService;
 
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
@@ -27,23 +29,37 @@ public class AccommodationCardPanel extends JPanel {
 
     private final Accommodation accommodation;
     private final MainWindow mainWindow;
+    private final UserService userService;
+    private JButton saveButton;
+    private ImageIcon heartEmptyIcon;
+    private ImageIcon heartFilledIcon;
+    private boolean isSaved = false;
 
-    private static final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("en", "ZA"));
+    private static final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new
+            Locale("en", "ZA"));
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
-
+    private static final Color BACKGROUND_COLOR = new Color(253, 251, 245);
+    private static final Color FIELD_COLOR = new Color(0, 100, 200);
+    private static final Color IMAGE_LABEL_BACKGROUND_COLOR = new Color(230, 230, 230);
 
     public AccommodationCardPanel(Accommodation accommodation, MainWindow mainWindow) {
         super(new BorderLayout(0, 0));
         this.accommodation = accommodation;
         this.mainWindow = mainWindow;
-
-
+        this.userService = mainWindow.getUserService();
+        loadIcons();
         initComponents();
+        updateSaveStateAsync();
+    }
+
+    private void loadIcons() {
+        heartEmptyIcon = loadIcon("/icons/heart_empty.png", 24, 24);
+        heartFilledIcon = loadIcon("/icons/heart_filled.png", 24, 24);
     }
 
     private void initComponents() {
         setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-        setBackground(new Color(253, 251, 245)); // Match background
+        setBackground(BACKGROUND_COLOR);
 
         // Image Panel (Top)
         JPanel imageContainerPanel = createImagePanel();
@@ -58,13 +74,17 @@ public class AccommodationCardPanel extends JPanel {
         add(bottomBarPanel, BorderLayout.SOUTH);
 
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        addMouseListener(new MouseAdapter() {
+        this.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent evt) {
+                if (evt.getSource() == saveButton) {
+                    return;
+                }
                 handleCardClick();
             }
         });
     }
+
 
     private JPanel createImagePanel() {
         final int IMG_WIDTH = 500;
@@ -75,7 +95,7 @@ public class AccommodationCardPanel extends JPanel {
         JLabel imageLabel = new JLabel("Loading image...", SwingConstants.CENTER);
         imageLabel.setPreferredSize(new Dimension(IMG_WIDTH, IMG_HEIGHT));
         imageLabel.setOpaque(true);
-        imageLabel.setBackground(new Color(230, 230, 230));
+        imageLabel.setBackground(IMAGE_LABEL_BACKGROUND_COLOR);
         imageLabel.setVerticalAlignment(SwingConstants.CENTER);
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         imageContainerPanel.add(imageLabel, BorderLayout.CENTER);
@@ -90,11 +110,20 @@ public class AccommodationCardPanel extends JPanel {
         JPanel detailsPanel = new JPanel();
         detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
         detailsPanel.setBorder(new EmptyBorder(10, 12, 10, 12));
-        detailsPanel.setBackground(new Color(253, 251, 245)); // Match background
+        detailsPanel.setBackground(BACKGROUND_COLOR);
+
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        titlePanel.setOpaque(false);
 
         JLabel titleLabel = new JLabel(limitString(accommodation.getTitle(), 45));
         titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titlePanel.add(titleLabel, BorderLayout.CENTER);
+
+        saveButton = new JButton();
+        styleIconButton(saveButton);
+        updateSaveButtonIcon(); // Set initial icon
+        saveButton.addActionListener(e -> handleSaveButtonClick());
+        titlePanel.add(saveButton, BorderLayout.EAST);
 
         JLabel priceLabel = new JLabel(currencyFormatter.format(accommodation.getPrice()) + " " + formatPriceFrequency(accommodation.getPriceFrequency()));
         priceLabel.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -110,10 +139,16 @@ public class AccommodationCardPanel extends JPanel {
 
         JLabel nsfasLabel = new JLabel("NSFAS " + (accommodation.isNsfasAccredited() ? "Accredited" : "Not Accredited"));
         nsfasLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        nsfasLabel.setForeground(accommodation.isNsfasAccredited() ? new Color(0, 100, 200) : Color.GRAY);
+        nsfasLabel.setForeground(accommodation.isNsfasAccredited() ? FIELD_COLOR : Color.GRAY);
         nsfasLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        detailsPanel.add(titleLabel);
+        titlePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        priceLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        infoLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        nsfasLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        detailsPanel.add(titlePanel);
+
         detailsPanel.add(Box.createRigidArea(new Dimension(0, 5)));
         detailsPanel.add(priceLabel);
         detailsPanel.add(Box.createRigidArea(new Dimension(0, 8)));
@@ -126,7 +161,7 @@ public class AccommodationCardPanel extends JPanel {
 
     private JPanel createBottomBar() {
         JPanel bottomBarPanel = new JPanel(new BorderLayout(10, 0));
-        bottomBarPanel.setBackground(new Color(230, 230, 230));
+        bottomBarPanel.setBackground(IMAGE_LABEL_BACKGROUND_COLOR);
         bottomBarPanel.setBorder(BorderFactory.createCompoundBorder(
                 new MatteBorder(1, 0, 0, 0, Color.LIGHT_GRAY),
                 new EmptyBorder(6, 12, 6, 12)
@@ -151,7 +186,7 @@ public class AccommodationCardPanel extends JPanel {
         // View More Label (Right)
         JLabel viewMoreLabel = new JLabel("View More");
         viewMoreLabel.setFont(new Font("Arial", Font.BOLD, 12));
-        viewMoreLabel.setForeground(new Color(0, 100, 200));
+        viewMoreLabel.setForeground(FIELD_COLOR);
         viewMoreLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         bottomBarPanel.add(availableLabel, BorderLayout.WEST);
@@ -163,6 +198,94 @@ public class AccommodationCardPanel extends JPanel {
     private void handleCardClick() {
         System.out.println("Card clicked - Navigate to details for Listing ID: " + accommodation.getId());
         mainWindow.switchToDetailedView(accommodation.getId());
+    }
+
+    public void updateSaveStateAsync() {
+        User currentUser = mainWindow.getCurrentUser();
+        if (currentUser == null) {
+            this.isSaved = false;
+            updateSaveButtonIcon();
+            return;
+        }
+
+        SwingWorker<Boolean, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Boolean doInBackground() throws Exception {
+                return userService.isListingSaved(currentUser.getId(), accommodation.getId());
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    isSaved = get();
+                    updateSaveButtonIcon();
+                } catch (Exception e) {
+                    System.err.println("Error checking initial saved state: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    private void handleSaveButtonClick() {
+        User currentUser = mainWindow.getCurrentUser();
+
+        // Check if user logged in
+        if (currentUser == null) {
+            JOptionPane.showMessageDialog(mainWindow, "Please log in to save listings.", "Login Required", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        // Perform database action in the background
+        saveButton.setEnabled(false);
+        final boolean saving = !isSaved;
+
+        SwingWorker<Boolean, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Boolean doInBackground() throws Exception {
+                if (saving) {
+                    userService.addSavedListing(currentUser.getId(), accommodation.getId());
+                } else {
+                    userService.removeSavedListing(currentUser.getId(), accommodation.getId());
+                }
+                return saving;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    isSaved = get();
+                    updateSaveButtonIcon();
+                } catch (Exception e) {
+                    System.err.println("Error toggling saved state: " + e.getMessage());
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(mainWindow, "Could not update " +
+                            "saved status. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                } finally {
+                    saveButton.setEnabled(true);
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    private void updateSaveButtonIcon() {
+        if (isSaved) {
+            saveButton.setIcon(heartFilledIcon);
+            saveButton.setToolTipText("Remove from Saved Listings");
+        } else {
+            saveButton.setIcon(heartEmptyIcon);
+            saveButton.setToolTipText("Save this Listing");
+        }
+    }
+
+    private void styleIconButton(JButton button) {
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
+        button.setFocusPainted(false);
+        button.setOpaque(false);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
     // Helper Methods
@@ -179,7 +302,7 @@ public class AccommodationCardPanel extends JPanel {
 
             SwingWorker<ImageIcon, Void> imageLoader = new SwingWorker<>() {
                 @Override
-                protected ImageIcon doInBackground() throws Exception {
+                protected ImageIcon doInBackground() {
                     Image scaledImage = null;
 
                     try {
@@ -193,7 +316,6 @@ public class AccommodationCardPanel extends JPanel {
                         if (originalImage == null) {
                             System.err.println("Failed to load image using ImageIO (unsupported format or error): " +
                                     imageUrlString);
-                            // TODO: Fallback attempt using TwelveMonkeysImageIO
                             return null;
                         }
 
@@ -229,16 +351,16 @@ public class AccommodationCardPanel extends JPanel {
                         g2d.drawImage(originalImage, 0, 0, scaledWidth, scaledHeight, null);
                         g2d.dispose();
 
-                        return new ImageIcon(scaledBI); // Return the scaled BufferedImage wrapped in an ImageIcon
+                        return new ImageIcon(scaledBI);
 
                     } catch (MalformedURLException e) {
                         System.err.println("Invalid image URL: " + imageUrlString + " - " + e.getMessage());
                         return null;
-                    } catch (IIOException e) { // Catch specific ImageIO errors
+                    } catch (IIOException e) {
                         System.err.println("ImageIO error loading/reading image: " + imageUrlString + " - " + e.getMessage());
                         e.printStackTrace();
                         return null;
-                    } catch (IOException e) { // Catch general IO errors (network, stream issues)
+                    } catch (IOException e) {
                         System.err.println("IO error loading image stream: " + imageUrlString + " - " + e.getMessage());
                         e.printStackTrace();
                         return null;
@@ -295,6 +417,24 @@ public class AccommodationCardPanel extends JPanel {
             } else {
                 return text.substring(0, maxLength - 3) + "...";
             }
+        }
+    }
+
+
+    private ImageIcon loadIcon(String path, int width, int height) {
+        try {
+            URL url = getClass().getResource(path);
+            if (url == null) {
+                System.err.println("Could not find icon resource: " + path);
+                return null;
+            }
+            BufferedImage img = ImageIO.read(url);
+            Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaledImg);
+        } catch (IOException e) {
+            System.err.println("Error loading icon: " + path);
+            e.printStackTrace();
+            return null;
         }
     }
 }

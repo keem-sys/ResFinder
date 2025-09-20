@@ -8,6 +8,8 @@ import accommodationfinder.service.UserService;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +17,7 @@ import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
-public class MainApplicationPanel {
+public class MainApplicationPanel implements ComponentListener {
 
     private JPanel mainPanel;
 
@@ -57,7 +59,7 @@ public class MainApplicationPanel {
 
 
     public MainApplicationPanel(AccommodationService accommodationService, UserService userService,
-                                MainWindow mainWindow) {
+                                MainWindow mainWindow)  {
         this.accommodationService = accommodationService;
         this.userService = userService;
         this.mainWindow = mainWindow;
@@ -100,6 +102,7 @@ public class MainApplicationPanel {
 
         loadInitialListings();
         showLoggedOutState();
+        mainPanel.addComponentListener(this);
     }
 
     // Data Loading
@@ -199,7 +202,7 @@ public class MainApplicationPanel {
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         filterPanel.setOpaque(false);
         filterButton = new JButton("Filters");
-        styleButton(filterButton, BUTTON_BACKGROUND_COLOR, TEXT_COLOR, 13);
+        styleButton(filterButton, 13);
         filterButton.setToolTipText("Apply filters to listings");
 
         filterButton.addActionListener(e -> {
@@ -233,7 +236,7 @@ public class MainApplicationPanel {
      * @param rawKeywords The raw text entered by the user in the search field.
      * @return A new list containing only accommodations matching the keywords.
      */
-     List<Accommodation> performSearch(List<Accommodation> inputList, String rawKeywords) {
+    List<Accommodation> performSearch(List<Accommodation> inputList, String rawKeywords) {
         String processedKeywords = rawKeywords.trim().toLowerCase();
 
         // If search is empty, return the original list
@@ -426,7 +429,7 @@ public class MainApplicationPanel {
         welcomeLabel = new JLabel("Welcome, " + username);
         welcomeLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         logoutButton = new JButton("Logout");
-        styleButton(logoutButton, BACKGROUND_COLOR, TEXT_COLOR, 13);
+        styleButton(logoutButton, 14);
         logoutButton.addActionListener(e -> mainWindow.handleLogout());
         authAreaPanel.add(welcomeLabel);
         authAreaPanel.add(Box.createRigidArea(new Dimension(10, 0)));
@@ -439,11 +442,11 @@ public class MainApplicationPanel {
     public void showLoggedOutState() {
         authAreaPanel.removeAll();
         signUpButton = new JButton("Sign Up");
-        styleButton(signUpButton, BACKGROUND_COLOR, TEXT_COLOR, 14);
+        styleButton(signUpButton, 14);
         signUpButton.setPreferredSize(new Dimension(90, 35));
 
         loginButton = new JButton("Login");
-        styleButton(loginButton, BACKGROUND_COLOR, TEXT_COLOR, 14);
+        styleButton(loginButton, 14);
         loginButton.setPreferredSize(new Dimension(90, 35));
 
 
@@ -513,10 +516,9 @@ public class MainApplicationPanel {
     /**
      * Helper to style JButtons consistently.
      */
-    private void styleButton(JButton button, Color bgColor, Color fgColor, int fontSize) {
+    private void styleButton(JButton button, int fontSize) {
         button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
-        button.setBackground(bgColor);
-        button.setForeground(fgColor);
+        button.setForeground(TEXT_COLOR);
         button.setFocusPainted(false);
     }
 
@@ -527,6 +529,33 @@ public class MainApplicationPanel {
                 new EmptyBorder(4, 6, 4, 6)
         ));
     }
+
+    private void refreshCardSaveStates() {
+        System.out.println("Refreshing save states for visible cards...");
+        SwingUtilities.invokeLater(() -> {
+            if (listingGridPanel != null) {
+                for (Component comp : listingGridPanel.getComponents()) {
+                    if (comp instanceof AccommodationCardPanel) {
+                        ((AccommodationCardPanel) comp).updateSaveStateAsync();
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void componentShown(ComponentEvent e) {
+        refreshCardSaveStates();
+    }
+
+    @Override
+    public void componentResized(ComponentEvent e) { }
+
+    @Override
+    public void componentMoved(ComponentEvent e) { }
+
+    @Override
+    public void componentHidden(ComponentEvent e) { }
 
 
     public JTextField getSearchField() {
