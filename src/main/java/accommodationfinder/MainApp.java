@@ -29,11 +29,29 @@ public class MainApp {
         splash.setVisible(true);
 
         SwingWorker<MainWindow, Void> worker = new SwingWorker<>() {
+            private static final long MINIMUM_SPLASH_TIME_MS = 1500;
+
             @Override
-            protected MainWindow doInBackground() throws Exception {
+            protected MainWindow doInBackground() {
+                long startTime = System.currentTimeMillis();
+
                 System.out.println("Starting background initialization...");
                 MainWindow mainWindow = new MainWindow();
                 System.out.println("Background initialization complete.");
+
+                long endTime = System.currentTimeMillis();
+                long elapsedTime = endTime - startTime;
+
+                long waitTime = MINIMUM_SPLASH_TIME_MS - elapsedTime;
+                if (waitTime > 0) {
+                    System.out.println("Initialization was fast. Waiting for " + waitTime + " ms");
+                    try {
+                        Thread.sleep(waitTime);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+
                 return mainWindow;
             }
 
