@@ -10,10 +10,10 @@ import java.util.Arrays;
 
 public class LoginPanel extends JPanel {
 
-    private JLabel usernameOrEmailLabel, passwordLabel, errorMessageLabel, titleLabel, registerPromptLabel;
+    private JLabel usernameOrEmailLabel, passwordLabel, titleLabel, registerPromptLabel;
     private JTextField usernameOrEmailField;
     private JPasswordField passwordField;
-    private JButton loginButton, backButton, registrationButton; // Changed cancelButton to backButton
+    private JButton loginButton, backButton, registrationButton;
     private JCheckBox rememberMeChkBox;
     private final UserService userService;
     private final MainWindow mainWindow;
@@ -45,51 +45,54 @@ public class LoginPanel extends JPanel {
         centerWrapper.setOpaque(false);
 
         JPanel formPanel = new JPanel(new GridBagLayout());
-        formPanel.setOpaque(false); // Transparent background
+        formPanel.setOpaque(false);
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.insets = new Insets(5, 8, 5, 8);
         gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Title
         titleLabel = new JLabel("Welcome back!");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 26));
         titleLabel.setForeground(TEXT_COLOR);
-        gbc.gridx = 1;
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        gbc.insets = new Insets(20, 8, 30, 8);
+        gbc.insets = new Insets(10, 8, 15, 8);
         formPanel.add(titleLabel, gbc);
-        gbc.gridwidth = 1; // Reset
-        gbc.insets = new Insets(8, 8, 8, 8); // Reset insets
+        gbc.insets = new Insets(5, 8, 5, 8); // Reset insets
 
-        // Username/Email Row
+        // Username/Email Label
         usernameOrEmailLabel = new JLabel("Username or Email:");
         styleLabel(usernameOrEmailLabel);
         gbc.gridx = 0;
         gbc.gridy = 1;
-        gbc.anchor = GridBagConstraints.EAST;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.NONE;
         formPanel.add(usernameOrEmailLabel, gbc);
 
+        // Username/Email Field
         usernameOrEmailField = new JTextField(25);
         styleTextField(usernameOrEmailField);
-        gbc.gridx = 1;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         formPanel.add(usernameOrEmailField, gbc);
 
-        // Password Row
+        // Password Label
         passwordLabel = new JLabel("Password:");
         styleLabel(passwordLabel);
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.NONE;
         formPanel.add(passwordLabel, gbc);
 
+        // Password Field
         passwordField = new JPasswordField(25);
         styleTextField(passwordField);
-        gbc.gridx = 1;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         formPanel.add(passwordField, gbc);
 
@@ -97,22 +100,10 @@ public class LoginPanel extends JPanel {
         rememberMeChkBox = new JCheckBox("Remember Me");
         rememberMeChkBox.setFont(new Font("SansSerif", Font.PLAIN, 13));
         rememberMeChkBox.setOpaque(false);
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.gridwidth = 2;
+        gbc.gridy = 5;
         gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.NONE;
         formPanel.add(rememberMeChkBox, gbc);
-
-        // Error Message Label
-        errorMessageLabel = new JLabel(" ");
-        errorMessageLabel.setForeground(ERROR_COLOR);
-        errorMessageLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        errorMessageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        formPanel.add(errorMessageLabel, gbc);
 
         // Log In Button (Centered)
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
@@ -120,38 +111,31 @@ public class LoginPanel extends JPanel {
         loginButton = new JButton("Login");
         styleButton(loginButton, 15);
         loginButton.setPreferredSize(new Dimension(150, 30));
-        gbc.gridx = 1;
-        gbc.gridy = 5;
-        gbc.gridwidth = 2;
+        gbc.gridy = 6;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.insets = new Insets(15, 8, 30, 8);
+        gbc.insets = new Insets(10, 8, 15, 8);
         buttonPanel.add(loginButton);
-        gbc.gridwidth = 1; // Reset
-        gbc.insets = new Insets(8, 8, 8, 8); // Reset
         formPanel.add(buttonPanel, gbc);
+        gbc.insets = new Insets(5, 8, 5, 8); // Reset
 
         // Sign Up Prompt
-        JPanel registerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0)); // Centered flow layout
+        JPanel registerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0));
         registerPanel.setOpaque(false);
         registerPromptLabel = new JLabel("Don't have an account?");
         styleLabel(registerPromptLabel);
         registrationButton = new JButton("Sign Up!");
-        styleButton(registrationButton,  13);
+        styleButton(registrationButton, 13);
         registerPanel.add(registerPromptLabel);
         registerPanel.add(registrationButton);
-        gbc.gridx = 0;
-        gbc.gridy = 6;
-        gbc.gridwidth = 2;
+        gbc.gridy = 8;
         gbc.anchor = GridBagConstraints.CENTER;
         formPanel.add(registerPanel, gbc);
-
 
         // Add formPanel to the centering wrapper
         centerWrapper.add(formPanel, new GridBagConstraints());
         // Add the centering wrapper to the main panel's center
         add(centerWrapper, BorderLayout.CENTER);
-
 
         // Login Button Action
         loginButton.addActionListener(e -> performLogin());
@@ -175,7 +159,6 @@ public class LoginPanel extends JPanel {
 
     }
 
-
     /**
      * Attempts the login process using the UserService.
      * Handles UI updates for success and failure.
@@ -195,8 +178,6 @@ public class LoginPanel extends JPanel {
             setErrorMessage("Username/Email and Password are required");
             Arrays.fill(passwordChars, ' '); // Clear password array
             return;
-        } else {
-            setErrorMessage(" "); // Clear previous error message
         }
 
         try {
@@ -241,7 +222,6 @@ public class LoginPanel extends JPanel {
         usernameOrEmailField.setText("");
         passwordField.setText("");
         rememberMeChkBox.setSelected(false);
-        setErrorMessage(" ");
     }
 
     /**
@@ -249,7 +229,7 @@ public class LoginPanel extends JPanel {
      * @param message The message to display, or " " to clear.
      */
     public void setErrorMessage(String message) {
-        errorMessageLabel.setText(message == null ? " " : message);
+        JOptionPane.showMessageDialog(this, message, "Login Error", JOptionPane.ERROR_MESSAGE);
     }
 
     /**

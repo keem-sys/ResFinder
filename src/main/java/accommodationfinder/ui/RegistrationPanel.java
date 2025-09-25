@@ -50,97 +50,99 @@ public class RegistrationPanel extends JPanel {
         formPanel.setOpaque(false);
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.insets = new Insets(5, 8, 5, 8);
         gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Title
         titleLabel = new JLabel("Create an account");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 26));
         titleLabel.setForeground(TEXT_COLOR);
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        gbc.insets = new Insets(20, 8, 30, 8);
+        gbc.insets = new Insets(10, 8, 15, 8);
         formPanel.add(titleLabel, gbc);
-        gbc.gridwidth = 1;
-        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.insets = new Insets(5, 8, 5, 8); // Reset insets
 
-        // Full Name Row
+        // Full Name Label
         JLabel fullNameLabel = new JLabel("Full Name:");
         styleLabel(fullNameLabel);
         gbc.gridx = 0;
-        gbc.gridy++; // y=1
-        gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.NONE;
         formPanel.add(fullNameLabel, gbc);
 
+        // Full Name Field
         fullNameField = new JTextField(25);
         styleTextField(fullNameField);
-        gbc.gridx = 1;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridy = 2; // Next row
+        gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         formPanel.add(fullNameField, gbc);
 
-        // Username Row
+        // Username Label
         JLabel usernameLabel = new JLabel("Username:");
         styleLabel(usernameLabel);
-        gbc.gridx = 0;
-        gbc.gridy++; // y=2
-        gbc.fill = GridBagConstraints.NONE; // Reset fill
-        gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.NONE;
         formPanel.add(usernameLabel, gbc);
 
+        // Username Field
         usernameField = new JTextField(25);
         styleTextField(usernameField);
-        gbc.gridx = 1;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         formPanel.add(usernameField, gbc);
 
-        // Email Row
+        // Email Label
         JLabel emailLabel = new JLabel("Email:");
         styleLabel(emailLabel);
-        gbc.gridx = 0;
-        gbc.gridy++; // y=3
+        gbc.gridy = 5;
+        gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(emailLabel, gbc);
 
+        // Email Field
         emailField = new JTextField(25);
         styleTextField(emailField);
-        gbc.gridx = 1;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridy = 6;
+        gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         formPanel.add(emailField, gbc);
 
-        // Password Row
+        // Password Label
         JLabel passwordLabel = new JLabel("Password:");
         styleLabel(passwordLabel);
-        gbc.gridx = 0;
-        gbc.gridy++; // y=4
+        gbc.gridy = 7;
+        gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(passwordLabel, gbc);
 
+        // Password Field
         passwordField = new JPasswordField(25);
         styleTextField(passwordField);
-        gbc.gridx = 1;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridy = 8;
+        gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         formPanel.add(passwordField, gbc);
 
-        // Confirm Password Row
+        // Confirm Password Label
         JLabel confirmPasswordLabel = new JLabel("Confirm Password:");
         styleLabel(confirmPasswordLabel);
-        gbc.gridx = 0;
-        gbc.gridy++; // y=5
+        gbc.gridy = 9;
+        gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(confirmPasswordLabel, gbc);
 
+        // Confirm Password Field
         confirmPasswordField = new JPasswordField(25);
         styleTextField(confirmPasswordField);
-        gbc.gridx = 1;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridy = 10;
+        gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         formPanel.add(confirmPasswordField, gbc);
 
@@ -149,13 +151,12 @@ public class RegistrationPanel extends JPanel {
         termsCheckBox.setFont(new Font("SansSerif", Font.PLAIN, 13));
         termsCheckBox.setForeground(TEXT_COLOR);
         termsCheckBox.setOpaque(false);
-        gbc.gridx = 1; // Align with fields
-        gbc.gridy++; // y=6
+        gbc.gridy = 11;
+        gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(0, 8, 15, 8);
+        gbc.insets = new Insets(0, 8, 8, 8);
         formPanel.add(termsCheckBox, gbc);
-        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.insets = new Insets(5, 8, 5, 8);
 
         // Error Message Label
         errorMsgLbl = new JLabel(" ");
@@ -176,28 +177,23 @@ public class RegistrationPanel extends JPanel {
         createAccountButton = new JButton("Create an Account");
         styleButton(createAccountButton, 15);
         createAccountButton.setPreferredSize(new Dimension(200, 40));
-        gbc.gridx = 1;
-        gbc.gridy++; // y=8
-        gbc.gridwidth = 2;
+        gbc.gridy = 13;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.insets = new Insets(15, 8, 25, 8);
+        gbc.insets = new Insets(10, 8, 15, 8);
         formPanel.add(createAccountButton, gbc);
-        gbc.gridwidth = 1;
-        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.insets = new Insets(5, 8, 5, 8); // Reset
 
         // Login Prompt
         JPanel loginPromptPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0));
         loginPromptPanel.setOpaque(false);
         loginPromptLabel = new JLabel("Already have an account?");
         styleLabel(loginPromptLabel);
-        loginButton = new JButton("Login"); // Added Login button
+        loginButton = new JButton("Login");
         styleButton(loginButton, 13);
         loginPromptPanel.add(loginPromptLabel);
         loginPromptPanel.add(loginButton);
-        gbc.gridx = 0;
-        gbc.gridy++; // y=9
-        gbc.gridwidth = 2;
+        gbc.gridy = 14;
         gbc.anchor = GridBagConstraints.CENTER;
         formPanel.add(loginPromptPanel, gbc);
 
@@ -225,7 +221,6 @@ public class RegistrationPanel extends JPanel {
 
         // Request initial focus
     }
-
 
     private void performRegistration() {
         System.out.println("Registration attempt started");
