@@ -37,7 +37,9 @@ public class MapManager {
 
         // Create and configure the map viewer
         JXMapViewer mapViewer = new JXMapViewer();
-        mapViewer.setTileFactory(new DefaultTileFactory(new OSMTileFactoryInfo()));
+        OSMTileFactoryInfo info = new OSMTileFactoryInfo("OpenStreetMap", "https://tile.openstreetmap.org");
+        DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+        mapViewer.setTileFactory(tileFactory);
         mapViewer.setZoom(4);
         mapViewer.setAddressLocation(location);
 
