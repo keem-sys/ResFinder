@@ -41,7 +41,7 @@ public class FilterDialog extends JDialog {
 
     public FilterDialog(Frame owner, FilterCriteria initialFilterCriteria, List<Accommodation> allListings) {
         super(owner, "Filter Accommodations", true);
-        this.currentFilterCriteria = new FilterCriteria();
+        this.currentFilterCriteria = initialFilterCriteria;
 
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
@@ -279,8 +279,8 @@ public class FilterDialog extends JDialog {
         clearButton.addActionListener(e -> {
             currentFilterCriteria.reset();
             populateFieldsFromCriteria(currentFilterCriteria);
-            filtersApplied = true;
         });
+
 
         cancelButton.addActionListener(e -> {
             this.filtersApplied = false;
