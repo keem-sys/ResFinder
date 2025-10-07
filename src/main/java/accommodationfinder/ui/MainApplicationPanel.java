@@ -212,7 +212,6 @@ public class MainApplicationPanel implements ComponentListener {
             filterDialog.setVisible(true);
 
             if (filterDialog.wereFiltersApplied()) {
-                this.currentFilterCriteria = filterDialog.getAppliedCriteria();
                 updateDisplayedListings();
             }
         });
