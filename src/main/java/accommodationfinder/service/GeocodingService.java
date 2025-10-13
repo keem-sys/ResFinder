@@ -41,7 +41,7 @@ public class GeocodingService {
             URL url = new URL(requestUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
-            connection.setRequestProperty("User-Agent", "ResFinderApp/1.0 (your-email@example.com)");
+            connection.setRequestProperty("User-Agent", "ResFinderApp/1.0 (iamwriter@regnum.slmail.me)");
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(10000);
 

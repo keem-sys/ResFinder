@@ -35,20 +35,22 @@ public class MapManager {
             return createErrorViewer("Could not determine location.");
         }
 
-        // --- Create and configure the map viewer ---
+        // Create and configure the map viewer
         JXMapViewer mapViewer = new JXMapViewer();
-        mapViewer.setTileFactory(new DefaultTileFactory(new OSMTileFactoryInfo()));
+        OSMTileFactoryInfo info = new OSMTileFactoryInfo("OpenStreetMap", "https://tile.openstreetmap.org");
+        DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+        mapViewer.setTileFactory(tileFactory);
         mapViewer.setZoom(4);
         mapViewer.setAddressLocation(location);
 
-        // --- Create and add the waypoint pin ---
+        // Create and add the waypoint pin
         Waypoint waypoint = new DefaultWaypoint(location);
         CustomWaypointPainter waypointPainter = new CustomWaypointPainter();
         waypointPainter.setWaypoints(Collections.singleton(waypoint));
 
         mapViewer.setOverlayPainter(new CompoundPainter<>(waypointPainter));
 
-        // --- Add interactivity listeners ---
+        // Add interactivity listeners
         PanMouseInputListener mia = new PanMouseInputListener(mapViewer);
         mapViewer.addMouseListener(mia);
         mapViewer.addMouseMotionListener(mia);
@@ -73,8 +75,7 @@ public class MapManager {
 
     private JXMapViewer createErrorViewer(String message) {
         JXMapViewer errorViewer = new JXMapViewer();
-        // You could display the message on the map, but for now, just log it.
         System.err.println("MapManager: " + message);
-        return errorViewer; // Return an empty map
+        return errorViewer;
     }
 }

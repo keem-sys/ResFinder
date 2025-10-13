@@ -108,7 +108,7 @@ public class LoginPanel extends JPanel {
         errorMessageLabel.setForeground(ERROR_COLOR);
         errorMessageLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
         errorMessageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        gbc.gridx = 0;
+        gbc.gridx = 1;
         gbc.gridy = 4;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
@@ -223,13 +223,14 @@ public class LoginPanel extends JPanel {
         } catch (Exception authenticationException) {
             // Login Failed
             System.err.println("Login failed: " + authenticationException.getMessage());
-            // Provide error message
-            setErrorMessage("Login failed: Invalid username/email or password.");
-            passwordField.setText("");
-            passwordField.requestFocusInWindow();
-
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Login failed: The username/email or password you entered is incorrect.",
+                    "Login Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
         } finally {
-            // Clear password array
+            Arrays.fill(passwordChars, ' ');
             Arrays.fill(passwordChars, ' ');
         }
     }

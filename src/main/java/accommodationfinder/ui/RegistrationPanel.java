@@ -21,8 +21,8 @@ public class RegistrationPanel extends JPanel {
     private final MainWindow mainWindow;
 
     // Colors
-    private static final Color BACKGROUND_COLOR = new Color(253, 251, 245); // Beige background
-    private static final Color TEXT_COLOR = new Color(50, 50, 50); // Dark gray for text
+    private static final Color BACKGROUND_COLOR = new Color(253, 251, 245);
+    private static final Color TEXT_COLOR = new Color(50, 50, 50);
     private static final Color ERROR_COLOR = new Color(211, 47, 47);
 
     public RegistrationPanel(UserService userService, MainWindow mainWindow) {
@@ -34,7 +34,7 @@ public class RegistrationPanel extends JPanel {
         setBackground(BACKGROUND_COLOR);
         setBorder(new EmptyBorder(15, 25, 15, 25)); // Padding
 
-        // Top Bar (Back Button)
+        // Back Button
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topPanel.setOpaque(false);
         backButton = new JButton("<- Back to Main View");
@@ -69,7 +69,7 @@ public class RegistrationPanel extends JPanel {
         JLabel fullNameLabel = new JLabel("Full Name:");
         styleLabel(fullNameLabel);
         gbc.gridx = 0;
-        gbc.gridy++; // y=1
+        gbc.gridy++;
         gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(fullNameLabel, gbc);
 
@@ -84,8 +84,8 @@ public class RegistrationPanel extends JPanel {
         JLabel usernameLabel = new JLabel("Username:");
         styleLabel(usernameLabel);
         gbc.gridx = 0;
-        gbc.gridy++; // y=2
-        gbc.fill = GridBagConstraints.NONE; // Reset fill
+        gbc.gridy++;
+        gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(usernameLabel, gbc);
 
@@ -100,7 +100,7 @@ public class RegistrationPanel extends JPanel {
         JLabel emailLabel = new JLabel("Email:");
         styleLabel(emailLabel);
         gbc.gridx = 0;
-        gbc.gridy++; // y=3
+        gbc.gridy++;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(emailLabel, gbc);
@@ -116,7 +116,7 @@ public class RegistrationPanel extends JPanel {
         JLabel passwordLabel = new JLabel("Password:");
         styleLabel(passwordLabel);
         gbc.gridx = 0;
-        gbc.gridy++; // y=4
+        gbc.gridy++;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(passwordLabel, gbc);
@@ -132,7 +132,7 @@ public class RegistrationPanel extends JPanel {
         JLabel confirmPasswordLabel = new JLabel("Confirm Password:");
         styleLabel(confirmPasswordLabel);
         gbc.gridx = 0;
-        gbc.gridy++; // y=5
+        gbc.gridy++;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(confirmPasswordLabel, gbc);
@@ -149,8 +149,8 @@ public class RegistrationPanel extends JPanel {
         termsCheckBox.setFont(new Font("SansSerif", Font.PLAIN, 13));
         termsCheckBox.setForeground(TEXT_COLOR);
         termsCheckBox.setOpaque(false);
-        gbc.gridx = 1; // Align with fields
-        gbc.gridy++; // y=6
+        gbc.gridx = 1;
+        gbc.gridy++;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(0, 8, 15, 8);
@@ -162,8 +162,8 @@ public class RegistrationPanel extends JPanel {
         errorMsgLbl.setForeground(ERROR_COLOR);
         errorMsgLbl.setFont(new Font("SansSerif", Font.PLAIN, 12));
         errorMsgLbl.setHorizontalAlignment(SwingConstants.CENTER);
-        gbc.gridx = 0;
-        gbc.gridy++; // y=7
+        gbc.gridx = 1;
+        gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -177,7 +177,7 @@ public class RegistrationPanel extends JPanel {
         styleButton(createAccountButton, 15);
         createAccountButton.setPreferredSize(new Dimension(200, 40));
         gbc.gridx = 1;
-        gbc.gridy++; // y=8
+        gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
@@ -191,20 +191,17 @@ public class RegistrationPanel extends JPanel {
         loginPromptPanel.setOpaque(false);
         loginPromptLabel = new JLabel("Already have an account?");
         styleLabel(loginPromptLabel);
-        loginButton = new JButton("Login"); // Added Login button
+        loginButton = new JButton("Login");
         styleButton(loginButton, 13);
         loginPromptPanel.add(loginPromptLabel);
         loginPromptPanel.add(loginButton);
         gbc.gridx = 0;
-        gbc.gridy++; // y=9
+        gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         formPanel.add(loginPromptPanel, gbc);
 
-
-        // Add formPanel to the centering wrapper
         centerWrapper.add(formPanel, new GridBagConstraints());
-        // Add wrapper to the main panel's center
         add(centerWrapper, BorderLayout.CENTER);
 
         // Action Listeners
@@ -214,16 +211,14 @@ public class RegistrationPanel extends JPanel {
         backButton.addActionListener(e -> {
             clearInputFields();
             setErrorMessage(" ");
-            mainWindow.showMainApplicationView(); // Go back to main listings/view
+            mainWindow.showMainApplicationView();
         });
 
         loginButton.addActionListener(e -> {
             clearInputFields();
             setErrorMessage(" ");
-            mainWindow.switchToLoginPanel(); // Switch to Login Panel
+            mainWindow.switchToLoginPanel();
         });
-
-        // Request initial focus
     }
 
 
@@ -236,20 +231,19 @@ public class RegistrationPanel extends JPanel {
         String password = new String(passwordChars);
         char[] confirmPasswordChars = confirmPasswordField.getPassword();
         String confirmPassword = new String(confirmPasswordChars);
-        boolean termsAccepted = termsCheckBox.isSelected(); // Get checkbox state
+        boolean termsAccepted = termsCheckBox.isSelected();
 
-        // Clear password arrays immediately after copying
         Arrays.fill(passwordChars, ' ');
         Arrays.fill(confirmPasswordChars, ' ');
 
-        // Input Validation
-        if (fullName.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+        if (fullName.isEmpty() || username.isEmpty()
+                || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             setErrorMessage("All fields are required.");
             return;
         }
 
         // Email Format Validation
-        String emailRegex = "^[A-Za-z0-9+_.-]+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2,}$"; // Slightly improved regex
+        String emailRegex = "^[A-Za-z0-9+_.-]+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2,}$";
         Pattern pattern = Pattern.compile(emailRegex);
         Matcher matcher = pattern.matcher(email);
         if (!matcher.matches()) {
@@ -286,10 +280,7 @@ public class RegistrationPanel extends JPanel {
         System.out.println("Registration validated - Attempting backend registration for username: " + username);
 
         try {
-            // Create User object
             User user = new User(null, fullName, username, email, password);
-
-            // Call the UserService to register
             Long userId = userService.registerUser(user);
 
             // Registration Successful
@@ -299,36 +290,40 @@ public class RegistrationPanel extends JPanel {
                     "Registration Complete",
                     JOptionPane.INFORMATION_MESSAGE);
 
-            clearInputFields(); // Clear form
-            mainWindow.switchToLoginPanel(); // Switch to log in panel after success
+            clearInputFields();
+            mainWindow.switchToLoginPanel();
 
         } catch (SQLException sqlException) {
-            // Handle specific database errors (like duplicates)
             System.err.println("Database error during registration: " + sqlException.getMessage());
-            // Check common constraint violation messages
             String sqlErrorMsg = sqlException.getMessage().toLowerCase();
+            String displayMessage;
+
             if (sqlErrorMsg.contains("unique constraint") || sqlErrorMsg.contains("duplicate key")) {
-                if (sqlErrorMsg.contains("username")) { // Be specific if possible
-                    setErrorMessage("Username already exists. Please choose another.");
+                if (sqlErrorMsg.contains("username")) {
+                    displayMessage = "This username is already taken. Please choose another.";
                     usernameField.requestFocusInWindow();
                 } else if (sqlErrorMsg.contains("email")) {
-                    setErrorMessage("Email already exists. Please use another or log in.");
+                    displayMessage = "An account with this email already exists. Please use another or log in.";
                     emailField.requestFocusInWindow();
                 } else {
-                    setErrorMessage("An account with these details might already exist.");
+                    displayMessage = "An account with these details might already exist.";
                 }
             } else {
-                setErrorMessage("A database error occurred. Please try again later.");
+                displayMessage = "A database error occurred. Please try again later.";
             }
+            JOptionPane.showMessageDialog(this, displayMessage, "Registration Error",
+                    JOptionPane.ERROR_MESSAGE);
+
         } catch (IllegalArgumentException iae) {
-            // Handle validation errors potentially thrown by the UserService layer
             System.err.println("Registration validation error (from service): " + iae.getMessage());
-            setErrorMessage(iae.getMessage());
+            JOptionPane.showMessageDialog(this, iae.getMessage(), "Registration Error",
+                    JOptionPane.ERROR_MESSAGE);
+
         } catch (Exception backendException) {
-            // Catch-all for other unexpected errors during registration
             System.err.println("Backend registration error: " + backendException.getMessage());
-            backendException.printStackTrace(); // Log for debugging
-            setErrorMessage("Registration failed. An unexpected error occurred.");
+            JOptionPane.showMessageDialog(this,
+                    "Registration failed due to an unexpected error. Please try again.",
+                    "Registration Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -355,8 +350,8 @@ public class RegistrationPanel extends JPanel {
         emailField.setText("");
         passwordField.setText("");
         confirmPasswordField.setText("");
-        termsCheckBox.setSelected(false); // Clear checkbox
-        errorMsgLbl.setText(" "); // Clear error message
+        termsCheckBox.setSelected(false);
+        errorMsgLbl.setText(" ");
     }
 
     /**
@@ -367,7 +362,6 @@ public class RegistrationPanel extends JPanel {
         errorMsgLbl.setText(message == null ? " " : message);
     }
 
-    // Styling Helper Methods
     private void styleLabel(JLabel label) {
         label.setFont(new Font("SansSerif", Font.PLAIN, 14));
         label.setForeground(TEXT_COLOR);
