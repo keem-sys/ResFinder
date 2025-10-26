@@ -38,6 +38,7 @@ public class AccommodationDetailPanel extends JPanel {
             Locale.forLanguageTag("en-ZA") );
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy 'at' HH:mm");
     private static final Color BACKGROUND_COLOR = new Color(253, 251, 245);
+    private static final Color TEXT_COLOR = new Color(50, 50, 50);
     private static final int IMG_WIDTH = 550;
     private static final int IMG_HEIGHT = 400;
 
@@ -59,6 +60,7 @@ public class AccommodationDetailPanel extends JPanel {
         JPanel topPanel = new JPanel(new BorderLayout(10, 0));
         topPanel.setOpaque(false);
         JButton backButton = new JButton("<- Back to Main View");
+        styleButton(backButton, 15);
         backButton.addActionListener(e -> mainWindow.showMainApplicationView());
         topPanel.add(backButton, BorderLayout.WEST);
         titleLabel = new JLabel("Loading...", SwingConstants.LEFT);
@@ -262,6 +264,12 @@ public class AccommodationDetailPanel extends JPanel {
             case PER_NIGHT -> "/ night";
             case OTHER -> "";
         };
+    }
+
+    private void styleButton(JButton button, int fontSize) {
+        button.setFont(new Font("SansSerif", Font.BOLD, fontSize));
+        button.setForeground(TEXT_COLOR);
+        button.setFocusPainted(false);
     }
 
     private void displayError(String title, String message) {

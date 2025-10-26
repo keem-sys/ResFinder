@@ -11,6 +11,7 @@ import accommodationfinder.data.UserDao;
 import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +31,7 @@ public class MainWindow extends JFrame {
     private SavedListingsPanel savedListingsPanel;
     private ContactPanel contactPanel;
     private FaqPanel faqPanel;
+    private AboutPanel aboutPanel;
 
     private JPanel mainCardPanel;
     private CardLayout cardLayout;
@@ -69,6 +71,7 @@ public class MainWindow extends JFrame {
             this.savedListingsPanel = new SavedListingsPanel(this);
             this.contactPanel = new ContactPanel(this);
             this.faqPanel = new FaqPanel(this);
+            this.aboutPanel = new AboutPanel(this);
             this.accommodationDetailPanel = new AccommodationDetailPanel(accommodationService, this);
 
             // Initialise MenuBar
@@ -84,6 +87,7 @@ public class MainWindow extends JFrame {
             mainCardPanel.add(savedListingsPanel.getSavedListingsPanel(), "savedListings");
             mainCardPanel.add(contactPanel.getContactPanel(), "contact");
             mainCardPanel.add(faqPanel.getFaqPanel(), "faq");
+            mainCardPanel.add(aboutPanel.getAboutPanel(), "about");
             mainCardPanel.add(accommodationDetailPanel.getDetailPanel(), "detail");
             setContentPane(mainCardPanel);
 
@@ -266,11 +270,9 @@ public class MainWindow extends JFrame {
         System.out.println("Switched to Faq Panel");
     }
 
-    public void showAboutDialog() {
-        JOptionPane.showMessageDialog(this,
-                "ResFinder version 1.0\nYour one-stop solution for student accommodation.",
-                "About ResFinder",
-                JOptionPane.INFORMATION_MESSAGE);
+    public void showAboutPanel() {
+        cardLayout.show(mainCardPanel, "about");
+        System.out.println("Switched to About Panel");
     }
 
     public void refreshMainViewListings() {

@@ -98,7 +98,7 @@ public class MenuBarManager {
 
         JMenuItem aboutItem = new JMenuItem("About ResFinder");
         styleMenuItem(aboutItem);
-        aboutItem.addActionListener(e -> mainWindow.showAboutDialog());
+        aboutItem.addActionListener(e -> mainWindow.showAboutPanel());
         helpMenu.add(aboutItem);
 
         menuBar.add(fileMenu);

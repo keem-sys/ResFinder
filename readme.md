@@ -108,8 +108,9 @@ This project is developed and maintained by:
     <img src="https://github.com/keem-sys.png?size=100" width="80px;" style="border-radius:50%; border: 1px solid #888;" alt="Keem-sys"/>
   </a>
 
-  <a href="https://github.com/AidenWallace" target="_blank" style="display: inline-block; margin-right: 10px;">
-    <img src="https://github.com/AidenWallace.png?size=100" width="80px;" style="border-radius:50%; border: 1px solid #888;" alt="Aiden Clinton Wallace"/>
+  <a href="https://github.com/Matthew-codez" target="_blank" style="display: inline-block; margin-right: 10px;">
+    <img src="https://github.com/Matthew-codez.png?size=100" width="80px;" style="border-radius:50%; border: 1px solid #888;"
+    alt="Matthew"/>
   </a>
 
   <a href="https://github.com/Jaydenchoppa" target="_blank" style="display: inline-block; margin-right: 10px;">
@@ -117,19 +118,9 @@ This project is developed and maintained by:
     alt="Jayden"/>
   </a>
 
-  <a href="https://github.com/Matthew-codez" target="_blank" style="display: inline-block; margin-right: 10px;">
-    <img src="https://github.com/Matthew-codez.png?size=100" width="80px;" style="border-radius:50%; border: 1px solid #888;"
-    alt="Matthew"/>
-  </a>
-
   <a href="https://github.com/WazeerG" target="_blank" style="display: inline-block; margin-right: 10px;">
     <img src="https://github.com/WazeerG.png?size=100" width="80px;" style="border-radius:50%; border: 1px solid #888;"
     alt="Wazeer"/>
-  </a>
-
-   <a href="https://github.com/Gwangwa-Innocentia" target="_blank" style="display: inline-block;">
-    <img src="https://github.com/Gwangwa-Innocentia.png?size=100" width="80px;" style="border-radius:50%; border: 1px solid #888;"
-      alt="Innocentia Gwangwa"/>
   </a>
 </div>
 

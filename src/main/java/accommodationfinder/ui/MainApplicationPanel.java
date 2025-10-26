@@ -55,7 +55,6 @@ public class MainApplicationPanel implements ComponentListener {
 
     private static final Color BACKGROUND_COLOR = new Color(253, 251, 245);
     private static final Color TEXT_COLOR = new Color(50, 50, 50);
-    private static final Color BUTTON_BACKGROUND_COLOR = new Color(230, 230, 230);
 
 
     public MainApplicationPanel(AccommodationService accommodationService, UserService userService,
@@ -134,12 +133,10 @@ public class MainApplicationPanel implements ComponentListener {
 
                 } catch (InterruptedException | ExecutionException | CancellationException e) {
 
-                    // Handle errors during fetching or processing
                     Throwable cause = e.getCause();
                     System.err.println("Error loading: " + (cause != null ? cause.getMessage() : e.getMessage()));
                     displayLoadingError("Error loading listings. Please try again later.");
 
-                    // Provide feedback to the user
                     if (cause instanceof SQLException) {
                         JOptionPane.showMessageDialog(mainPanel, "Database error loading listings.",
                                 "Database Error", JOptionPane.ERROR_MESSAGE);
@@ -157,7 +154,7 @@ public class MainApplicationPanel implements ComponentListener {
                 }
             }
         };
-        worker.execute(); // Start the background worker
+        worker.execute();
     }
 
     // Helper method to create the Search/Filter Bar
@@ -202,7 +199,7 @@ public class MainApplicationPanel implements ComponentListener {
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         filterPanel.setOpaque(false);
         filterButton = new JButton("Filters");
-        styleButton(filterButton, 13);
+        styleButton(filterButton, 14);
         filterButton.setToolTipText("Apply filters to listings");
 
         filterButton.addActionListener(e -> {
