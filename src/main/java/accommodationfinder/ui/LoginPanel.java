@@ -60,8 +60,8 @@ public class LoginPanel extends JPanel {
         gbc.gridwidth = 2;
         gbc.insets = new Insets(20, 8, 30, 8);
         formPanel.add(titleLabel, gbc);
-        gbc.gridwidth = 1; // Reset
-        gbc.insets = new Insets(8, 8, 8, 8); // Reset insets
+        gbc.gridwidth = 1;
+        gbc.insets = new Insets(8, 8, 8, 8);
 
         // Username/Email Row
         usernameOrEmailLabel = new JLabel("Username or Email:");
